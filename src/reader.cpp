@@ -20,7 +20,6 @@ Reader::~Reader()
 {
   TTF_CloseFont(FontMain);
   TTF_CloseFont(FontSys);
-  SDL_FreeSurface(SysBG);
   SDL_FreeSurface(Backdrop);
 
   delete MyBook;
@@ -36,7 +35,6 @@ bool Reader::Init(int width,
   SDL_SetAlpha(Screen, SDL_SRCALPHA, 255);
 
   // load an image
-  SysBG = SDL_LoadBMP("data/black.bmp");
   Backdrop = SDL_LoadBMP("data/default_bg.bmp");
 
   if (!Screen) {
@@ -44,7 +42,7 @@ bool Reader::Init(int width,
     return false;
   }
 
-  if (!Backdrop || !SysBG) {
+  if (!Backdrop) {
     printf("Unable to load bitmap: %s\n", SDL_GetError());
     return false;
   }

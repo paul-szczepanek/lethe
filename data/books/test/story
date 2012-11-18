@@ -1,0 +1,280 @@
+[<story>]
+  
+
+[:begin]
+    [!your room:go]
+      This is a test of breakline\nhere.
+  [:about]
+    This is a test story.
+
+//***************************** Lethe Language *********************************
+//
+// Whitespace is ignored but the noun definition needs to start on a new line.
+// Otherwise you can use whitespace to help readability.
+//
+// ******** Noun Definition **********
+//
+// [<noun>] - this delimates noun definition blocks, starts on a new line.
+// Keywords can't start with numbers (1noun) but may contain numbers and spaces.
+// Use alphanumeric characters. Nouns need to have unique names.
+// Nouns are Case *Sensitive*!
+//
+// [<noun> = value1, value2, #9] - sets the initial values of the noun.
+// (in the initial assignment, you can't force noun evaluation with @)
+//
+// prepend integers with #, there can only ever be one integer value.
+// [<noun> = #1, #7, #8] - will set it to 8.
+// 0 is the default.
+// The integer value doesn't count as a value when checking size of the array.
+// if no # is used then the number is treated as string.
+//
+// [<noun[pattern]>] - sets the pattern to use for this definition.
+// Patterns get prepended and every occurance of the pattern string gets
+// replaced with the noun string of the noun using the pattern.
+//
+// [<[pattern]>] = this defines a pettern (sorry for the forest of brackets).
+// They are not evaluated and need to be defined before they are used.
+// They are essentially macros that get prepended to a noun deifnition.
+//
+// ******** Verb Definition [:] ******
+//
+// [:verb] - past this is where execution goes when you choose this verb.
+// [:verb1] [:verb2] - only the first one is visible but both work.
+// [:visible verb name[real verb name]] - the visible name may be different.
+// [:[real verb name]] - leaving the visible name blank will make the verb
+//                       hidden from the list.
+//
+// You can have mutiple verb definitions of the same name.
+// First one with true top level condition will activate upon being called.
+//
+// ******** Conditions [?] ***********
+//
+// [?noun+=string] - noun contains string.
+// [?noun-=string] - noun doesn't cantain string.
+// [?noun=string] - noun contains string and nothing else.
+// [?=string] - noun is implied here (assuming this is it's definition).
+//
+// These will try to compare the integer value of a:
+// [?a=#4] [?a<=#5] [?a>=#2] [?a<#4] [?a>#8]
+//
+// Conditions may be placed above verb definitions. They will work by
+// hiding the verb if the condition is not met.
+//
+// ******** Intructions [!] **********
+//
+// [!b:verb] - go to and execute [b:verb], return and continue afterwards.
+// Instructions need to be below a verb definition.
+//
+// [!noun+=string] - add string to noun.
+// [!noun-=string] - remove string from noun.
+// [!noun=string] - set noun to string (removes previous contents).
+// [!=string] - missing noun defaults to the one beying defined.
+// [!noun=] - delete all values of noun (except the integer value).
+// [!noun=#0] - set the integer value of noun to 0.
+//
+// ******** Evaluation ***************
+//
+// The left side of the instruction or condition is always a noun.
+// What's on the right is normally considered a string or an #integer.
+// You can force a noun to be evaluated to strings it contains by using @.
+// If letters follow # it's assumed to be a noun becuase nouns can't
+// start with digits.
+//
+// #noun evaluates to integer, @noun to string values of the noun.
+// [!a=string] - noun a = string.
+// [!a=@b] - noun a = string values of noun b.
+// [!a=#b] - noun a integer = integer value of noun b.
+//
+// Numbers are handled wholly seperate so if you wanted to copy both strings
+// and the integer value from b to a you would need to explicitly say:
+// [!a=@b + #b]
+//
+// [?noun=#0+#b] will try to do arithmetic with + - / *
+// You can add and subtract string values as well (but not divide and multiply)
+// Arithmetic operations are only allowed on the right.
+//
+// [!@function(argument)] - calls a function with an argument.
+// A function can be called in an instruction or in a condition.
+// [?@size(a)=#n] - size of noun array, i.e. check if it contains n values.
+//
+// ******** Code blcoks **************
+//
+// {} are used for blocks. If no {} are used the code block is up to next
+// condition. Implied block of a top level condition (condition above verb)
+// ends with the next top level condition.
+//
+// [] & [] series of conditions (will short circuit, first negative hit stops).
+// [] | [] series of conditions (will short circuit, first positive hit stops).
+// (Don't mix ! and ? within these series, results are undefined.)
+//
+// [!<<] - breaks out of the current and parent block.
+// [!<<<] - breaks up three levels up (and so on, add more <).
+// Note that a single < as in [!<] is illegal (and would be pointless).
+//
+// ******** Printing text ************
+//
+// Text written outside of [] will be printed to the screen. Text needs to be
+// placed under a verb definition.
+//
+// Text can contain <keywords> inlined with text.
+// <visual name[real name]> - keyword for the noun [<real name>].
+// <name> - keyword where the visual and real name are the same.
+//
+// Multiple newlines are contracted to a single newline. You can force a newline
+// by using \n in text. These are treated as text and retained.
+// Whitespace around newlines is ignored so you can indent text in the file.
+// You can use the escape character \ to ignore that and force whitespaces
+//
+// Reserved characters that need to be esacped with \ in text are:
+// < > [ ] { } \ & | //
+// & and | will work unescaped but will contract whitespace around them.
+// A combination of two / is used for comments so you'll have to escape one
+// if you want to use // in text.
+//
+// All other characters are legal and only treated as special characters
+// if within [ ] or < >.
+//
+// ******** Special nouns ************
+//
+// These nouns are treated differently by the reader (not all are required).
+// [<story>] - how the story starts, at the verb [:begin] (this is essential).
+// [<nouns>] - list of always accessible nouns, like an inventory.
+// [<verbs>] - the list of common verbs for use on all nouns.
+// [<exits>] - where we can go.
+// [<place>] - where we are.
+//
+// The absolute minimum is:
+// [<story>] [:begin] [!noun:verb]
+// This will be called when starting the story and will tell the reader to go to
+// verb in noun and execute that block.
+//
+//******************************************************************************
+
+//***************** starting place, exits, inventory and tools *****************
+
+[<nouns> = self, pen] //assign default values
+[<verbs> = look, go, use]
+[<place>] // we start nowhere
+[<exits> = your room] // so we can enter our starting room
+
+//******************************************************************************
+
+[<self>]
+  [:look]
+    You are tired.
+
+//******************************************************************************
+
+[<pen>]
+  [:look]
+    Black ink.
+
+//************************ pattern for places  *********************************
+
+[<[room]>] //pattern definition because noun after [< is blank
+
+// top level conditions are the ones placed above the verb definition
+[?exits+=room] & [?place-=room] { // two conditions, both need to be met to access
+  [:go] // verb, this is where the excutions goes upon calling [!room:go]
+    // these instruction get executed when room:go gets called,
+    [!exits=] // this one clears exits
+    [!place=room] // change place to the room we're entering
+    [!:look] // look at the room we're in now
+}
+
+[?place=room] { // rest of the actions are available when we are in the room
+  // this is a cheat, if there is no closing } it's assumed to be at the end
+  // of the definition rather then at the next top level condition
+  // rest gets appended here
+
+//******************************************************************************
+
+[<your room[room]> = reminder] // noun definition for <your room>,
+                               // uses the <room> definition as base
+
+[:look] // because we appended the room definition these are only visible
+        // when we're in the room
+  You  are sitting in your <room[your room]> <programming[program]>.
+  [!tea:look]
+  The room has only one <door>.
+  [?+=reminder]
+    [!-=reminder]
+    Shouldn't you be doing something?
+  [?door=open] // if the door is open
+    [!exits+=staircase] // add the staircase as a possible exit
+
+[:leave]
+  [!door=open]
+  [!staircase:go]
+
+//******************************************************************************
+
+[<door>] // noun definition, this ends the last block and starts a new one
+
+[?-=open] // if the door is not open
+  [:open] [:use] // only the first one is visible, but both will work
+    You open the door.
+    [!door=open]
+
+[?=open] // if the door is open (door is implied)
+  [:close] [:use] // this time use will close it
+    You close the door.
+    [!door=] // close it by clearing the open value from the door noun
+
+//******************************************************************************
+
+[<tea>]
+
+[?-=empty] {
+  [:look]
+    [?-=warm]
+      The <cup of tea[tea]> is getting cold.
+    [?+=warm]
+      The fresh <cup of tea[tea]> is nice and warm.
+
+  [:drink] [:use]
+    [?-=warm]
+      You drink the cold tea, it's not very nice.
+      [!+=empty]
+    [?+=warm]
+      Ahh, that hits the spot.
+      [!+=empty]
+}
+
+[?+=empty] {
+  [:look] [:use]
+    The cup of tea is empty.
+}
+
+[:make fresh]
+  You make a fresh <cup of tea[tea]>.
+  [!+=warm] [!-=empty]
+
+//******************************************************************************
+
+[<program>]
+
+[:look]
+  You are writing an interactive fiction engine.
+  [?<=#1] {
+    It's a long way to go.
+    [!<<] // this aborts the execution of the parent block
+          // so the next statement doesn't activate
+  }
+  [?<=#3] {
+    Still needs a lot of work.
+  }
+
+[:program] [:use]
+  You work for a few minutes.
+  [!tea-=warm]
+  [!=#program+#1]
+
+//******************************************************************************
+
+[<staircase[room]>]
+
+[?place:+staircase]
+  [:look]
+    You are outside your <room[your room]>.
+    [!exits+=your room]

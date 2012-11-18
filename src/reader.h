@@ -50,7 +50,6 @@ private:
   MouseState Mouse;
 
   SDL_Surface* Screen;
-  SDL_Surface* SysBG;
   SDL_Surface* Backdrop;
 
   TTF_Font* FontMain;
