@@ -32,19 +32,19 @@ bool Reader::Init(int width,
   // create a new window
   Screen = SDL_SetVideoMode(width, height, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
-  SDL_SetAlpha(Screen, SDL_SRCALPHA, 255);
-
-  // load an image
-  Backdrop = SDL_LoadBMP("data/default_bg.bmp");
-
   if (!Screen) {
     printf("Unable to set video: %s\n", SDL_GetError());
     return false;
   }
 
+  SDL_SetAlpha(Screen, SDL_SRCALPHA, 255);
+
+  // load an image
+  Backdrop = SDL_LoadBMP("data/default_bg.bmp");
+
   if (!Backdrop) {
     printf("Unable to load bitmap: %s\n", SDL_GetError());
-    return false;
+    Backdrop = SDL_SetVideoMode(width, height, 32, 0);
   }
 
   FontSys = TTF_OpenFont("data/font/mono.ttf", 20);
@@ -161,11 +161,6 @@ void Reader::ProcessInput()
 
 bool Reader::Tick(real DeltaTime)
 {
-  if (!Screen) {
-    printf("Unable to set video: %s\n", SDL_GetError());
-    return false;
-  }
-
   // do a forced update
   RedrawCountdown -= DeltaTime;
   if (RedrawCountdown < 0.f) {
