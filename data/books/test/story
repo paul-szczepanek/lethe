@@ -1,10 +1,9 @@
 [<story>]
 
 [:begin]
-    [!your room:go]
-      This is a test of breakline\nhere.
-  [:about]
-    This is a test story.
+  [!your room:go]
+[:about]
+  This is a test story.
 
 //***************************** Lethe Language *********************************
 //
