@@ -94,8 +94,8 @@ bool TextBox::Select(MouseState& Mouse,
     Pane.DragTimeout -= DeltaTime;
   }
 
-  if (Mouse.X > Size.X && Mouse.X < Size.X + Size.W
-      && Mouse.Y > Size.Y && Mouse.Y < Size.Y + Size.Y) {
+  if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
+      || (Mouse.Y < Size.Y) || (Mouse.Y > Size.Y + Size.H)) {
     Pane.DragTimeout = DRAG_TIMEOUT;
     return false;
   }
@@ -109,11 +109,12 @@ bool TextBox::Select(MouseState& Mouse,
   const Uint16 Y = Mouse.Y - (DstRect.y - ClipRect.y);
 
   for (size_t i = 0, forSize = keywordsNum; i < forSize; ++i) {
-    if ((Keywords[i].X < X) &&
-        (Keywords[i].Y < Y) &&
-        (X < Keywords[i].X + Keywords[i].W) &&
-        (Y < Keywords[i].Y + Keywords[i].H)) {
+    if ((Keywords[i].X < X)
+        && (Keywords[i].Y < Y)
+        && (X < Keywords[i].X + Keywords[i].W)
+        && (Y < Keywords[i].Y + Keywords[i].H)) {
       SelectedKeyword = i;
+      break;
     }
   }
 
@@ -154,7 +155,7 @@ void TextBox::Draw(SDL_Surface* Screen)
 
 /** @brief word wrap and find keywords
   *
-  * fills in Lines and Keywords in a single pass
+  * fills in Lines and Keywords
   */
 bool TextBox::BreakText()
 {
@@ -356,6 +357,11 @@ bool TextBox::BreakText()
     lastLineEnd = lineEnd;
   }
 
+  SelectedKeyword = Keywords.size();
+
+  // scroll to end
+  ClipRect.y = PageHeight > ClipRect.h? (PageHeight - ClipRect.h) : 0;
+
   return (PageHeight > 0);
 }
 
@@ -373,7 +379,9 @@ SDL_Surface* TextBox::GetPageTextSurface()
     BreakText();
   }
 
-  assert(PageHeight > 0);
+  if (PageHeight == 0) {
+    return NULL;
+  }
 
   PageTextSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, ClipRect.w,
                                          max(PageHeight, uint(ClipRect.h)),

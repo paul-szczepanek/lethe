@@ -1,5 +1,4 @@
 [<story>]
-  
 
 [:begin]
     [!your room:go]
@@ -182,7 +181,7 @@
     [!:look] // look at the room we're in now
 }
 
-[?place=room] { // rest of the actions are available when we are in the room
+[?place+=room] { // rest of the actions are available when we are in the room
   // this is a cheat, if there is no closing } it's assumed to be at the end
   // of the definition rather then at the next top level condition
   // rest gets appended here
@@ -202,10 +201,7 @@
     Shouldn't you be doing something?
   [?door=open] // if the door is open
     [!exits+=staircase] // add the staircase as a possible exit
-
-[:leave]
-  [!door=open]
-  [!staircase:go]
+    You can see the <staircase> through the open <door>.
 
 //******************************************************************************
 
@@ -216,10 +212,13 @@
     You open the door.
     [!door=open]
 
-[?=open] // if the door is open (door is implied)
+[?+=open] // if the door is open (door is implied)
   [:close] [:use] // this time use will close it
     You close the door.
     [!door=] // close it by clearing the open value from the door noun
+
+  [:leave]
+    [!staircase:go]
 
 //******************************************************************************
 
@@ -242,7 +241,7 @@
 }
 
 [?+=empty] {
-  [:look] [:use]
+  [:look at] [:use]
     The cup of tea is empty.
 }
 
@@ -274,7 +273,6 @@
 
 [<staircase[room]>]
 
-[?place:+staircase]
-  [:look]
-    You are outside your <room[your room]>.
-    [!exits+=your room]
+[:look]
+  You are outside your <room[your room]>.
+  [!exits+=your room]

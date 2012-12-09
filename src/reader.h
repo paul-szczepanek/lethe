@@ -62,6 +62,9 @@ private:
   TextBox SideMenu;
   TextBox VerbMenu;
 
+  string NounKeyword;
+  string VerbKeyword;
+
   real SplitH;
   real SplitV;
 

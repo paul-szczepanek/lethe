@@ -84,17 +84,17 @@ bool Reader::Init(int width,
 
   PageSource = MyBook->Read(Progress, "story", "begin");
 
-
   MainText.SetText(PageSource, FontMain);
   MainText.Visible = true;
   ChoiceMenu.SetText("choice", FontMain);
   ChoiceMenu.Visible = true;
-  SideMenu.SetText("side", FontMain);
+  SideMenu.SetText("", FontMain);
   SideMenu.Visible = true;
 
 #ifdef LOGGER
   GLog = "Log";
   Logger = new TextBox();
+  Logger->Visible = true;
   Logger->SetSize(boxSize);
   Logger->SetText("", FontMain);
 #endif
@@ -181,19 +181,21 @@ bool Reader::Tick(real DeltaTime)
     // touch released, see if we cliked on something interative
     Mouse.LeftUp = false;
 
-    string keyword;
-
     if (VerbMenu.Visible) {
-      VerbMenu.Deselect();
-      if (VerbMenu.GetSelectedKeyword(keyword)) {
-        LOG("verb clicked: " + keyword);
+      if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
+        VerbMenu.Visible = false;
+        PageSource += MyBook->Read(Progress, NounKeyword, VerbKeyword);
+        MainText.SetText(PageSource, FontMain);
       }
+      VerbMenu.Deselect();
     }
 
     if (MainText.Visible) {
+      string keyword;
       if (MainText.GetSelectedKeyword(keyword)) {
+        NounKeyword = keyword;
         // we clicked on a keyword, create a menu full of verbs
-        string VerbsText = MyBook->GetVerbList(Progress, keyword);
+        string VerbsText = MyBook->GetVerbList(Progress, NounKeyword);
 
         Rect boxSize(400, 400, Mouse.X, Mouse.Y);
         VerbMenu.Visible = true;

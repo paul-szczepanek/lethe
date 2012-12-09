@@ -1,7 +1,7 @@
 #include "page.h"
 #include "tokens.h"
 
-Verb Page::MissingVerb = { "", Block("You can't do that")};
+Verb Page::MissingVerb = { "", Block("You can't do that.") };
 
 Page::Page(const string& SourceText)
   : Text(SourceText)
@@ -234,11 +234,10 @@ const Verb& Page::GetVerb(const string& VerbName) const
     }
   }
 
-  MissingVerb.BlockTree.Expression = "You can't " + VerbName + " this.";
+  MissingVerb.BlockTree.Expression = "You can't " + VerbName + " that.";
 
   return MissingVerb;
 }
-
 
 /** \brief Add the verb definition to the page
  *
@@ -275,13 +274,11 @@ void Page::NewVerbCondition(size_t_pair& TokenPos,
   }
 
   // pop old conditions that no longer apply
-  while (!VerbConditions.empty() && VerbConditions.back().End < TokenPos.X) {
+  // or didn't have an explicit { } scope
+  while (!VerbConditions.empty()
+         && (VerbConditions.back().End < TokenPos.Y
+             || VerbConditions.back().End == Text.size())) {
     VerbConditions.pop_back();
-  }
-
-  // close the previous condition if didn't have an explicit { } scope
-  if (VerbConditions.size() && VerbConditions.back().End == Text.size()) {
-    VerbConditions.back().End = TokenPos.X;
   }
 
   VerbConditions.push_back(condition);

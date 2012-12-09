@@ -77,6 +77,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
     return false;
   }
 
+  // parsing happens in the constructor
   Page* page = new Page(pageText);
 
   if (valuesPos.X != string::npos) {
@@ -304,37 +305,30 @@ Properties Story::EvaluateExpression(const Session& Progress,
     const string& valueText = cutString(Expression, valuePos, pos);
     Properties* newValue = new Properties(valueText);
 
-    if (valueText[0] == token::Start[token::number]) { // treat as number
-      IsNum = true;
-      lint intValue = 0;
-      // interpret into a number
-      if (valueText.size() > 1) {
+    if (!valueText.empty()) {
+      if (valueText[0] == token::Start[token::number]) { // treat as number
+        IsNum = true;
         const string number = cutString(valueText, 1, valueText.size());
-        // check if it's a plain text number (keywords can't start with a digit)
-        if (isdigit(valueText[0])) {
-          intValue = intoInt(number);
+        // check for a plain text number (keywords can't start with a digit)
+        if (isdigit(valueText[1])) {
+          newValue->IntValue = intoInt(number);
         } else {
           // this a noun, find its value
           if (!Progress.GetUserValuesInteger(number, newValue->IntValue)) {
             newValue->IntValue = FindPage(number).PageValues.IntValue;
           }
         }
-      }
-      newValue->IntValue = intValue;
-    } else if (!valueText.empty()
-               && valueText[0] == token::Start[token::value]) {
-      // get text values of this noun
-      if (valueText.size() > 1) {
+      } else if (valueText[0] == token::Start[token::value]) { // text values
         IsText = true;
         const string text = cutString(valueText, 1, valueText.size());
         // try to find the Values of this noun, user values first
         if (!Progress.GetUserValuesText(text, newValue->TextValues)) {
           newValue->AddValues(FindPage(text).PageValues);
         }
+      } else { // plain text
+        IsText = true;
+        newValue->AddValue(valueText);
       }
-    } else { //plain text
-      IsText = true;
-      newValue->AddValue(valueText);
     }
 
     valueStack.push_back(newValue);
@@ -364,7 +358,6 @@ Properties Story::EvaluateExpression(const Session& Progress,
         case token::multiply:
           result.IntValue *= value.IntValue;
           break;
-
         default:
           break;
       }
@@ -409,13 +402,13 @@ bool Story::ExecuteExpression(const string& Noun,
     if (c == token::Start[token::instruction]) { // [!var=value]
       // check which assignment operation it is
       // TODO: do this in one scan
-      token::tokenName op = token::assign;
+      token::tokenName op = token::remove;
       size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
       if (opPos.X == string::npos) {
         op = token::add;
         opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
         if (opPos.X == string::npos) {
-          op = token::remove;
+          op = token::assign;
           opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
           if (opPos.X == string::npos) {
             LOG(Expression + " - wrong isntruction");
@@ -433,8 +426,8 @@ bool Story::ExecuteExpression(const string& Noun,
         assert(CleanLeftSide(left));
       }
 
-      // in instructions we always create UserValues if they weren't there
-      if (Progress.IsUserValues(left)) {
+      // copy the story values if they haven't been created for the user yet
+      if (!Progress.IsUserValues(left)) {
         Progress.UserValues[left] = FindPage(left).PageValues;
       }
 
@@ -474,11 +467,8 @@ bool Story::ExecuteExpression(const string& Noun,
         default:
           break;
       }
-
     } else if (c == token::Start[token::condition]) { // [?var=value]
-
       // check which condition it is
-
       // TODO: do this in one scan
       // Keep calm, this is just an unrolled loop
       token::tokenName op = token::contains;
@@ -487,16 +477,16 @@ bool Story::ExecuteExpression(const string& Noun,
         op = token::notContains;
         opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
         if (opPos.X == string::npos) {
-          op = token::equals;
+          op = token::notEquals;
           opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
           if (opPos.X == string::npos) {
-            op = token::notEquals;
+            op = token::equalsOrLess;
             opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
             if (opPos.X == string::npos) {
-              op = token::equalsOrLess;
+              op = token::equalsOrMore;
               opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
               if (opPos.X == string::npos) {
-                op = token::equalsOrMore;
+                op = token::equals;
                 opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
                 if (opPos.X == string::npos) {
                   op = token::isMore;
