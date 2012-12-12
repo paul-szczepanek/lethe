@@ -94,10 +94,6 @@
 // You can add and subtract string values as well (but not divide and multiply)
 // Arithmetic operations are only allowed on the right.
 //
-// [!@function(argument)] - calls a function with an argument.
-// A function can be called in an instruction or in a condition.
-// [?@size(a)=#n] - size of noun array, i.e. check if it contains n values.
-//
 // ******** Code blcoks **************
 //
 // {} are used for blocks. If no {} are used the code block is up to next
@@ -160,6 +156,9 @@
 // Stop(asset) - returns true if stopped
 // Size(noun) - returns number of values of a noun (not counting the integer)
 //
+// A function can be called in an instruction or in a condition.
+// [?@Size(a)=#n] - size of noun array, i.e. check if it contains n values.
+//
 // ******** Media Assets *************
 //
 // [$asset=type(parameter1, parameter2)] - creates an image, sound etc.
@@ -169,10 +168,10 @@
 // Play again will play from beginning. Calling Stop on a stopped asset is safe.
 //
 // Supported types are:
-// bg(filename) - background, always to fit the window and behind all else
-// image(filename, position x%, position y%, size x%, size y%)
-// music(filename) - sound that loops
-// voice(filename) - sound that plays once and only one voice at a time
+// BG(filename) - background, always to fit the window and behind all else
+// Image(filename, position x%, position y%, size x%, size y%)
+// Music(filename) - sound that loops
+// Voice(filename) - sound that plays once and only one voice at a time
 //
 //******************************************************************************
 
@@ -188,9 +187,9 @@
 
 //******************** background setting **************************************
 
-[$bgroom=bg(bgroom.png)] // this creates an asset of type bg (background)
-[$musicroom=music(musicroom.ogg)]
-[$voiceroom=voice(voiceroom.ogg)]
+[$bgroom=BG(bgroom.png)] // this creates an asset of type BG (background)
+[$musicroom=Music(musicroom.ogg)]
+[$voiceroom=Voice(voiceroom.ogg)]
 
 [<your room media>]
   [:show]
