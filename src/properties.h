@@ -34,7 +34,6 @@ public:
 typedef vector<string>::iterator TextValues_it;
 
 /** @brief Check if a value is there
-  *
   * Done on a vector since the set will usually be small (mostly 1)
   */
 bool Properties::ContainsValue(const string& Value) const
@@ -48,7 +47,6 @@ bool Properties::ContainsValue(const string& Value) const
 }
 
 /** @brief Contains all the value of the passed in Value
-  *
   * \return if any is missing return false immediately
   */
 bool Properties::ContainsValues(const Properties& Value) const
@@ -62,7 +60,6 @@ bool Properties::ContainsValues(const Properties& Value) const
 }
 
 /** @brief Add Value if needed
-  *
   * \return false if nothing needed doing
   */
 bool Properties::AddValue(const string& Value)
@@ -76,7 +73,6 @@ bool Properties::AddValue(const string& Value)
 }
 
 /** @brief Remove Value if needed
-  *
   * \return false if nothing needed doing
   */
 bool Properties::RemoveValue(const string& Value)
@@ -96,7 +92,6 @@ bool Properties::RemoveValue(const string& Value)
 }
 
 /** @brief Set Value
-  *
   * \return false if nothing needed doing
   */
 bool Properties::SetValue(const string& Value)

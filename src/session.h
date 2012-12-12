@@ -8,7 +8,7 @@ struct Snapshot {
   Snapshot() : HistoryIndex(0) { };
   Snapshot(size_t Index, const string& LastNoun, const string& LastVerb)
     : HistoryIndex(Index), Noun(LastNoun), Verb(LastVerb) { };
-  size_t HistoryIndex;
+  size_t HistoryIndex; // this is the Progress from before the noun:verb
   string Noun;
   string Verb;
 };

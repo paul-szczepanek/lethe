@@ -15,24 +15,27 @@
 // [<noun>] - this delimates noun definition blocks, starts on a new line.
 // Keywords can't start with numbers (1noun) but may contain numbers and spaces.
 // Use alphanumeric characters. Nouns need to have unique names.
+//
 // Nouns are Case *Sensitive*!
+//
+// [<noun[pattern]>] - sets the pattern to use for this definition.
+// Patterns get prepended and every occurance of the pattern string gets
+// replaced with the noun string of the noun using the pattern.
+//
+// [<[pattern]>] - this defines a pettern (sorry for the forest of brackets).
+// They are not evaluated and need to be defined before they are used.
+// They are essentially macros that get prepended to a noun deifnition.
+//
+// ******** Values *******************
 //
 // [<noun> = value1, value2, #9] - sets the initial values of the noun.
 // (in the initial assignment, you can't force noun evaluation with @)
 //
 // prepend integers with #, there can only ever be one integer value.
 // [<noun> = #1, #7, #8] - will set it to 8.
-// 0 is the default.
-// The integer value doesn't count as a value when checking size of the array.
-// if no # is used then the number is treated as string.
 //
-// [<noun[pattern]>] - sets the pattern to use for this definition.
-// Patterns get prepended and every occurance of the pattern string gets
-// replaced with the noun string of the noun using the pattern.
-//
-// [<[pattern]>] = this defines a pettern (sorry for the forest of brackets).
-// They are not evaluated and need to be defined before they are used.
-// They are essentially macros that get prepended to a noun deifnition.
+// 0 is the default. The integer value doesn't count as a regular text value.
+// if no # is used then the number is treated as text.
 //
 // ******** Verb Definition [:] ******
 //
@@ -132,28 +135,75 @@
 // All other characters are legal and only treated as special characters
 // if within [ ] or < >.
 //
-// ******** Special nouns ************
+// ******** Special noun names *******
 //
 // These nouns are treated differently by the reader (not all are required).
 // [<story>] - how the story starts, at the verb [:begin] (this is essential).
-// [<nouns>] - list of always accessible nouns, like an inventory.
-// [<verbs>] - the list of common verbs for use on all nouns.
-// [<exits>] - where we can go.
 // [<place>] - where we are.
+// [<exits>] - where we can go.
+// [<nouns>] - list of always accessible nouns, like an inventory.
+// [<verbs>] - the list of choices that are noun:verb combinations.
+// [<calls>] - all values get executed every turn as instructions.
 //
 // The absolute minimum is:
 // [<story>] [:begin] [!noun:verb]
 // This will be called when starting the story and will tell the reader to go to
 // verb in noun and execute that block.
 //
+// ******** Function calls ***********
+//
+// [!function(parameter1, parameter2)] - bare function call.
+// Function calls can also be used on the right side of instructions and
+// conditions as the return values.
+//
+// Play(asset) - returns true if played
+// Stop(asset) - returns true if stopped
+// Size(noun) - returns number of values of a noun (not counting the integer)
+//
+// ******** Media Assets *************
+//
+// [$asset=type(parameter1, parameter2)] - creates an image, sound etc.
+// No breaklines allowed within definition.
+//
+// Each needs a unique name and only one instance of each is allowed. Calling
+// Play again will play from beginning. Calling Stop on a stopped asset is safe.
+//
+// Supported types are:
+// bg(filename) - background, always to fit the window and behind all else
+// image(filename, position x%, position y%, size x%, size y%)
+// music(filename) - sound that loops
+// voice(filename) - sound that plays once and only one voice at a time
+//
 //******************************************************************************
 
 //***************** starting place, exits, inventory and tools *****************
 
-[<nouns> = self, pen] //assign default values
-[<verbs> = look, go, use]
 [<place>] // we start nowhere
 [<exits> = your room] // so we can enter our starting room
+
+[<nouns> = self, pen] //assign default values
+[<verbs> = @place:look]
+
+[<calls>]
+
+//******************** background setting **************************************
+
+[$bgroom=bg(bgroom.png)] // this creates an asset of type bg (background)
+[$musicroom=music(musicroom.ogg)]
+[$voiceroom=voice(voiceroom.ogg)]
+
+[<your room media>]
+  [:show]
+    [!Play(bgroom)]
+    [!Play(musicroom)]
+    [!Play(voiceroom)]
+    [!calls+=your room media:autohide] // this gets evaluated each turn
+  [:autohide] // and will hide the background if we leave
+    [?place-=your room]
+      [!calls-=your room media:autohide]
+      [!Stop(bgroom)]
+      [!Stop(musicroom)]
+      // [!Stop(voiceroom)] voice is a one off so no need to stop
 
 //******************************************************************************
 
@@ -169,7 +219,7 @@
 
 //************************ pattern for places  *********************************
 
-[<[room]>] //pattern definition because noun after [< is blank
+[<[room]>] // pattern definition because noun after [< is blank
 
 // top level conditions are the ones placed above the verb definition
 [?exits+=room] & [?place-=room] { // two conditions, both need to be met to access
@@ -192,7 +242,7 @@
 
 [:look] // because we appended the room definition these are only visible
         // when we're in the room
-  You  are sitting in your <room[your room]> <programming[program]>.
+  You are sitting in your <room[your room]> <programming[program]>.
   [!tea:look]
   The room has only one <door>.
   [?+=reminder]
@@ -218,6 +268,7 @@
 
   [:leave]
     [!staircase:go]
+      You leave the room and enter the <staircase>.
 
 //******************************************************************************
 
@@ -253,6 +304,7 @@
 [<program>]
 
 [:look]
+  [!your room media:show]
   You are writing an interactive fiction engine.
   [?<=#1] {
     It's a long way to go.

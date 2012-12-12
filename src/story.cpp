@@ -19,6 +19,28 @@ Story::~Story()
   }
 }
 
+/** @brief AddAssetDefinition
+  *
+  * This saves the asset definition which is parsed later by the reader
+  */
+bool Story::AddAssetDefinition(const string& StoryText)
+{
+  string text = CleanWhitespace(StoryText);
+
+  const size_t_pair namePos = FindToken(text, token::expression); // []
+  const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
+                                     namePos.Y);
+  if (namePos.Y == string::npos || defPos == string::npos) {
+    return false;
+  }
+
+  // get the strings [$name=def]
+  string assetName = cutString(text, namePos.X+2, defPos);
+  string assetDefinition = cutString(text, defPos+1, namePos.Y);
+
+  return true;
+}
+
 /** @brief ParseKeywordDefinition
   *
   * this expects a single keyword definition block
@@ -182,7 +204,7 @@ uint Story::ExecuteBlock(const string& Noun,
       // is it a [!noun:verb] command
       const size_t scopePos = FindTokenStart(expression, token::scope);
 
-      // if it's an command, recurse with the new block
+      // if it's a verb command, recurse with the new block
       if (scopePos != string::npos) {
         string noun = cutString(expression, tokenPos.X+2, scopePos);
         const string verbName = cutString(expression, scopePos+1, tokenPos.Y);
@@ -246,6 +268,21 @@ vector<string> Story::GetVerbs(Session& Progress,
   }
 
   return verbs;
+}
+
+
+
+/** @brief Execute Expression
+  *
+  * Parses the instruction or condition, checks for user values
+  * and modifies them if needed
+  */
+Properties Story::ExecuteFunction(Session& Progress,
+                                  const string& FunctionName,
+                                  const string& FunctionParams)
+{
+  Properties result;
+  return result;
 }
 
 /** @brief Evaluate Expression
@@ -371,7 +408,6 @@ Properties Story::EvaluateExpression(const Session& Progress,
   return result;
 }
 
-
 /** @brief Execute Expression
   *
   * Parses the instruction or condition, checks for user values
@@ -401,7 +437,6 @@ bool Story::ExecuteExpression(const string& Noun,
 
     if (c == token::Start[token::instruction]) { // [!var=value]
       // check which assignment operation it is
-      // TODO: do this in one scan
       token::tokenName op = token::remove;
       size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
       if (opPos.X == string::npos) {
@@ -411,61 +446,78 @@ bool Story::ExecuteExpression(const string& Noun,
           op = token::assign;
           opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
           if (opPos.X == string::npos) {
-            LOG(Expression + " - wrong isntruction");
+            op = token::function;
+            opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+            if (opPos.X == string::npos) {
+              LOG(Expression + " - incorrect isntruction");
+            }
             return false;
           }
         }
-      }
+      } // TODO: do this in one scan
 
-      string left = cutString(Expression, tokenPos.X+2, opPos.X);
+      // bare function calls have different syntax
+      if (op == token::function) {
+        const string funcName = cutString(Expression, tokenPos.X+2,
+                                          opPos.X);
+        const string funcParams = cutString(Expression, opPos.X, opPos.Y);
 
-      // default to current page noun
-      if (left.empty()) {
-        left = Noun;
+        const Properties& funcReturn = ExecuteFunction(Progress, funcName,
+                                       funcParams);
+
+        // function call instructions return a boolean value for chaining
+        result = funcReturn.IntValue;
       } else {
-        assert(CleanLeftSide(left));
-      }
+        string left = cutString(Expression, tokenPos.X+2, opPos.X);
 
-      // copy the story values if they haven't been created for the user yet
-      if (!Progress.IsUserValues(left)) {
-        Progress.UserValues[left] = FindPage(left).PageValues;
-      }
+        // default to current page noun
+        if (left.empty()) {
+          left = Noun;
+        } else {
+          assert(CleanLeftSide(left));
+        }
 
-      Properties& userValues = Progress.UserValues[left];
+        // copy the story values if they haven't been created for the user yet
+        if (!Progress.IsUserValues(left)) {
+          Progress.UserValues[left] = FindPage(left).PageValues;
+        }
 
-      const string evaluate = cutString(Expression, opPos.Y+1, tokenPos.Y);
+        Properties& userValues = Progress.UserValues[left];
 
-      bool isNum, isText;
-      const Properties& newValues = EvaluateExpression(Progress, evaluate,
-                                    isNum, isText);
+        const string evaluate = cutString(Expression, opPos.Y+1, tokenPos.Y);
 
-      switch (op) {
-        case token::assign:
-          if (isText || evaluate.empty()) {
-            userValues.SetValues(newValues);
-          }
-          if (isNum) {
-            userValues.IntValue = newValues.IntValue;
-          }
-          break;
-        case token::add:
-          if (isText) {
-            userValues.AddValues(newValues);
-          }
-          if (isNum) {
-            userValues.IntValue += newValues.IntValue;
-          }
-          break;
-        case token::remove:
-          if (isText) {
-            userValues.RemoveValues(newValues);
-          }
-          if (isNum) {
-            userValues.IntValue -= newValues.IntValue;
-          }
-          break;
-        default:
-          break;
+        bool isNum, isText;
+        const Properties& newValues = EvaluateExpression(Progress, evaluate,
+                                      isNum, isText);
+
+        switch (op) {
+          case token::assign:
+            if (isText || evaluate.empty()) {
+              userValues.SetValues(newValues);
+            }
+            if (isNum) {
+              userValues.IntValue = newValues.IntValue;
+            }
+            break;
+          case token::add:
+            if (isText) {
+              userValues.AddValues(newValues);
+            }
+            if (isNum) {
+              userValues.IntValue += newValues.IntValue;
+            }
+            break;
+          case token::remove:
+            if (isText) {
+              userValues.RemoveValues(newValues);
+            }
+            if (isNum) {
+              userValues.IntValue -= newValues.IntValue;
+            }
+            break;
+          default:
+            break;
+        }
       }
     } else if (c == token::Start[token::condition]) { // [?var=value]
       // check which condition it is

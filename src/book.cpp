@@ -43,7 +43,7 @@ bool Book::Open(string Title)
       continue;
     }
 
-    // look for a keyword definition
+    // look for a keyword definition of asset definition
     if (FindTokenStart(buffer, token::keywordBlockMark) != string::npos) {
       // if it's the second keyword we hit on this run
       if (storyText.empty()) {
@@ -54,9 +54,12 @@ bool Book::Open(string Title)
         StoryDefinition->ParseKeywordDefinition(storyText);
         storyText = buffer;
       }
+    } else if (FindTokenStart(buffer, token::assetBlockMark) != string::npos) {
+      StoryDefinition->AddAssetDefinition(buffer);
     } else if (!storyText.empty()) {
       // we didn't find a keyword, keep adding lines if we already hit one
-      storyText += "\n" + buffer;
+      storyText += "\n";
+      storyText += buffer;
     }
   }
 

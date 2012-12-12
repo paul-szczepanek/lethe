@@ -6,10 +6,10 @@
 namespace token
 {
 
-const size_t NUM_TOKENS_INSTRUCTION = 3;
+const size_t NUM_TOKENS_INSTRUCTION = 4;
 const size_t NUM_TOKENS_CONDITION = 8;
 const size_t NUM_SPACE_REMOVERS = 6;
-const size_t NUM_EXPRESSION_SPACE_REMOVERS = 17;
+const size_t NUM_EXPRESSION_SPACE_REMOVERS = 20;
 
 const uint isPaired = 0x0001;
 const uint isWide   = 0x0002;
@@ -58,6 +58,7 @@ enum tokenName {
 
   number,
   value,
+  function,
 
   separator,
   block,
@@ -65,6 +66,7 @@ enum tokenName {
 
   keywordBlockMark, // not a real token, marks start and end of keyword defs
   verbBlockMark, // not a real token, marks start of a verb block
+  assetBlockMark, // not a real token, marks start of a verb block
 
   TOKEN_NAME_MAX
 };
@@ -98,13 +100,15 @@ const char Start[TOKEN_NAME_MAX] = {
 
   '#',    //number,
   '@',    //value,
+  '(',    //function,
 
   ',',    //separator,
   '{',    //block,
   '<',    //stop
 
   '[',    //keywordBlockMark,
-  '['     //verbBlockMark,
+  '[',     //verbBlockMark,
+  '['     //assetBlockMark,
 };
 
 const char End[TOKEN_NAME_MAX] = {
@@ -136,13 +140,15 @@ const char End[TOKEN_NAME_MAX] = {
 
   ' ',    //number,
   ' ',    //value,
+  ')',    //function,
 
   ' ',    //separator,
   '}',    //block,
   '<',    //stop,
 
   '<',    //keywordBlockMark,
-  ':'     //verbBlockMark,
+  ':',    //verbBlockMark,
+  '$'     //assetBlockMark,
 };
 
 const uint Type[TOKEN_NAME_MAX] = {
@@ -174,13 +180,15 @@ const uint Type[TOKEN_NAME_MAX] = {
 
   0,    //number,
   0,    //value,
+  isPaired,    //function,
 
   0,    //separator,
   isPaired,    //block,
   isWide,    //stop,
 
   isWide,    //keywordBlockMark,
-  isWide    //verbBlockMark,
+  isWide,    //verbBlockMark,
+  isWide    //assetBlockMark,
 };
 
 const tokenName Conditions[NUM_TOKENS_CONDITION] = {
@@ -198,6 +206,7 @@ const tokenName Instructions[NUM_TOKENS_INSTRUCTION] = {
   add,
   remove,
   assign,
+  function
 };
 
 const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
@@ -226,7 +235,10 @@ const char ExpressionWhitespaceRemovers[NUM_EXPRESSION_SPACE_REMOVERS] = {
   '@',
   '-',
   ':',//16
-  ','
+  ',',
+  '$',
+  '(',
+  ')'
 };
 
 } // namespace token

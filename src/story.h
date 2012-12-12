@@ -15,6 +15,7 @@ public:
   virtual ~Story();
 
   bool ParseKeywordDefinition(const string& StoryText);
+  bool AddAssetDefinition(const string& StoryText);
 
   string Read(Session& Progress, const string& Noun,
               const string& VerbName);
@@ -28,8 +29,12 @@ private:
                     Session& Progress, string& Text);
   bool ExecuteExpression(const string& Noun, Session& Progress,
                          const string& Expression);
-  Properties EvaluateExpression(const Session& Progress, const string& Expression,
-                            bool& IsNum, bool& IsText);
+  Properties EvaluateExpression(const Session& Progress,
+                                const string& Expression,
+                                bool& IsNum, bool& IsText);
+  Properties ExecuteFunction(Session& Progress,
+                             const string& FunctionName,
+                             const string& FunctionParams);
 
   string PrependPattern(const string& Keyword, const string& PageText,
                         const string& PatternName, const string& PatternText);
@@ -38,6 +43,7 @@ private:
 private:
   map<string, Page*> Pages;
   map<string, string> Patterns;
+  map<string, string> Assets;
 
   static Page MissingPage;
 };
