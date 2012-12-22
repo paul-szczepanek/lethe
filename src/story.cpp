@@ -137,24 +137,6 @@ string Story::PrependPattern(const string& Keyword,
   return text + PageText;
 }
 
-/** @brief FindPage
-  *
-  * @todo: document this function
-  */
-Page& Story::FindPage(const string& Noun)
-{
-  page_it it = Pages.find(Noun);
-
-  if (it != Pages.end()) {
-    return *(it->second);
-  }
-
-  LOG(Noun + " - not defined in the story");
-
-  return MissingPage;
-}
-
-
 string Story::Read(Session& Progress,
                    const string& Noun,
                    const string& VerbName)
@@ -164,9 +146,32 @@ string Story::Read(Session& Progress,
   const Page& page = FindPage(Noun);
   const Verb& verb = page.GetVerb(VerbName);
 
-  ExecuteBlock(Noun, verb.BlockTree, Progress, pageText);
+  ExecuteBlock(Progress, Noun, verb.BlockTree, pageText);
 
   return pageText;
+}
+
+/** \brief get list of active verbs
+ *
+ * \return array of verbs that pass their top level condition
+ */
+vector<string> Story::GetVerbs(Session& Progress,
+                               const string& Noun)
+{
+  vector<string> verbs;
+  const Page& page = FindPage(Noun);
+
+  for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
+    const Verb& verb = page.Verbs[i];
+    if (!verb.VisualName.empty()) {
+      string text; // discarded
+      if (ExecuteExpression(Progress, Noun, verb.BlockTree.Expression, text)) {
+        verbs.push_back(verb.VisualName);
+      }
+    }
+  }
+
+  return verbs;
 }
 
 /** \brief fills in the Text param with the story to display
@@ -179,9 +184,9 @@ string Story::Read(Session& Progress,
  * \param the resulting text of the story
  * \return how many parents up do we break with [!<<]
  */
-uint Story::ExecuteBlock(const string& Noun,
+uint Story::ExecuteBlock(Session& Progress,
+                         const string& Noun,
                          const Block& CurBlock,
-                         Session& Progress,
                          string& Text)
 {
   const string& expression = CurBlock.Expression;
@@ -201,29 +206,12 @@ uint Story::ExecuteBlock(const string& Noun,
     assert(tokenPos.Y != string::npos);
 
     if (c == token::Start[token::instruction]) {
-      // is it a [!noun:verb] command
-      const size_t scopePos = FindTokenStart(expression, token::scope);
-
-      // if it's a verb command, recurse with the new block
-      if (scopePos != string::npos) {
-        string noun = cutString(expression, tokenPos.X+2, scopePos);
-        const string verbName = cutString(expression, scopePos+1, tokenPos.Y);
-
-        // if no noun, use the current page noun by default
-        if (noun.empty()) {
-          noun = Noun;
-        }
-        const Page& page = FindPage(noun);
-        const Block& block = page.GetVerb(verbName).BlockTree;
-
-        return ExecuteBlock(noun, block, Progress, Text);
-      } else if (FindTokenStart(expression, token::stop) != string::npos) {
-        // this is a [!<<] (this will work for for [!anything<<])
+      // this is a [!<<] (this will work for for [!anything<<])
+      if (FindTokenStart(expression, token::stop) != string::npos) {
         const uint breakUp = tokenPos.Y - tokenPos.X - 2;
         return breakUp; // this breaks out of n loops above
       } else {
-        //execute the expression
-        ExecuteExpression(Noun, Progress, expression);
+        ExecuteExpression(Progress, Noun, expression, Text);
       }
     } else if (c == token::Start[token::condition]) { // [?condition]
       LOG(expression + " - childless condition");
@@ -231,11 +219,11 @@ uint Story::ExecuteBlock(const string& Noun,
       LOG(expression + " - illegal character: " + c +", use ? or ! after [");
     }
   } else { // we have children so this must be a [?condition]
-    if (length == 0 || ExecuteExpression(Noun, Progress, expression)) {
+    if (length == 0 || ExecuteExpression(Progress, Noun, expression, Text)) {
       // if the condition is true, execute all the child blocks
       for (size_t i = 0, forSz = CurBlock.Blocks.size(); i < forSz; ++i) {
         // if [!<<] used to escape parent break from loop
-        uint backUp = ExecuteBlock(Noun, CurBlock.Blocks[i], Progress, Text);
+        uint backUp = ExecuteBlock(Progress, Noun, CurBlock.Blocks[i], Text);
         if (backUp > 0) {
           // so the parent remains unaffected
           return --backUp;
@@ -248,42 +236,24 @@ uint Story::ExecuteBlock(const string& Noun,
   return 0;
 }
 
-/** \brief get list of active verbs
- *
- * \return array of verbs that pass their top level condition
- */
-vector<string> Story::GetVerbs(Session& Progress,
-                               const string& Noun)
-{
-  vector<string> verbs;
-  const Page& page = FindPage(Noun);
-
-  for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
-    const Verb& verb = page.Verbs[i];
-    if (!verb.VisualName.empty()) {
-      if (ExecuteExpression(Noun, Progress, verb.BlockTree.Expression)) {
-        verbs.push_back(verb.VisualName);
-      }
-    }
-  }
-
-  return verbs;
-}
-
-
-
-/** @brief Execute Expression
+/** @brief Execute all functions on args
   *
-  * Parses the instruction or condition, checks for user values
-  * and modifies them if needed
   */
-Properties Story::ExecuteFunction(Session& Progress,
-                                  const string& FunctionName,
-                                  const string& FunctionParams)
+bool Story::ExecuteFunction(const Session& Progress,
+                            const Properties& FunctionName,
+                            Properties& FunctionArgs)
 {
-  Properties result;
-  return result;
+  for (const string& text : FunctionName.TextValues) {
+    // execute function
+  }
+  return true;
 }
+
+struct OperationNode {
+  token::operationName Operation = token::plus;
+  Properties Operand;
+  bool Nested = true; //doesn't have operand, copy from result of next
+};
 
 /** @brief Evaluate Expression
   *
@@ -294,118 +264,206 @@ Properties Story::ExecuteFunction(Session& Progress,
   * \param returns true if there is a string in the expression
   * \return Values that the expression results in
   */
-Properties Story::EvaluateExpression(const Session& Progress,
-                                     const string& Expression,
-                                     bool& IsNum,
-                                     bool& IsText)
+bool Story::EvaluateExpression(const Session& Progress,
+                               Properties& Result,
+                               const string& Expression,
+                               bool& IsNum,
+                               bool& IsText)
 {
-  Properties result;
+  // important hints to determine type of assignment
   IsNum = false;
   IsText = false;
 
   size_t length = Expression.size();
   size_t pos = 0;
   size_t valuePos = 0;
+  size_t valueEnd = 0; //needed because function names vary in length
 
-  vector<Properties*> valueStack;
-  vector<token::mathName> opStack;
+  vector<OperationNode> opStack;
+  opStack.reserve(16); // too avoid constant allocs
 
   // it's more efficient to scan char by char
   while (pos < length) {
     const char c = Expression[pos];
-    // ignore escaped characters
+    bool valueFound = false;
+    bool opFound = false;
+    bool funcFound = false;
+
     if (c == '\\') {
-      pos += 2;
-      continue;
-    }
-
-    bool valueCharacter = true;
-    // look for operators that delimate values
-    for (size_t i = 0; i < token::MATH_NAME_MAX; ++i) {
-      if (token::Math[i] == c) {
-        valueCharacter = false;
-        opStack.push_back((token::mathName)i);
-        break;
-      }
-    }
-
-    // not hit an operator
-    if (valueCharacter) {
+      // ignore escaped characters
       ++pos;
-      // don't continue if it's the last character so we can get the last value
-      if (pos < length) {
-        continue;
+    } else if (pos + 1 >= length) {
+      valueFound = true;
+      valueEnd = ++pos;
+      // if there was no operator we need at least one op to store the value
+      if (opStack.empty()) {
+        opStack.resize(1);
+      }
+    } else {
+      // look for operators that delimate values
+      for (size_t i = 0; i < token::OPERATION_NAME_MAX; ++i) {
+        if (token::Operations[i] == c) {
+          opFound = true;
+          opStack.resize(opStack.size()+1);
+          //if it's the first character, there could be no value
+          valueFound = (pos > 0);
+          valueEnd = pos;
+
+          // grouping and function calls recurse with the (contents)
+          if (i == token::parens) {
+            const size_t funcEnd = FindTokenEnd(Expression, token::function,
+                                                pos);
+            if (funcEnd == string::npos) {
+              LOG(Expression + " - unmatched \"(\" in expression");
+              return false;
+            } else {
+              // so that the values before are treated as function names
+              funcFound = true;
+              opStack.back().Nested = true;
+              // prepare function arguments by evaluating recursively
+              const string& funcArgs = cutString(Expression, pos + 1, funcEnd);
+              EvaluateExpression(Progress, opStack.back().Operand, funcArgs,
+                                 IsNum, IsText);
+            }
+
+            pos = funcEnd;
+          }
+
+          opStack.back().Operation = (token::operationName)i;
+          break;
+        }
       }
     }
 
-    // create temporary values
-    const string& valueText = cutString(Expression, valuePos, pos);
-    Properties* newValue = new Properties(valueText);
+    if (valueFound && valueEnd > valuePos) {
+      // if an op was found this iteration, assign value to the previous op
+      OperationNode& lastOp = opFound? opStack.back() : *(opStack.end()-1);
+      const string& valueText = cutString(Expression, valuePos, valueEnd);
 
-    if (!valueText.empty()) {
-      if (valueText[0] == token::Start[token::number]) { // treat as number
-        IsNum = true;
-        const string number = cutString(valueText, 1, valueText.size());
-        // check for a plain text number (keywords can't start with a digit)
-        if (isdigit(valueText[1])) {
-          newValue->IntValue = intoInt(number);
-        } else {
-          // this a noun, find its value
-          if (!Progress.GetUserValuesInteger(number, newValue->IntValue)) {
-            newValue->IntValue = FindPage(number).PageValues.IntValue;
+      // a value terminates a series of nested operators
+      lastOp.Nested = funcFound; // unless it was a function
+      lastOp.Operand.AddValue(valueText);
+    }
+
+    ++pos;
+
+    if (opFound) {
+      valuePos = pos;
+    }
+  }
+
+  size_t opI = 0; // current operation
+  size_t nextOp = 0; // next operation after nesting is finished
+  const size_t stackSize = opStack.size();
+
+  // traverse the tree, do math operations and accumulate the result
+  while (opI < stackSize) {
+    bool nested = false;
+
+    // go to the end of nested ops
+    while (opI < stackSize && opStack[opI].Nested) {
+      ++opI;
+      nested = true;
+    }
+
+    if (nested) {
+      // remember the end of nested ops so we can pick it up later
+      if (nextOp < opI) {
+        nextOp = opI + 1;
+      }
+      opStack[opI - 1].Nested = false; // the result will be copied there
+    } else if (opI > 0 && opStack[opI - 1].Nested) {
+      // we have a nested value behind us
+      // we're in the middle of collapsing a nesting
+      nested = true;
+      opStack[opI - 1].Nested = false; // the result will be copied there
+    }
+
+    Properties& operand = opStack[opI].Operand;
+    // when dealing with nested values copy values to previous operand
+    Properties& target = nested? opStack[opI - 1].Operand : Result;
+
+    switch (opStack[opI].Operation) {
+      case token::plus:
+        if (!operand.TextValues.empty()) {
+          IsText = true;
+          target.AddValues(operand);
+        }
+        target.IntValue += operand.IntValue;
+        break;
+      case token::minus:
+        if (!operand.TextValues.empty()) {
+          IsText = true;
+          target.RemoveValues(operand);
+        }
+        target.IntValue -= operand.IntValue;
+        break;
+      case token::divide:
+        if (!operand.TextValues.empty()) {
+          IsText = true;
+          target.ConcatValues(operand);
+        }
+        target.IntValue /= operand.IntValue;
+        break;
+      case token::multiply:
+        if (!operand.TextValues.empty()) {
+          IsText = true;
+          target.CommonValues(operand);
+        }
+        target.IntValue *= operand.IntValue;
+        break;
+      case token::parens:
+        // all parens are preceded by nested
+        // target is the previous op containing function names
+        ExecuteFunction(Progress, target, operand);
+        // replace the function names with the results
+        target.SetValues(operand);
+        target.IntValue = operand.IntValue;
+        break;
+      case token::evaluate:
+        // evaluate all text into noun values, add them up and reuse the value
+        for (string text : operand.TextValues) {
+          // try to find the Values of this noun, user values first
+          if (!Progress.GetUserValues(text, target)) {
+            target.AddValues(FindPage(text).PageValues);
           }
         }
-      } else if (valueText[0] == token::Start[token::value]) { // text values
-        IsText = true;
-        const string text = cutString(valueText, 1, valueText.size());
-        // try to find the Values of this noun, user values first
-        if (!Progress.GetUserValuesText(text, newValue->TextValues)) {
-          newValue->AddValues(FindPage(text).PageValues);
+        break;
+      case token::integer:
+        // evaluate all text into int values, add them up and reuse the value
+        for (string numberText : operand.TextValues) {
+          // check for a plain text number (keywords can't start with a digit)
+          if (isdigit(numberText[0])) {
+            target.IntValue += intoInt(numberText);
+          } else { // this a noun, find its value
+            if (!Progress.GetUserInteger(numberText, operand)) {
+              target.IntValue += FindPage(numberText).PageValues.IntValue;
+            }
+          }
         }
-      } else { // plain text
-        IsText = true;
-        newValue->AddValue(valueText);
-      }
+        IsNum = true;
+        break;
+      default:
+        break;
     }
 
-    valueStack.push_back(newValue);
-
-    valuePos = ++pos;
-  }
-
-  // execute math operators
-  if (!valueStack.empty()) {
-    result = *valueStack[0];
-
-    for (size_t i = 1, j = 0, forSz = valueStack.size(); i < forSz; ++i, ++j) {
-      const Properties& value = *valueStack[i];
-
-      switch (opStack[j]) {
-        case token::plus:
-          result.AddValues(value);
-          result.IntValue += value.IntValue;
-          break;
-        case token::minus:
-          result.RemoveValues(value);
-          result.IntValue -= value.IntValue;
-          break;
-        case token::divide:
-          result.IntValue /= value.IntValue;
-          break;
-        case token::multiply:
-          result.IntValue *= value.IntValue;
-          break;
-        default:
-          break;
+    // if nested go back to previous op to which the values have been copied
+    if (nested) {
+      --opI;
+    } else { // move to next op
+      ++opI;
+      // jump over the nested ops we've already evaluated
+      if (opI < nextOp) {
+        opI = nextOp;
       }
-
-      delete valueStack[i];
-
-      ++j;
     }
   }
 
-  return result;
+  if (opStack.empty()) {
+    return false;
+  }
+
+  return true;
 }
 
 /** @brief Execute Expression
@@ -413,9 +471,10 @@ Properties Story::EvaluateExpression(const Session& Progress,
   * Parses the instruction or condition, checks for user values
   * and modifies them if needed
   */
-bool Story::ExecuteExpression(const string& Noun,
-                              Session& Progress,
-                              const string& Expression)
+bool Story::ExecuteExpression(Session& Progress,
+                              const string& Noun,
+                              const string& Expression,
+                              string& Text)
 {
   size_t length = Expression.size();
   size_t pos = 0;
@@ -434,10 +493,11 @@ bool Story::ExecuteExpression(const string& Noun,
     }
 
     const char c = Expression[tokenPos.X+1];
+    token::tokenName op;
 
     if (c == token::Start[token::instruction]) { // [!var=value]
       // check which assignment operation it is
-      token::tokenName op = token::remove;
+      op = token::remove;
       size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
       if (opPos.X == string::npos) {
         op = token::add;
@@ -446,84 +506,73 @@ bool Story::ExecuteExpression(const string& Noun,
           op = token::assign;
           opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
           if (opPos.X == string::npos) {
-            op = token::function;
-            opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
-            if (opPos.X == string::npos) {
-              LOG(Expression + " - incorrect isntruction");
-            }
-            return false;
+            op = token::instruction; // [!value]
+            // no assignment, just a bare instruction
           }
         }
       } // TODO: do this in one scan
 
-      // bare function calls have different syntax
-      if (op == token::function) {
-        const string funcName = cutString(Expression, tokenPos.X+2,
-                                          opPos.X);
-        const string funcParams = cutString(Expression, opPos.X, opPos.Y);
+      // bare instructions have different syntax because no assignment
+      if (op != token::instruction) {
+        bool isNum = false, isText = false;
+        Properties leftValues;
+        Properties rightValues;
 
-        const Properties& funcReturn = ExecuteFunction(Progress, funcName,
-                                       funcParams);
-
-        // function call instructions return a boolean value for chaining
-        result = funcReturn.IntValue;
-      } else {
-        string left = cutString(Expression, tokenPos.X+2, opPos.X);
+        const string& left = cutString(Expression, tokenPos.X+2, opPos.X);
+        const string& right = cutString(Expression, opPos.Y+1, tokenPos.Y);
 
         // default to current page noun
         if (left.empty()) {
-          left = Noun;
+          leftValues.AddValue(Noun);
         } else {
-          assert(CleanLeftSide(left));
+          EvaluateExpression(Progress, leftValues, left, isNum, isText);
         }
 
-        // copy the story values if they haven't been created for the user yet
-        if (!Progress.IsUserValues(left)) {
-          Progress.UserValues[left] = FindPage(left).PageValues;
-        }
+        EvaluateExpression(Progress, rightValues, right, isNum, isText);
 
-        Properties& userValues = Progress.UserValues[left];
+        // assign right values to all nouns whose name is in left values
+        for (const string& text : leftValues.TextValues) {
+          // copy the story values if they haven't been created for the user yet
+          if (!Progress.IsUserValues(text)) {
+            Progress.UserValues[text] = FindPage(text).PageValues;
+          }
+          Properties& userValues = Progress.UserValues[text];
 
-        const string evaluate = cutString(Expression, opPos.Y+1, tokenPos.Y);
-
-        bool isNum, isText;
-        const Properties& newValues = EvaluateExpression(Progress, evaluate,
-                                      isNum, isText);
-
-        switch (op) {
-          case token::assign:
-            if (isText || evaluate.empty()) {
-              userValues.SetValues(newValues);
-            }
-            if (isNum) {
-              userValues.IntValue = newValues.IntValue;
-            }
-            break;
-          case token::add:
-            if (isText) {
-              userValues.AddValues(newValues);
-            }
-            if (isNum) {
-              userValues.IntValue += newValues.IntValue;
-            }
-            break;
-          case token::remove:
-            if (isText) {
-              userValues.RemoveValues(newValues);
-            }
-            if (isNum) {
-              userValues.IntValue -= newValues.IntValue;
-            }
-            break;
-          default:
-            break;
+          switch (op) {
+            case token::assign:
+              if (isText || right.empty()) {
+                userValues.SetValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue = rightValues.IntValue;
+              }
+              break;
+            case token::add:
+              if (isText) {
+                userValues.AddValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue += rightValues.IntValue;
+              }
+              break;
+            case token::remove:
+              if (isText) {
+                userValues.RemoveValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue -= rightValues.IntValue;
+              }
+              break;
+            default:
+              break;
+          }
         }
       }
     } else if (c == token::Start[token::condition]) { // [?var=value]
       // check which condition it is
       // TODO: do this in one scan
       // Keep calm, this is just an unrolled loop
-      token::tokenName op = token::contains;
+      op = token::contains;
       size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
       if (opPos.X == string::npos) {
         op = token::notContains;
@@ -547,8 +596,8 @@ bool Story::ExecuteExpression(const string& Noun,
                     op = token::isLess;
                     opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
                     if (opPos.X == string::npos) {
-                      LOG(Expression + " - illegal condition");
-                      return false;
+                      op = token::condition; // [?value]
+                      // no comparison, just a bare condition
                     }
                   }
                 }
@@ -558,76 +607,104 @@ bool Story::ExecuteExpression(const string& Noun,
         }
       } // Keep calm, this was just an unrolled loop
 
-      string left = cutString(Expression, tokenPos.X+2, opPos.X);
+      // bare conditions have different syntax because no comparison
+      if (op != token::condition) {
+        bool isNum = false, isText = false;
+        Properties leftValues;
+        Properties rightValues;
 
-      // default to current page noun
-      if (left.empty()) {
-        left = Noun;
-      } else {
-        assert(CleanLeftSide(left));
-      }
+        const string& left = cutString(Expression, tokenPos.X+2, opPos.X);
+        const string& right = cutString(Expression, opPos.Y+1, tokenPos.Y);
 
-      // if UserValues don't exist use page values
-      const Properties& leftValues = Progress.IsUserValues(left)?
-                                     Progress.UserValues[left]
-                                     : FindPage(left).PageValues;
+        // default to current page noun
+        if (left.empty()) {
+          leftValues = Progress.IsUserValues(Noun)?
+                       Progress.UserValues[Noun]
+                       : FindPage(Noun).PageValues;
+        } else {
+          EvaluateExpression(Progress, leftValues, left, isNum, isText);
+        }
 
-      const string& right = cutString(Expression, opPos.Y+1, tokenPos.Y);
+        EvaluateExpression(Progress, rightValues, right, isNum, isText);
 
-      bool isNum, isText;
-      const Properties& rightValues = EvaluateExpression(Progress, right,
-                                      isNum, isText);
-
-      switch (op) {
-        case token::contains:
-          if (isText) {
-            result = leftValues.ContainsValues(rightValues);
-          }
-          if (isNum && result) {
-            result = leftValues.IntValue == rightValues.IntValue;
-          }
-          break;
-        case token::notContains:
-          if (isText) {
-            result = !leftValues.ContainsValues(rightValues);
-          }
-          if (isNum && result) {
-            result = leftValues.IntValue != rightValues.IntValue;
-          }
-          break;
-        case token::equals:
-          if (isText) {
-            result = leftValues.IsEquivalent(rightValues);
-          }
-          if (isNum && result) {
-            result = leftValues.IntValue == rightValues.IntValue;
-          }
-          break;
-        case token::notEquals:
-          if (isText) {
-            result = !leftValues.IsEquivalent(rightValues);
-          }
-          if (isNum && result) {
-            result = leftValues.IntValue != rightValues.IntValue;
-          }
-          break;
-        case token::equalsOrLess:
-          result = leftValues.IntValue <= rightValues.IntValue;
-          break;
-        case token::equalsOrMore:
-          result = leftValues.IntValue >= rightValues.IntValue;
-          break;
-        case token::isMore:
-          result = leftValues.IntValue > rightValues.IntValue;
-          break;
-        case token::isLess:
-          result = leftValues.IntValue < rightValues.IntValue;
-          break;
-        default:
-          break;
+        switch (op) {
+          case token::contains:
+            if (isText) {
+              result = leftValues.ContainsValues(rightValues);
+            }
+            if (isNum && result) {
+              result = leftValues.IntValue == rightValues.IntValue;
+            }
+            break;
+          case token::notContains:
+            if (isText) {
+              result = !leftValues.ContainsValues(rightValues);
+            }
+            if (isNum && result) {
+              result = leftValues.IntValue != rightValues.IntValue;
+            }
+            break;
+          case token::equals:
+            if (isText) {
+              result = leftValues.IsEquivalent(rightValues);
+            }
+            if (isNum && result) {
+              result = leftValues.IntValue == rightValues.IntValue;
+            }
+            break;
+          case token::notEquals:
+            if (isText) {
+              result = !leftValues.IsEquivalent(rightValues);
+            }
+            if (isNum && result) {
+              result = leftValues.IntValue != rightValues.IntValue;
+            }
+            break;
+          case token::equalsOrLess:
+            result = leftValues.IntValue <= rightValues.IntValue;
+            break;
+          case token::equalsOrMore:
+            result = leftValues.IntValue >= rightValues.IntValue;
+            break;
+          case token::isMore:
+            result = leftValues.IntValue > rightValues.IntValue;
+            break;
+          case token::isLess:
+            result = leftValues.IntValue < rightValues.IntValue;
+            break;
+          default:
+            break;
+        }
       }
     } else { // illegal
       LOG(Expression + " - illegal character: " + c +", use ? or ! after [");
+    }
+
+    if (op == token::condition || op == token::instruction) {
+      const string evaluate = cutString(Expression, tokenPos.X+2, tokenPos.Y);
+      bool isNum, isText;
+      Properties values;
+      EvaluateExpression(Progress, values, evaluate, isNum, isText);
+
+      // executy [!noun:verb] commands
+      for (const string& text : values.TextValues) {
+        const size_t scopePos = FindTokenStart(text, token::scope);
+        if (scopePos != string::npos) { // recurse with the new block
+          string noun = cutString(text, 0, scopePos);
+          const string verbName = cutString(text, scopePos+1);
+
+          // if no noun, use the current page noun by default
+          if (noun.empty()) {
+            noun = Noun;
+          }
+          const Block& block = FindPage(noun).GetVerb(verbName).BlockTree;
+
+          result &= ExecuteBlock(Progress, noun, block, Text);
+        }
+      }
+
+      // function call instructions return the result in the IntValue
+      result = values.IntValue + values.TextValues.size();
     }
 
     pos = tokenPos.Y;
@@ -656,21 +733,4 @@ bool Story::ExecuteExpression(const string& Noun,
   } // end while
 
   return result;
-}
-
-/** @brief removes # and @
-  */
-bool Story::CleanLeftSide(string& Left)
-{
-  // cut the @ if used
-  if (Left[0] == token::Start[token::value]) {
-    Left = cutString(Left, 1, Left.size());
-    LOG("do not use @ on the left side");
-    return false;
-  } else if (Left[0] == token::Start[token::number]) {
-    Left = cutString(Left, 1, Left.size());
-    LOG("do not use # on the left side");
-    return false;
-  }
-  return true;
 }

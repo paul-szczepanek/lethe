@@ -24,8 +24,8 @@ public:
   void SetUserValues(const string& Text);
 
   bool IsUserValues(const string& Noun) const;
-  bool GetUserValuesInteger(const string& Noun, lint& ReturnValue) const;
-  bool GetUserValuesText(const string& Noun, vector<string>& ReturnValue) const;
+  bool GetUserInteger(const string& Noun, Properties& ReturnValue) const;
+  bool GetUserValues(const string& Noun, Properties& ReturnValue) const;
 
   void MakeSnapshot(const string& Progress, const string& Noun,
                     const string& Verb);

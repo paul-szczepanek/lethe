@@ -37,14 +37,48 @@ bool Properties::AddValues(const Properties& Value)
 {
   bool dirty = false;
 
-  typedef vector<string>::const_iterator iter;
-
-  iter it = Value.TextValues.begin();
-  for (iter endIt = Value.TextValues.end(); it != endIt; ++it) {
-    if (AddValue(*it)) {
+  for (const string& text : Value.TextValues) {
+    if (AddValue(text)) {
       dirty = true;
     }
   }
+
+  return dirty;
+}
+
+/** @brief Concatenate all text values with passed in text values
+  *
+  * \return false if nothing needed doing
+  */
+bool Properties::ConcatValues(const Properties& Value)
+{
+  for (string& text : TextValues) {
+    for (const string& textAdded : Value.TextValues) {
+      text += textAdded;
+    }
+  }
+
+  return !TextValues.empty() && !Value.TextValues.empty();
+}
+
+/** @brief Remove all Text Values that aren't present in the passes in value
+  *
+  * \return false if nothing needed doing
+  */
+bool Properties::CommonValues(const Properties& Value)
+{
+  bool dirty = false;
+  Properties common;
+
+  for (const string& text : TextValues) {
+    if (Value.ContainsValue(text)) {
+      common.AddValue(text);
+    } else {
+      dirty = true;
+    }
+  }
+
+  TextValues = common.TextValues;
 
   return dirty;
 }
@@ -57,11 +91,8 @@ bool Properties::RemoveValues(const Properties& Value)
 {
   bool dirty = false;
 
-  typedef vector<string>::const_iterator iter;
-
-  iter it = Value.TextValues.begin();
-  for (iter endIt = Value.TextValues.end(); it != endIt; ++it) {
-    if (RemoveValue(*it)) {
+  for (const string& text : Value.TextValues) {
+    if (RemoveValue(text)) {
       dirty = true;
     }
   }

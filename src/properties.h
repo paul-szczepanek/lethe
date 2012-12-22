@@ -17,6 +17,8 @@ public:
   bool AddValues(const Properties& Value);
   bool RemoveValues(const Properties& Value);
   bool SetValues(const Properties& Value);
+  bool CommonValues(const Properties& Value);
+  bool ConcatValues(const Properties& Value);
 
   inline bool AddValue(const string& Value);
   inline bool RemoveValue(const string& Value);
@@ -38,8 +40,8 @@ typedef vector<string>::iterator TextValues_it;
   */
 bool Properties::ContainsValue(const string& Value) const
 {
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
-    if (TextValues[i] == Value) {
+  for (const string& text : TextValues) {
+    if (text == Value) {
       return true;
     }
   }
@@ -51,8 +53,8 @@ bool Properties::ContainsValue(const string& Value) const
   */
 bool Properties::ContainsValues(const Properties& Value) const
 {
-  for (size_t i = 0, for_size = Value.TextValues.size(); i < for_size; ++i) {
-    if (!ContainsValue(Value.TextValues[i])) {
+  for (const string& text : Value.TextValues) {
+    if (!ContainsValue(text)) {
       return false;
     }
   }
@@ -81,6 +83,7 @@ bool Properties::RemoveValue(const string& Value)
     return false;
   }
   // iterators have the most annoying syntax
+  // not using erase-remove because elements are unique so we can return early
   TextValues_it it = TextValues.begin();
   for (TextValues_it endIt = TextValues.end(); it != endIt; ++it) {
     if (*it == Value) {

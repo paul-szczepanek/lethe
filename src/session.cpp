@@ -88,14 +88,14 @@ bool Session::IsUserValues(const string& Noun) const
 
 /** @brief Check for presence in user values
   *
-  * will fill in the passed in values with user values if found
+  * will add to the passed in value with user values if found
   */
-bool Session::GetUserValuesInteger(const string& Noun,
-                                   lint& ReturnValue) const
+bool Session::GetUserInteger(const string& Noun,
+                             Properties& ReturnValue) const
 {
   map<string, Properties>::const_iterator it = UserValues.find(Noun);
   if (it != UserValues.end()) {
-    ReturnValue = it->second.IntValue;
+    ReturnValue.IntValue += it->second.IntValue;
     return true;
   }
   return false;
@@ -105,12 +105,12 @@ bool Session::GetUserValuesInteger(const string& Noun,
   *
   * will fill in the passed in values with user values if found
   */
-bool Session::GetUserValuesText(const string& Noun,
-                                vector<string>& ReturnValue) const
+bool Session::GetUserValues(const string& Noun,
+                            Properties& ReturnValue) const
 {
   map<string, Properties>::const_iterator it = UserValues.find(Noun);
   if (it != UserValues.end()) {
-    ReturnValue = it->second.TextValues;
+    ReturnValue.AddValues(it->second);
     return true;
   }
   return false;

@@ -57,7 +57,4 @@ private:
   static Verb MissingVerb;
 };
 
-typedef map<string, Page*>::iterator page_it;
-
-
 #endif // PAGE_H

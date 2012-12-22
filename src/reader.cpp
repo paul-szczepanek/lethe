@@ -40,7 +40,7 @@ bool Reader::Init(int width,
   SDL_SetAlpha(Screen, SDL_SRCALPHA, 255);
 
   // load an image
-  Backdrop = SDL_LoadBMP("data/default_bg.bmp");
+  Backdrop = IMG_Load("data/default_bg.png");
 
   if (!Backdrop) {
     printf("Unable to load bitmap: %s\n", SDL_GetError());
@@ -246,9 +246,9 @@ void Reader::DrawBackdrop()
   double zoom;
 
   if (Screen->w > Screen->h) {
-    zoom = Screen->w / double(Backdrop->w);
+    zoom = (Screen->w) / double(Backdrop->w);
   } else {
-    zoom = Screen->h / double(Backdrop->w);
+    zoom = (Screen->h) / double(Backdrop->w);
   }
 
   if (zoom > 1.01d || zoom < 0.99d) {

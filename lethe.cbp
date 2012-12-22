@@ -5,7 +5,7 @@
 		<Option title="lethe" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="data/;src/;" />
+		<Option virtualFolders="data/;" />
 		<Build>
 			<Script file="lib_finder.script" />
 			<Target title="debug">
@@ -14,6 +14,9 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-Wextra" />
+					<Add option="-Wall" />
 					<Add option="-g" />
 				</Compiler>
 			</Target>
@@ -24,6 +27,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-std=c++11" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -31,72 +35,34 @@
 			</Target>
 		</Build>
 		<Compiler>
-			<Add option="`sdl-config --cflags`" />
+			<Add option="-std=c++11" />
+			<Add option="-Wextra" />
 			<Add option="-Wall" />
+			<Add option="`sdl-config --cflags`" />
 		</Compiler>
 		<Linker>
 			<Add option="`sdl-config --libs`" />
 		</Linker>
-		<Unit filename="src/book.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/book.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/keywordsmap.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/keywordsmap.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/main.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/main.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/page.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/page.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/properties.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/properties.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/reader.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/reader.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/session.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/session.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/story.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/story.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/textbox.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/textbox.h">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/tokens.cpp">
-			<Option virtualFolder="src/" />
-		</Unit>
-		<Unit filename="src/tokens.h">
-			<Option virtualFolder="src/" />
-		</Unit>
+		<Unit filename="src/book.cpp" />
+		<Unit filename="src/book.h" />
+		<Unit filename="src/keywordsmap.cpp" />
+		<Unit filename="src/keywordsmap.h" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/main.h" />
+		<Unit filename="src/page.cpp" />
+		<Unit filename="src/page.h" />
+		<Unit filename="src/properties.cpp" />
+		<Unit filename="src/properties.h" />
+		<Unit filename="src/reader.cpp" />
+		<Unit filename="src/reader.h" />
+		<Unit filename="src/session.cpp" />
+		<Unit filename="src/session.h" />
+		<Unit filename="src/story.cpp" />
+		<Unit filename="src/story.h" />
+		<Unit filename="src/textbox.cpp" />
+		<Unit filename="src/textbox.h" />
+		<Unit filename="src/tokens.cpp" />
+		<Unit filename="src/tokens.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

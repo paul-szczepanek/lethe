@@ -10,7 +10,7 @@
 // Whitespace is ignored but the noun definition needs to start on a new line.
 // Otherwise you can use whitespace to help readability.
 //
-// ******** Noun Definition **********
+// ******** Noun Definition ********** [<>] [<[]>]
 //
 // [<noun>] - this delimates noun definition blocks, starts on a new line.
 // Keywords can't start with numbers (1noun) but may contain numbers and spaces.
@@ -26,7 +26,7 @@
 // They are not evaluated and need to be defined before they are used.
 // They are essentially macros that get prepended to a noun deifnition.
 //
-// ******** Values *******************
+// ******** Values ******************* [<> = ]
 //
 // [<noun> = value1, value2, #9] - sets the initial values of the noun.
 // (in the initial assignment, you can't force noun evaluation with @)
@@ -37,7 +37,7 @@
 // 0 is the default. The integer value doesn't count as a regular text value.
 // if no # is used then the number is treated as text.
 //
-// ******** Verb Definition [:] ******
+// ******** Verb Definition ********** [:]
 //
 // [:verb] - past this is where execution goes when you choose this verb.
 // [:verb1] [:verb2] - only the first one is visible but both work.
@@ -48,53 +48,84 @@
 // You can have mutiple verb definitions of the same name.
 // First one with true top level condition will activate upon being called.
 //
-// ******** Conditions [?] ***********
+// ******** Conditions *************** [?@]
 //
-// [?noun+=string] - noun contains string.
-// [?noun-=string] - noun doesn't cantain string.
-// [?noun=string] - noun contains string and nothing else.
-// [?=string] - noun is implied here (assuming this is it's definition).
+// [?value1 += value2] - value1 contains value2.
+// [?value1 -= value2] - value1 doesn't cantain value2.
+// [?value1 = value2] - value1 contains value2 and nothing else.
+//
+// [?= value2] - noun is implied here (noun being defined).
+// In case of an impied noun it will expand to @noun and/or #noun
+// based on the contents of the expression on the right.
 //
 // These will try to compare the integer value of a:
-// [?a=#4] [?a<=#5] [?a>=#2] [?a<#4] [?a>#8]
+// [?#a = #4] [?#a <= #5] [?#a >= #2] [?#a < #4] [?#a > #8]
+//
+// If no comparison is present it will return true if it has any contents.
+// [?#value1] - returns true if integer greater than 0 or has text values.
 //
 // Conditions may be placed above verb definitions. They will work by
 // hiding the verb if the condition is not met.
 //
-// ******** Intructions [!] **********
+// ******** Intructions ************** [!]
 //
-// [!b:verb] - go to and execute [b:verb], return and continue afterwards.
+// [!b:verb] - go to and execute [b:verb], return and continue.
+//
+// Assignment instructions:
+// [!noun += value] - add value to noun.
+// [!noun -= value] - remove value from noun.
+// [!noun = value] - set values of noun to value (removes previous values).
+// [!= value] - missing noun defaults to the one beying defined.
+// [!noun=] - delete all values of noun (except the integer value).
+// [!noun = #0] - set the integer value of noun to 0.
+//
+// What is on the left side is the name of the noun you want to assign to.
+// Using @ might not work as you expect as @noun will evaluate to its values.
+// [!@noun = value] - will not assign value to noun. It will assign value to
+// nouns with names that match existing values of noun.
+//
 // Instructions need to be below a verb definition.
 //
-// [!noun+=string] - add string to noun.
-// [!noun-=string] - remove string from noun.
-// [!noun=string] - set noun to string (removes previous contents).
-// [!=string] - missing noun defaults to the one beying defined.
-// [!noun=] - delete all values of noun (except the integer value).
-// [!noun=#0] - set the integer value of noun to 0.
-//
-// ******** Evaluation ***************
-//
-// The left side of the instruction or condition is always a noun.
-// What's on the right is normally considered a string or an #integer.
-// You can force a noun to be evaluated to strings it contains by using @.
-// If letters follow # it's assumed to be a noun becuase nouns can't
-// start with digits.
+// ******** Evaluation ***************  @ #
 //
 // #noun evaluates to integer, @noun to string values of the noun.
-// [!a=string] - noun a = string.
-// [!a=@b] - noun a = string values of noun b.
-// [!a=#b] - noun a integer = integer value of noun b.
+// [!noun = string] - assign noun a the value string.
+// [!noun1 = @noun2] - assign to noun1 values of noun2.
+// [!noun1 = #noun2] - assign the integer of noun1 the integer value of noun2.
+// If letters follow # it's a noun becuase nouns can't start with digits.
 //
 // Numbers are handled wholly seperate so if you wanted to copy both strings
 // and the integer value from b to a you would need to explicitly say:
-// [!a=@b + #b]
+// [!a = @b + #b]
 //
-// [?noun=#0+#b] will try to do arithmetic with + - / *
-// You can add and subtract string values as well (but not divide and multiply)
-// Arithmetic operations are only allowed on the right.
+// You can also use evaluation in a verb instruction:
+// [!@noun1:@noun2] - this will go to noun1_value:noun2_value.
+// If there are multiple values it will execute them all in sequence.
 //
-// ******** Code blcoks **************
+// You can nest @ evaluations:
+// [!@@noun:verb] - will go to value:verb, if noun has a value called noun2
+// and there is a noun2 that has a value called value.
+//
+// ******** Arithmetic *************** ( ) - + * /
+//
+// You can do arithmetic operations on numbers with + - / * ( ).
+//
+// You can also add and subtract text values.
+// Multiplying text values concatenates them.
+// Dividing text values returns values present in both values.
+//
+// Let's assume we have two nouns defined like so:
+// [<noun1> = A, C]
+// [<noun2> = B, C]
+// Then the following statements are all true
+// [?@noun1 = A + C].
+// [?@noun1 * @noun2 = AB + AC + CB + CC].
+// [?@noun1 / @noun2 = C].
+//
+// Order of operations is left to right regardless of type so if you need
+// a different order of evaluation you can use parenthesis.
+//
+// ******** Code blocks ************** { } & | [!<<]
 //
 // {} are used for blocks. If no {} are used the code block is up to next
 // condition. Implied block of a top level condition (condition above verb)
@@ -110,7 +141,7 @@
 //
 // ******** Printing text ************
 //
-// Text written outside of [] will be printed to the screen. Text needs to be
+// Text written outside of [ ] will be printed to the screen. Text needs to be
 // placed under a verb definition.
 //
 // Text can contain <keywords> inlined with text.
@@ -131,7 +162,7 @@
 // All other characters are legal and only treated as special characters
 // if within [ ] or < >.
 //
-// ******** Special noun names *******
+// ******** Special noun names ******* [<story>]
 //
 // These nouns are treated differently by the reader (not all are required).
 // [<story>] - how the story starts, at the verb [:begin] (this is essential).
@@ -146,23 +177,27 @@
 // This will be called when starting the story and will tell the reader to go to
 // verb in noun and execute that block.
 //
-// ******** Function calls ***********
+// ******** Function calls *********** name()
 //
-// [!function(parameter1, parameter2)] - bare function call.
-// Function calls can also be used on the right side of instructions and
-// conditions as the return values.
+// [!function(argument1, argument2)] - bare function call.
+// Function calls can also be used wherever a value can be used.
+//
+// The arguments are values so you can do execution inside the arguments so
+// both function(arg1 + arg2) and function(@noun) calls are legal.
+//
+// You can even evaluate a name of the function @noun1(@noun2). This will call
+// all the functions with names matching the text values of noun1 and use
+// values of noun2 as arguments.
 //
 // Play(asset) - returns true if played
 // Stop(asset) - returns true if stopped
 // Size(noun) - returns number of values of a noun (not counting the integer)
 //
-// A function can be called in an instruction or in a condition.
-// [?@Size(a)=#n] - size of noun array, i.e. check if it contains n values.
-//
-// ******** Media Assets *************
+// ******** Media Assets ************* [$ = type()]
 //
 // [$asset=type(parameter1, parameter2)] - creates an image, sound etc.
-// No breaklines allowed within definition.
+// Asseet definitions need to be outside noun definitions and start on a new
+// line. No breaklines allowed within definition. These are not function calls.
 //
 // Each needs a unique name and only one instance of each is allowed. Calling
 // Play again will play from beginning. Calling Stop on a stopped asset is safe.
@@ -196,9 +231,9 @@
     [!Play(bgroom)]
     [!Play(musicroom)]
     [!Play(voiceroom)]
-    [!calls+=your room media:autohide] // this gets evaluated each turn
+    // [!calls+=your room media:autohide] // this gets evaluated each turn
   [:autohide] // and will hide the background if we leave
-    [?place-=your room]
+    [?@place-=your room]
       [!calls-=your room media:autohide]
       [!Stop(bgroom)]
       [!Stop(musicroom)]
@@ -221,7 +256,7 @@
 [<[room]>] // pattern definition because noun after [< is blank
 
 // top level conditions are the ones placed above the verb definition
-[?exits+=room] & [?place-=room] { // two conditions, both need to be met to access
+[?@exits+=room] & [?@place-=room] { // two conditions, both need to be met to access
   [:go] // verb, this is where the excutions goes upon calling [!room:go]
     // these instruction get executed when room:go gets called,
     [!exits=] // this one clears exits
@@ -229,7 +264,7 @@
     [!:look] // look at the room we're in now
 }
 
-[?place+=room] { // rest of the actions are available when we are in the room
+[?@place+=room] { // rest of the actions are available when we are in the room
   // this is a cheat, if there is no closing } it's assumed to be at the end
   // of the definition rather then at the next top level condition
   // rest gets appended here
@@ -244,10 +279,10 @@
   You are sitting in your <room[your room]> <programming[program]>.
   [!tea:look]
   The room has only one <door>.
-  [?+=reminder]
+  [?@+=reminder]
     [!-=reminder]
     Shouldn't you be doing something?
-  [?door=open] // if the door is open
+  [?@door=open] // if the door is open
     [!exits+=staircase] // add the staircase as a possible exit
     You can see the <staircase> through the open <door>.
 
@@ -255,12 +290,13 @@
 
 [<door>] // noun definition, this ends the last block and starts a new one
 
-[?-=open] // if the door is not open
+[?@-=open] // if the door is not open
   [:open] [:use] // only the first one is visible, but both will work
-    You open the door.
+    You open the door. You may now exit to the <staircase>.
+    [!exits+=staircase]
     [!door=open]
 
-[?+=open] // if the door is open (door is implied)
+[?@+=open] // if the door is open (door is implied)
   [:close] [:use] // this time use will close it
     You close the door.
     [!door=] // close it by clearing the open value from the door noun
@@ -273,23 +309,23 @@
 
 [<tea>]
 
-[?-=empty] {
+[?@-=empty] {
   [:look]
-    [?-=warm]
+    [?@-=warm]
       The <cup of tea[tea]> is getting cold.
-    [?+=warm]
+    [?@+=warm]
       The fresh <cup of tea[tea]> is nice and warm.
 
   [:drink] [:use]
-    [?-=warm]
+    [?@-=warm]
       You drink the cold tea, it's not very nice.
       [!+=empty]
-    [?+=warm]
+    [?@+=warm]
       Ahh, that hits the spot.
       [!+=empty]
 }
 
-[?+=empty] {
+[?@+=empty] {
   [:look at] [:use]
     The cup of tea is empty.
 }
@@ -305,19 +341,19 @@
 [:look]
   [!your room media:show]
   You are writing an interactive fiction engine.
-  [?<=#1] {
+  [?@<=#1] {
     It's a long way to go.
     [!<<] // this aborts the execution of the parent block
           // so the next statement doesn't activate
   }
-  [?<=#3] {
+  [?@<=#3] {
     Still needs a lot of work.
   }
 
 [:program] [:use]
   You work for a few minutes.
   [!tea-=warm]
-  [!=#program+#1]
+  [!=#program+#1+(#1+#1)+Size(program)]
 
 //******************************************************************************
 

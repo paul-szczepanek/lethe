@@ -14,19 +14,25 @@ const size_t NUM_EXPRESSION_SPACE_REMOVERS = 20;
 const uint isPaired = 0x0001;
 const uint isWide   = 0x0002;
 
-enum mathName {
+enum operationName {
   plus,
   minus,
   divide,
   multiply,
-  MATH_NAME_MAX
+  evaluate,
+  integer,
+  parens,
+  OPERATION_NAME_MAX
 };
 
-const char Math[MATH_NAME_MAX] = {
+const char Operations[OPERATION_NAME_MAX] = {
   '+',
   '-',
   '/',
-  '*'
+  '*',
+  '@',
+  '#',
+  '('
 };
 
 enum tokenName {

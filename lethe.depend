@@ -1,0 +1,408 @@
+# depslib dependency file v1.0
+1353262466 source:/home/paul/lethe/lethe/main.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	"main.h"
+	"reader.h"
+
+1340285254 /usr/include/SDL/SDL.h
+	"SDL_main.h"
+	"SDL_stdinc.h"
+	"SDL_audio.h"
+	"SDL_cdrom.h"
+	"SDL_cpuinfo.h"
+	"SDL_endian.h"
+	"SDL_error.h"
+	"SDL_events.h"
+	"SDL_loadso.h"
+	"SDL_mutex.h"
+	"SDL_rwops.h"
+	"SDL_thread.h"
+	"SDL_timer.h"
+	"SDL_video.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_main.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_stdinc.h
+	"SDL_config.h"
+	<sys/types.h>
+	<stdio.h>
+	<stdlib.h>
+	<stddef.h>
+	<stdarg.h>
+	<stdlib.h>
+	<malloc.h>
+	<stddef.h>
+	<stdarg.h>
+	<memory.h>
+	<string.h>
+	<strings.h>
+	<inttypes.h>
+	<stdint.h>
+	<ctype.h>
+	<iconv.h>
+	"begin_code.h"
+	<alloca.h>
+	<malloc.h>
+	<malloc.h>
+	<malloc.h>
+	<stdlib.h>
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_config.h
+	"SDL_platform.h"
+	<stdarg.h>
+
+1340285254 /usr/include/SDL/SDL_platform.h
+
+1340285254 /usr/include/SDL/begin_code.h
+
+1340285254 /usr/include/SDL/close_code.h
+
+1340285254 /usr/include/SDL/SDL_audio.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_endian.h"
+	"SDL_mutex.h"
+	"SDL_thread.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_error.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_endian.h
+	"SDL_stdinc.h"
+	<endian.h>
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_mutex.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_thread.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_mutex.h"
+	"begin_code.h"
+	<process.h>
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_rwops.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_cdrom.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_cpuinfo.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_events.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_active.h"
+	"SDL_keyboard.h"
+	"SDL_mouse.h"
+	"SDL_joystick.h"
+	"SDL_quit.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_active.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_keyboard.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_keysym.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_keysym.h
+
+1340285254 /usr/include/SDL/SDL_mouse.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_video.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_video.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"SDL_rwops.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_joystick.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_quit.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+
+1340285254 /usr/include/SDL/SDL_loadso.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_timer.h
+	"SDL_stdinc.h"
+	"SDL_error.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_version.h
+	"SDL_stdinc.h"
+	"begin_code.h"
+	"close_code.h"
+
+1353264093 /home/paul/lethe/lethe/main.h
+	<cstdlib>
+	<iostream>
+	<fstream>
+	<sstream>
+	<iomanip>
+	<string>
+	<iterator>
+	<functional>
+	<vector>
+	<bitset>
+	<list>
+	<map>
+	<queue>
+	<set>
+	<cmath>
+	<cassert>
+	<stack>
+
+1353269246 /home/paul/lethe/lethe/reader.h
+	"main.h"
+	"session.h"
+	"textbox.h"
+
+1353271689 source:/home/paul/lethe/lethe/reader.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	<SDL_rotozoom.h>
+	"main.h"
+	"reader.h"
+	"book.h"
+	"textbox.h"
+	"keywordsmap.h"
+
+1330794975 /usr/include/SDL/SDL_ttf.h
+	"SDL.h"
+	"begin_code.h"
+	"close_code.h"
+
+1335902784 /usr/include/SDL/SDL_image.h
+	"SDL.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1344012992 /usr/include/SDL/SDL_rotozoom.h
+	<math.h>
+	"SDL.h"
+
+1352847011 source:/home/paul/lethe/lethe/page.cpp
+	"page.h"
+	"tokens.h"
+
+1353185470 /home/paul/lethe/lethe/page.h
+	"main.h"
+	"properties.h"
+
+1353195961 source:/home/paul/lethe/lethe/story.cpp
+	"story.h"
+	"page.h"
+	"tokens.h"
+	"session.h"
+
+1353186178 /home/paul/lethe/lethe/story.h
+	"main.h"
+	"properties.h"
+
+1353192543 source:/home/paul/lethe/lethe/book.cpp
+	"book.h"
+	"tokens.h"
+	"story.h"
+	"session.h"
+
+1353186204 /home/paul/lethe/lethe/book.h
+	"main.h"
+
+1353271711 /home/paul/lethe/lethe/textbox.h
+	"main.h"
+
+1346603456 /home/paul/lethe/lethe/keywordsmap.h
+
+1353271142 source:/home/paul/lethe/lethe/textbox.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	"textbox.h"
+	"reader.h"
+	"tokens.h"
+
+1352852028 /home/paul/lethe/lethe/tokens.h
+	"main.h"
+
+1352568147 /home/paul/lethe/lethe/values.h
+	"main.h"
+
+1352568147 source:/home/paul/lethe/lethe/values.cpp
+	"values.h"
+	"tokens.h"
+
+1353269854 source:/home/paul/lethe/lethe/tokens.cpp
+	"tokens.h"
+
+1353155152 /home/paul/lethe/lethe/session.h
+	"main.h"
+	"properties.h"
+
+1353155053 source:/home/paul/lethe/lethe/session.cpp
+	"session.h"
+
+1353155151 /home/paul/lethe/lethe/properties.h
+	"main.h"
+
+1353155222 source:/home/paul/lethe/lethe/properties.cpp
+	"properties.h"
+	"tokens.h"
+
+1355339532 source:/home/paul/lethe/lethe/src/book.cpp
+	"book.h"
+	"tokens.h"
+	"story.h"
+	"session.h"
+
+1353186204 /home/paul/lethe/lethe/src/book.h
+	"main.h"
+
+1353264093 /home/paul/lethe/lethe/src/main.h
+	<cstdlib>
+	<iostream>
+	<fstream>
+	<sstream>
+	<iomanip>
+	<string>
+	<iterator>
+	<functional>
+	<vector>
+	<bitset>
+	<list>
+	<map>
+	<queue>
+	<set>
+	<cmath>
+	<cassert>
+	<stack>
+
+1355948850 /home/paul/lethe/lethe/src/tokens.h
+	"main.h"
+
+1356111066 /home/paul/lethe/lethe/src/story.h
+	"main.h"
+	"properties.h"
+
+1356096871 /home/paul/lethe/lethe/src/properties.h
+	"main.h"
+
+1355841943 /home/paul/lethe/lethe/src/session.h
+	"main.h"
+	"properties.h"
+
+1346603456 source:/home/paul/lethe/lethe/src/keywordsmap.cpp
+	"keywordsmap.h"
+
+1346603456 /home/paul/lethe/lethe/src/keywordsmap.h
+
+1356097889 source:/home/paul/lethe/lethe/src/main.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	"main.h"
+	"reader.h"
+
+1354918729 /home/paul/lethe/lethe/src/reader.h
+	"main.h"
+	"session.h"
+	"textbox.h"
+
+1353271711 /home/paul/lethe/lethe/src/textbox.h
+	"main.h"
+
+1356127894 source:/home/paul/lethe/lethe/src/page.cpp
+	"page.h"
+	"tokens.h"
+
+1356103445 /home/paul/lethe/lethe/src/page.h
+	"main.h"
+	"properties.h"
+
+1356096899 source:/home/paul/lethe/lethe/src/properties.cpp
+	"properties.h"
+	"tokens.h"
+
+1356099953 source:/home/paul/lethe/lethe/src/reader.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	<SDL_image.h>
+	<SDL_rotozoom.h>
+	"main.h"
+	"reader.h"
+	"book.h"
+	"textbox.h"
+	"keywordsmap.h"
+
+1355841943 source:/home/paul/lethe/lethe/src/session.cpp
+	"session.h"
+
+1356130905 source:/home/paul/lethe/lethe/src/story.cpp
+	"story.h"
+	"page.h"
+	"tokens.h"
+	"session.h"
+
+1354929659 source:/home/paul/lethe/lethe/src/textbox.cpp
+	<SDL.h>
+	<SDL_ttf.h>
+	"textbox.h"
+	"reader.h"
+	"tokens.h"
+
+1353269854 source:/home/paul/lethe/lethe/src/tokens.cpp
+	"tokens.h"
+

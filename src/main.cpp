@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 
 #include "main.h"
 #include "reader.h"
@@ -48,13 +49,18 @@ int main (int argc, char** argv)
     return 1;
   }
 
+  if (IMG_Init(IMG_INIT_PNG) < 0) {
+    printf( "Unable to init IMG: %s\n", SDL_GetError() );
+    return 1;
+  }
+
   // make sure SDL cleans up before exit
   atexit(SDL_Quit);
   atexit(TTF_Quit);
 
   Reader* reader = new Reader();
 
-  if (reader->Init(1000, 600, 32)) {
+  if (reader->Init(1000, 800, 32)) {
     Uint32 lastTime = 0.f;
     real deltaTime = 1.f;
 
