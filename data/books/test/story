@@ -279,7 +279,7 @@
   You are sitting in your <room[your room]> <programming[program]>.
   [!tea:look]
   The room has only one <door>.
-  [?@+=reminder]
+  [?+=reminder]
     [!-=reminder]
     Shouldn't you be doing something?
   [?@door=open] // if the door is open
@@ -290,13 +290,13 @@
 
 [<door>] // noun definition, this ends the last block and starts a new one
 
-[?@-=open] // if the door is not open
+[?-=open] // if the door is not open
   [:open] [:use] // only the first one is visible, but both will work
     You open the door. You may now exit to the <staircase>.
     [!exits+=staircase]
     [!door=open]
 
-[?@+=open] // if the door is open (door is implied)
+[?+=open] // if the door is open (door is implied)
   [:close] [:use] // this time use will close it
     You close the door.
     [!door=] // close it by clearing the open value from the door noun
@@ -309,23 +309,23 @@
 
 [<tea>]
 
-[?@-=empty] {
+[?-=empty] {
   [:look]
-    [?@-=warm]
+    [?-=warm]
       The <cup of tea[tea]> is getting cold.
-    [?@+=warm]
+    [?+=warm]
       The fresh <cup of tea[tea]> is nice and warm.
 
   [:drink] [:use]
-    [?@-=warm]
+    [?-=warm]
       You drink the cold tea, it's not very nice.
       [!+=empty]
-    [?@+=warm]
+    [?+=warm]
       Ahh, that hits the spot.
       [!+=empty]
 }
 
-[?@+=empty] {
+[?+=empty] {
   [:look at] [:use]
     The cup of tea is empty.
 }
@@ -341,12 +341,12 @@
 [:look]
   [!your room media:show]
   You are writing an interactive fiction engine.
-  [?@<=#1] {
+  [?<=#1] {
     It's a long way to go.
     [!<<] // this aborts the execution of the parent block
           // so the next statement doesn't activate
   }
-  [?@<=#3] {
+  [?<=#3] {
     Still needs a lot of work.
   }
 

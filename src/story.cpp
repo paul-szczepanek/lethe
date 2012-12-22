@@ -281,6 +281,7 @@ bool Story::EvaluateExpression(const Session& Progress,
 
   vector<OperationNode> opStack;
   opStack.reserve(16); // too avoid constant allocs
+  opStack.resize(1);
 
   // it's more efficient to scan char by char
   while (pos < length) {
@@ -295,10 +296,6 @@ bool Story::EvaluateExpression(const Session& Progress,
     } else if (pos + 1 >= length) {
       valueFound = true;
       valueEnd = ++pos;
-      // if there was no operator we need at least one op to store the value
-      if (opStack.empty()) {
-        opStack.resize(1);
-      }
     } else {
       // look for operators that delimate values
       for (size_t i = 0; i < token::OPERATION_NAME_MAX; ++i) {
@@ -317,9 +314,8 @@ bool Story::EvaluateExpression(const Session& Progress,
               LOG(Expression + " - unmatched \"(\" in expression");
               return false;
             } else {
-              // so that the values before are treated as function names
               funcFound = true;
-              opStack.back().Nested = true;
+              opStack.back().Nested = false; // the arguments are the value
               // prepare function arguments by evaluating recursively
               const string& funcArgs = cutString(Expression, pos + 1, funcEnd);
               EvaluateExpression(Progress, opStack.back().Operand, funcArgs,
@@ -337,7 +333,7 @@ bool Story::EvaluateExpression(const Session& Progress,
 
     if (valueFound && valueEnd > valuePos) {
       // if an op was found this iteration, assign value to the previous op
-      OperationNode& lastOp = opFound? opStack.back() : *(opStack.end()-1);
+      OperationNode& lastOp = opFound? *(opStack.rbegin()+1) : opStack.back();
       const string& valueText = cutString(Expression, valuePos, valueEnd);
 
       // a value terminates a series of nested operators
