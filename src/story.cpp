@@ -281,7 +281,12 @@ bool Story::EvaluateExpression(const Session& Progress,
 
   vector<OperationNode> opStack;
   opStack.reserve(16); // too avoid constant allocs
-  opStack.resize(1);
+
+  // parse expressions like a+@b-func(arg)-#1
+  // into an array of pairs like this
+  // +,a  +,_ <- @,b  -,func_ <- (,arg  -,_ <- #,1
+  // _ <- means that the next pair will write its result there
+  // in case of functions it will replace the values that are the func names
 
   // it's more efficient to scan char by char
   while (pos < length) {
@@ -296,15 +301,27 @@ bool Story::EvaluateExpression(const Session& Progress,
     } else if (pos + 1 >= length) {
       valueFound = true;
       valueEnd = ++pos;
+      // at least one op needed to store the value
+      if (opStack.empty()) {
+        opStack.resize(1);
+      }
     } else {
       // look for operators that delimate values
       for (size_t i = 0; i < token::OPERATION_NAME_MAX; ++i) {
         if (token::Operations[i] == c) {
           opFound = true;
-          opStack.resize(opStack.size()+1);
-          //if it's the first character, there could be no value
-          valueFound = (pos > 0);
           valueEnd = pos;
+          valueFound = true;
+
+          if (pos > 0) {
+            // unless the expression starts with an operator we need
+            // a previous op to store the value in
+            if (opStack.empty()) {
+              opStack.resize(1);
+            }
+          }
+
+          opStack.resize(opStack.size()+1);
 
           // grouping and function calls recurse with the (contents)
           if (i == token::parens) {
@@ -315,6 +332,8 @@ bool Story::EvaluateExpression(const Session& Progress,
               return false;
             } else {
               funcFound = true;
+              // a function need a previous op to store the func names in
+
               opStack.back().Nested = false; // the arguments are the value
               // prepare function arguments by evaluating recursively
               const string& funcArgs = cutString(Expression, pos + 1, funcEnd);
