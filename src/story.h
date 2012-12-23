@@ -29,13 +29,18 @@ private:
                     string& Text);
   bool ExecuteExpression(Session& Progress, const string& Noun,
                          const string& Expression, string& Text);
-  bool EvaluateExpression(const Session& Progress, Properties& Result,
+  bool EvaluateExpression(Session& Progress, Properties& Result,
                           const string& Expression, bool& IsNum, bool& IsText);
-  bool ExecuteFunction(const Session& Progress, const Properties& FunctionName,
+  bool ExecuteFunction(Session& Progress, const Properties& FunctionName,
                        Properties& FunctionArgs);
 
   string PrependPattern(const string& Keyword, const string& PageText,
                         const string& PatternName, const string& PatternText);
+
+  bool GetUserInteger(const Session& Progress, const string& Noun,
+                      Properties& Result);
+  bool GetUserValues(const Session& Progress, const string& Noun,
+                     Properties& Result);
 
 private:
   map<string, Page*> Pages;

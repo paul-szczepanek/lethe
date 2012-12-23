@@ -38,7 +38,7 @@ string CleanWhitespace(const string& Text)
         // check for a newline
         if (Text[pos] == 'n') {
           // add an escaped newline
-          clean = clean + '\n';
+          clean += "\n";
           ++pos;
           continue;
         }
@@ -102,7 +102,7 @@ string CleanWhitespace(const string& Text)
 
         // add a space for the new line of plain text
         if (newlineCount) {
-          clean += ' ';
+          //clean += ' ';
         }
         whiteCount = 0;
         newlineCount = 0;

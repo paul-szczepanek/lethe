@@ -194,6 +194,7 @@ uint Story::ExecuteBlock(Session& Progress,
 
   // handle plain text Expression by copying to the display page
   if (length && expression[0] != token::Start[token::expression]) {
+    Text += " ";
     Text += expression;
     return 0;
   }
@@ -236,15 +237,34 @@ uint Story::ExecuteBlock(Session& Progress,
   return 0;
 }
 
-/** @brief Execute all functions on args
+/** @brief Executes all functions on all argument values
   *
   */
-bool Story::ExecuteFunction(const Session& Progress,
+bool Story::ExecuteFunction(Session& Progress,
                             const Properties& FunctionName,
                             Properties& FunctionArgs)
 {
-  for (const string& text : FunctionName.TextValues) {
+  for (const string& func : FunctionName.TextValues) {
     // execute function
+    if (func == "Size") {
+      FunctionArgs.IntValue = 0;
+      for (const string& arg : FunctionArgs.TextValues) {
+        const Properties& nounValues = Progress.IsUserValues(arg)?
+                                       Progress.UserValues[arg]
+                                       : FindPage(arg).PageValues;
+        FunctionArgs.IntValue += nounValues.TextValues.size();
+      }
+      FunctionArgs.TextValues.clear();
+    } else if (func == "Play") {
+      for (const string& arg : FunctionArgs.TextValues) {
+      }
+    } else if (func == "Stop") {
+      for (const string& arg : FunctionArgs.TextValues) {
+      }
+    } else {
+      LOG(func + " - function doesn't exist!");
+      return false;
+    }
   }
   return true;
 }
@@ -264,7 +284,7 @@ struct OperationNode {
   * \param returns true if there is a string in the expression
   * \return Values that the expression results in
   */
-bool Story::EvaluateExpression(const Session& Progress,
+bool Story::EvaluateExpression(Session& Progress,
                                Properties& Result,
                                const string& Expression,
                                bool& IsNum,
@@ -416,14 +436,14 @@ bool Story::EvaluateExpression(const Session& Progress,
       case token::divide:
         if (!operand.TextValues.empty()) {
           IsText = true;
-          target.ConcatValues(operand);
+          target.CommonValues(operand);
         }
         target.IntValue /= operand.IntValue;
         break;
       case token::multiply:
         if (!operand.TextValues.empty()) {
           IsText = true;
-          target.CommonValues(operand);
+          target.ConcatValues(operand);
         }
         target.IntValue *= operand.IntValue;
         break;
@@ -439,9 +459,7 @@ bool Story::EvaluateExpression(const Session& Progress,
         // evaluate all text into noun values, add them up and reuse the value
         for (string text : operand.TextValues) {
           // try to find the Values of this noun, user values first
-          if (!Progress.GetUserValues(text, target)) {
-            target.AddValues(FindPage(text).PageValues);
-          }
+          GetUserValues(Progress, text, target);
         }
         break;
       case token::integer:
@@ -451,9 +469,7 @@ bool Story::EvaluateExpression(const Session& Progress,
           if (isdigit(numberText[0])) {
             target.IntValue += intoInt(numberText);
           } else { // this a noun, find its value
-            if (!Progress.GetUserInteger(numberText, operand)) {
-              target.IntValue += FindPage(numberText).PageValues.IntValue;
-            }
+            GetUserInteger(Progress, numberText, operand);
           }
         }
         IsNum = true;
@@ -479,6 +495,36 @@ bool Story::EvaluateExpression(const Session& Progress,
   }
 
   return true;
+}
+
+/** @brief add user values of the noun to the passed in Properites
+  * \return true if value was found in the user values
+  */
+bool Story::GetUserValues(const Session& Progress,
+                   const string& Noun,
+                   Properties& Result)
+{
+  if (Progress.GetUserValues(Noun, Result)) {
+    return true;
+  }
+  // fall back to values as defined in the story
+  Result.AddValues(FindPage(Noun).PageValues);
+  return false;
+}
+
+/** @brief add user integer value of the noun to the passed in Properites
+  * \return true if value was found in the user values
+  */
+bool Story::GetUserInteger(const Session& Progress,
+                    const string& Noun,
+                    Properties& Result)
+{
+  if (Progress.GetUserInteger(Noun, Result)) {
+    return true;
+  }
+  // fall back to values as defined in the story
+  Result.IntValue = FindPage(Noun).PageValues.IntValue;
+  return false;
 }
 
 /** @brief Execute Expression

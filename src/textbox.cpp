@@ -279,7 +279,8 @@ bool TextBox::BreakText()
     // what's first, newline or space?
     if (newline < space) {
       pos = newline;
-      Text[pos] = ' '; // replace with a space
+      //TODO we can't replace with space because of possible rollback
+      //Text[pos] = ' '; // replace with a space
       flush = true;
     } else {
       pos = space;

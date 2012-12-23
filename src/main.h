@@ -51,7 +51,7 @@ using std::find;
 #ifdef LOGGER
 extern string GLog;
 #define LOG(t) { string log = (t); \
-  if (log.size() > 0) { GLog = GLog + "\n- " + log; } };
+  if (log.size() > 0) { GLog = GLog + "\n" + log; } };
 #define RLOG(t) { GLog = (t); };
 #else
 #define LOG(t);

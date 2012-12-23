@@ -1,7 +1,7 @@
 #include "page.h"
 #include "tokens.h"
 
-Verb Page::MissingVerb = { "", Block("You can't do that."), {} };
+Verb Page::MissingVerb = { "", Block("You can't do that."), { } };
 
 Page::Page(const string& SourceText)
   : Text(SourceText)

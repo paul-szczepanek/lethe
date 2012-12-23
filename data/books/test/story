@@ -249,7 +249,7 @@
 
 [<pen>]
   [:look]
-    Black ink.
+    Black ink pen.
 
 //************************ pattern for places  *********************************
 
@@ -271,17 +271,17 @@
 
 //******************************************************************************
 
-[<your room[room]> = reminder] // noun definition for <your room>,
+[<your room[room]> = tea, pen] // noun definition for <your room>,
                                // uses the <room> definition as base
 
 [:look] // because we appended the room definition these are only visible
         // when we're in the room
-  You are sitting in your <room[your room]> <programming[program]>.
-  [!tea:look]
-  The room has only one <door>.
-  [?+=reminder]
-    [!-=reminder]
-    Shouldn't you be doing something?
+  You are sitting in your <room[your room]> <programming[program]>. 
+
+[?+=tea] {A cup of <tea> is on the desk.}
+  The room has only one <door>.\n
+  Items:[!@your room*:look].
+
   [?@door=open] // if the door is open
     [!exits+=staircase] // add the staircase as a possible exit
     You can see the <staircase> through the open <door>.

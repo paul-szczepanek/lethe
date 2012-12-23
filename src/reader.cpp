@@ -115,12 +115,18 @@ void Reader::ProcessInput()
         RedrawPending = true;
         if (event.key.keysym.sym == SDLK_ESCAPE) {
           Quit = true;
-        }
-        if (event.key.keysym.sym == SDLK_PAGEDOWN) {
+        } else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
           MainText.Pane.PaneScroll = 100;
-        }
-        if (event.key.keysym.sym == SDLK_PAGEUP) {
+        } else if (event.key.keysym.sym == SDLK_PAGEUP) {
           MainText.Pane.PaneScroll = -100;
+        } else if (event.key.keysym.sym == SDLK_r) {
+          // temp for debug help
+          delete MyBook;
+          Progress.UserValues.clear();
+          MyBook = new Book();
+          MyBook->Open(Progress.BookName);
+          PageSource = MyBook->Read(Progress, "story", "begin");
+          MainText.SetText(PageSource, FontMain);
         }
         break;
 
@@ -128,11 +134,9 @@ void Reader::ProcessInput()
         RedrawPending = true;
         if (event.button.button == SDL_BUTTON_LEFT) {
           Mouse.Left = true;
-        }
-        if (event.button.button == SDL_BUTTON_RIGHT) {
+        } else if (event.button.button == SDL_BUTTON_RIGHT) {
           Mouse.Right = true;
-        }
-        if (event.button.button == SDL_BUTTON_MIDDLE) {
+        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
           Mouse.Middle = true;
         }
         break;
@@ -142,12 +146,10 @@ void Reader::ProcessInput()
         if (event.button.button == SDL_BUTTON_LEFT) {
           Mouse.Left = false;
           Mouse.LeftUp = true;
-        }
-        if (event.button.button == SDL_BUTTON_RIGHT) {
+        } else if (event.button.button == SDL_BUTTON_RIGHT) {
           Mouse.Right = false;
           Mouse.RightUp = true;
-        }
-        if (event.button.button == SDL_BUTTON_MIDDLE) {
+        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
           Mouse.Middle = false;
           Mouse.MiddleUp = true;
         }
