@@ -3,10 +3,8 @@
 #include <SDL_image.h>
 #include <SDL_rotozoom.h>
 
-#include "main.h"
 #include "reader.h"
 #include "book.h"
-#include "textbox.h"
 #include "keywordsmap.h"
 
 const real REDRAW_TIMEOUT = 1.0;
@@ -23,6 +21,12 @@ Reader::~Reader()
   SDL_FreeSurface(Backdrop);
 
   delete MyBook;
+
+#ifdef LOGGER
+  if (Logger) {
+    delete Logger;
+  }
+#endif
 }
 
 bool Reader::Init(int width,
@@ -30,7 +34,7 @@ bool Reader::Init(int width,
                   int bpp)
 {
   // create a new window
-  Screen = SDL_SetVideoMode(width, height, 32, SDL_HWSURFACE|SDL_DOUBLEBUF);
+  Screen = SDL_SetVideoMode(width, height, bpp, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
   if (!Screen) {
     printf("Unable to set video: %s\n", SDL_GetError());
@@ -60,31 +64,32 @@ bool Reader::Init(int width,
 
   // read layout
   // TODO: read defaults from file
-  SplitH = 0.6;
-  SplitV = 0.8;
+  SplitH = height;
+  SplitV = height - 200;
 
   // calculate positions of text boxes
   Rect boxSize;
-  boxSize.W = (uint)(SplitH * (real)width);
-  boxSize.H = (uint)(SplitV * (real)height);
-  MainText.SetSize(boxSize);
-  boxSize.W = (uint)(SplitH * (real)width);
-  boxSize.H = (uint)((1.f - SplitV) * (real)height);
-  boxSize.Y = (uint)(SplitV * (real)height);
+  boxSize.W = width - SplitH;
+  boxSize.H = height - SplitV;
+  boxSize.X = SplitH;
+  boxSize.Y = SplitV;
   ChoiceMenu.SetSize(boxSize);
-  boxSize.W = (uint)((1.f - SplitH) * (real)width);
-  boxSize.H = (uint)height;
-  boxSize.X = (uint)(SplitH * (real)width);
+  boxSize.W = width - SplitH;
+  boxSize.H = SplitV;
+  boxSize.X = SplitH;
   boxSize.Y = 0;
   SideMenu.SetSize(boxSize);
+  boxSize.W = SplitH;
+  boxSize.H = height/2;
+  boxSize.X = 0;
+  boxSize.Y = 0;
+  MainText.SetSize(boxSize);
 
   PageSource = MyBook->Start();
   QuickMenuSource = MyBook->QuickMenu();
 
   MainText.SetText(PageSource, FontMain);
   MainText.Visible = true;
-  ChoiceMenu.SetText("choice", FontMain);
-  ChoiceMenu.Visible = true;
   SideMenu.SetText(QuickMenuSource, FontMain);
   SideMenu.Visible = true;
 
@@ -92,8 +97,8 @@ bool Reader::Init(int width,
   GLog = "Log";
   Logger = new TextBox();
   Logger->Visible = true;
-  boxSize.Y += boxSize.H / 2;
-  boxSize.H = boxSize.Y;
+  boxSize.Y += height / 2;
+  boxSize.H = height / 2;
   Logger->SetSize(boxSize);
   Logger->SetText("", FontMain);
 #endif
@@ -170,33 +175,38 @@ bool Reader::Tick(real DeltaTime)
   ProcessInput();
 
   if (Mouse.Left) {
-    if (VerbMenu.Visible && VerbMenu.Select(Mouse, DeltaTime)) {
-    } else {
+    if (ChoiceMenu.Visible) {
+      ChoiceMenu.Select(Mouse, DeltaTime);
+    } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
       VerbMenu.Visible = false;
+      NounKeyword.clear();
+    } else if (!SideMenu.Select(Mouse, DeltaTime)) {
+      SideMenu.Deselect();
       MainText.Select(Mouse, DeltaTime);
     }
-
     RedrawPending = true;
   } else if (Mouse.LeftUp) {
-    // touch released, see if we cliked on something interative
     Mouse.LeftUp = false;
-
-    if (VerbMenu.Visible) {
-      if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
-        VerbMenu.Visible = false;
-        PageSource += MyBook->Read(NounKeyword, VerbKeyword);
-        MainText.SetText(PageSource, FontMain);
-
-        QuickMenuSource = MyBook->QuickMenu();
-        SideMenu.SetText(QuickMenuSource, FontMain);
+    // touch released, see if we cliked on something interactive
+    if (ChoiceMenu.Visible) {
+      // todo: make choice
+    } else {
+      if (VerbMenu.Visible) {
+        if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
+          VerbMenu.Visible = false;
+          ReadBook();
+          QuickMenuSource = MyBook->QuickMenu();
+          MainText.SetText(PageSource, FontMain);
+          SideMenu.SetText(QuickMenuSource, FontMain);
+        }
+        VerbMenu.Deselect();
+      } else if (SideMenu.GetSelectedKeyword(NounKeyword)) {
+        SideMenu.Deselect();
+      } else if (MainText.GetSelectedKeyword(NounKeyword)) {
+        MainText.Deselect();
       }
-      VerbMenu.Deselect();
-    }
 
-    if (MainText.Visible) {
-      string keyword;
-      if (MainText.GetSelectedKeyword(keyword)) {
-        NounKeyword = keyword;
+      if (!NounKeyword.empty()) {
         // we clicked on a keyword, create a menu full of verbs
         string VerbsText = MyBook->GetVerbList(NounKeyword);
 
@@ -205,7 +215,6 @@ bool Reader::Tick(real DeltaTime)
         VerbMenu.SetSize(boxSize);
         VerbMenu.SetText(VerbsText, FontMain);
       }
-      MainText.Deselect();
     }
   }
 
@@ -216,6 +225,24 @@ bool Reader::Tick(real DeltaTime)
   }
 
   return !Quit;
+}
+/** @brief ReadBook
+  *
+  * @todo: document this function
+  */
+bool Reader::ReadBook()
+{
+  // clear out old keywords
+  // PageSource;
+  if (NounKeyword.empty() || VerbKeyword.empty()) {
+    return false;
+  }
+
+  PageSource += MyBook->Read(NounKeyword, VerbKeyword);
+  NounKeyword.clear();
+  VerbKeyword.clear();
+
+  return true;
 }
 
 void Reader::RedrawScreen(real DeltaTime)

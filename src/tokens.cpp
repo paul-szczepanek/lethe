@@ -13,14 +13,11 @@ string CleanWhitespace(const string& Text)
   size_t pos = 0;
   size_t expCount = 0;
   size_t whiteCount = 0;
-  size_t newlineCount = 0;
   const size_t length = Text.size();
 
   char expStart = token::Start[token::expression];
   char expEnd = token::End[token::expression];
-  bool ignoreWhiteAhead = true;
   bool ignoreWhite = false;
-  bool newLine = false;
 
   while (pos < length) {
     bool escaped = false;

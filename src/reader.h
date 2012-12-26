@@ -4,7 +4,6 @@
 #include "main.h"
 #include "textbox.h"
 
-class Session;
 class Book;
 
 struct MouseState {
@@ -37,7 +36,8 @@ public:
   void DrawBackdrop();
 
   void ProcessInput();
-  bool ProcessEvents();
+
+  bool ReadBook();
 
   string PageSource;
   string QuickMenuSource;
@@ -55,16 +55,16 @@ private:
 
   Book* MyBook;
 
-  TextBox MainText;
   TextBox ChoiceMenu;
-  TextBox SideMenu;
   TextBox VerbMenu;
+  TextBox SideMenu;
+  TextBox MainText;
 
   string NounKeyword;
   string VerbKeyword;
 
-  real SplitH;
-  real SplitV;
+  uint SplitH;
+  uint SplitV;
 
   bool RedrawPending;
   float RedrawCountdown;
