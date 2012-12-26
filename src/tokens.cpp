@@ -18,118 +18,100 @@ string CleanWhitespace(const string& Text)
 
   char expStart = token::Start[token::expression];
   char expEnd = token::End[token::expression];
-
   bool ignoreWhiteAhead = true;
-  bool ignoreWhiteBehind = false;
-  bool escaped = false;
+  bool ignoreWhite = false;
+  bool newLine = false;
 
   while (pos < length) {
+    bool escaped = false;
     char c = Text[pos];
 
-    // ignore illegal chars
+    // handle the special meaning the character may have
     if (c == '\t') {
+      // ignore illegal chars
       c = ' ';
-    }
-
-    // anything after the escape character is just copied over and ignored
-    // except a newline
-    if (c == '\\') {
-      if (++pos < length) {
-        // check for a newline
-        if (Text[pos] == 'n') {
-          // add an escaped newline
-          clean += "\n";
-          ++pos;
-          continue;
-        }
+    } else if (c == '\\') {
+      ignoreWhite = false;
+      // anything after the escape character is just copied over and ignored
+      if (pos + 1 < length) {
+        escaped = true;
       } else {
         break;
       }
-      escaped = true; // the escape character \ does get copied
-    } else { // handle the special meaning the character may have
-      escaped = false;
-
-      // should we remove all whitespace around this character?
-      if (expCount > 0) {
+    } else if (c == '\n') {
+      // collapse multiple newlines
+      while ((pos + 1 < length) && ('\n' == Text[pos + 1])) {
+        ++pos;
+      }
+      // if the newline is after plain text, treat it as space
+      if (!ignoreWhite) {
+        clean += " ";
+      }
+      ignoreWhite = true;
+    } else if (c == expStart) { // [
+      ++expCount;
+      ignoreWhite = true;
+      clean += c;
+    } else if (c == expEnd) { // ]
+      --expCount;
+      ignoreWhite = true;
+      clean += c;
+    } else {
+      // we have hit a regular character
+      ignoreWhite = false;
+      // unless it's a whitespace remover
+      if (expCount) {
+        // should we remove all whitespace around this character?
         for (size_t i = 0; i < token::NUM_EXPRESSION_SPACE_REMOVERS; ++i) {
           if (c == token::ExpressionWhitespaceRemovers[i]) {
-            ignoreWhiteAhead = ignoreWhiteBehind = true;
+            ignoreWhite = true;
+            clean += c;
             break;
           }
         }
       } else {
         for (size_t i = 0; i < token::NUM_SPACE_REMOVERS; ++i) {
           if (c == token::WhitespaceRemovers[i]) {
-            ignoreWhiteAhead = ignoreWhiteBehind = true;
+            ignoreWhite = true;
+            clean += c;
             break;
           }
         }
       }
-
-      // collapse multiple newlines
-      if (c == '\n') {
-        while ((pos < length - 1) && ('\n' == Text[pos + 1])) {
-          ++pos;
-        }
-        // if we're already ignoring whitespace ignore this newline
-        if (!ignoreWhiteAhead) {
-          ++newlineCount;
-        }
-        // newline are restored later
-        c = ' ';
-        ignoreWhiteAhead = ignoreWhiteBehind = true;
-      }
-
-      if (c == expStart) {
-        ++expCount;
-      } else if (c == expEnd) {
-        --expCount;
-      }
     }
 
-    // merge whitespaces
-    if (c == ' ') {
+    // deal with whitespace and finally copy the character to the clean text
+    if (ignoreWhite) {
+      whiteCount = 0;
+      while (++pos < length && (Text[pos] == ' ' || Text[pos] == '\t'));
+      --pos;
+    } else if (c == ' ') {
+      // merge whitespaces
       ++whiteCount;
-
-      while ((pos < length - 1) && (Text[pos + 1] == ' ')) {
-        ++pos;
+      while (++pos < length && (Text[pos] == ' ' || Text[pos] == '\t')) {
         ++whiteCount;
       }
+      --pos;
     } else {
       // deal with accumulated whitespaces
-      if (ignoreWhiteBehind) {
-        ignoreWhiteBehind = false;
-
-        // add a space for the new line of plain text
-        if (newlineCount) {
-          //clean += ' ';
-        }
-        whiteCount = 0;
-        newlineCount = 0;
-        // discard trailing whitespaces as well
-        while ((pos < length - 1) && (Text[pos + 1] == ' ')) {
-          ++pos;
-        }
-      } else {
-        ignoreWhiteAhead = false;
-        if (whiteCount) { // restore whitespace
-          do {
-            clean += ' ';
-          } while (--whiteCount);
-        } else if (newlineCount) {
-          do {
-            clean += '\n';
-          } while (--newlineCount);
-        }
+      if (whiteCount) { // restore whitespace
+        do { // becuase whiteCount is unsigned
+          clean += ' ';
+        } while (--whiteCount);
       }
 
-      clean += c;
-    }
-
-    // copy the escaped character ignoring any special meaning
-    if (escaped) {
-      if (++pos < length) {
-        clean += Text[pos];
+      if (escaped) {
+        ++pos;
+        // check for a newline
+        if (Text[pos] == 'n') {
+          clean += "\n";
+        } else {
+          // copy the escaped character ignoring any special meaning
+          clean += "\\";
+          clean += Text[pos];
+        }
+      } else {
+        clean += c;
       }
     }
 

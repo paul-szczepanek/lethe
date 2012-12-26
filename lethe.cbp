@@ -59,6 +59,8 @@
 		<Unit filename="src/session.h" />
 		<Unit filename="src/story.cpp" />
 		<Unit filename="src/story.h" />
+		<Unit filename="src/storyquery.cpp" />
+		<Unit filename="src/storyquery.h" />
 		<Unit filename="src/textbox.cpp" />
 		<Unit filename="src/textbox.h" />
 		<Unit filename="src/tokens.cpp" />

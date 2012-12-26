@@ -302,16 +302,16 @@
 	"properties.h"
 	"tokens.h"
 
-1355339532 source:/home/paul/lethe/lethe/src/book.cpp
+1356536385 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"tokens.h"
+
+1356536429 /home/paul/lethe/lethe/src/book.h
+	"main.h"
 	"story.h"
 	"session.h"
 
-1353186204 /home/paul/lethe/lethe/src/book.h
-	"main.h"
-
-1353264093 /home/paul/lethe/lethe/src/main.h
+1356281141 /home/paul/lethe/lethe/src/main.h
 	<cstdlib>
 	<iostream>
 	<fstream>
@@ -330,12 +330,11 @@
 	<cassert>
 	<stack>
 
-1355948850 /home/paul/lethe/lethe/src/tokens.h
+1356524012 /home/paul/lethe/lethe/src/tokens.h
 	"main.h"
 
-1356111066 /home/paul/lethe/lethe/src/story.h
+1356536105 /home/paul/lethe/lethe/src/story.h
 	"main.h"
-	"properties.h"
 
 1356096871 /home/paul/lethe/lethe/src/properties.h
 	"main.h"
@@ -356,15 +355,14 @@
 	"main.h"
 	"reader.h"
 
-1354918729 /home/paul/lethe/lethe/src/reader.h
+1356535900 /home/paul/lethe/lethe/src/reader.h
 	"main.h"
-	"session.h"
 	"textbox.h"
 
 1353271711 /home/paul/lethe/lethe/src/textbox.h
 	"main.h"
 
-1356127894 source:/home/paul/lethe/lethe/src/page.cpp
+1356301865 source:/home/paul/lethe/lethe/src/page.cpp
 	"page.h"
 	"tokens.h"
 
@@ -376,7 +374,7 @@
 	"properties.h"
 	"tokens.h"
 
-1356099953 source:/home/paul/lethe/lethe/src/reader.cpp
+1356536404 source:/home/paul/lethe/lethe/src/reader.cpp
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
@@ -390,19 +388,33 @@
 1355841943 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
 
-1356192452 source:/home/paul/lethe/lethe/src/story.cpp
+1356536173 source:/home/paul/lethe/lethe/src/story.cpp
 	"story.h"
 	"page.h"
 	"tokens.h"
 	"session.h"
+	"storyquery.h"
+	"properties.h"
 
-1354929659 source:/home/paul/lethe/lethe/src/textbox.cpp
+1356517752 source:/home/paul/lethe/lethe/src/textbox.cpp
 	<SDL.h>
 	<SDL_ttf.h>
 	"textbox.h"
 	"reader.h"
 	"tokens.h"
 
-1353269854 source:/home/paul/lethe/lethe/src/tokens.cpp
+1356537800 source:/home/paul/lethe/lethe/src/tokens.cpp
 	"tokens.h"
+
+1356534820 /home/paul/lethe/lethe/src/storyquery.h
+	"main.h"
+	"properties.h"
+
+1356534894 source:/home/paul/lethe/lethe/src/storyquery.cpp
+	"storyquery.h"
+	"tokens.h"
+	"properties.h"
+	"page.h"
+	"story.h"
+	"session.h"
 

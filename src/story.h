@@ -2,11 +2,9 @@
 #define STORY_H
 
 #include "main.h"
-#include "properties.h"
 
 class Page;
 class Session;
-struct Block;
 
 class Story
 {
@@ -17,30 +15,17 @@ public:
   bool ParseKeywordDefinition(const string& StoryText);
   bool AddAssetDefinition(const string& StoryText);
 
-  string Read(Session& Progress, const string& Noun,
-              const string& VerbName);
+  string Read(Session& Progress, const string& Noun, const string& VerbName);
+  string Start(Session& Progress);
+  string QuickMenu(Session& Progress);
 
   vector<string> GetVerbs(Session& Progress, const string& Noun);
 
-private:
   inline Page& FindPage(const string& Noun);
 
-  uint ExecuteBlock(Session& Progress, const string& Noun, const Block& CurBlock,
-                    string& Text);
-  bool ExecuteExpression(Session& Progress, const string& Noun,
-                         const string& Expression, string& Text);
-  bool EvaluateExpression(Session& Progress, Properties& Result,
-                          const string& Expression, bool& IsNum, bool& IsText);
-  bool ExecuteFunction(Session& Progress, const Properties& FunctionName,
-                       Properties& FunctionArgs);
-
-  string PrependPattern(const string& Keyword, const string& PageText,
-                        const string& PatternName, const string& PatternText);
-
-  bool GetUserInteger(const Session& Progress, const string& Noun,
-                      Properties& Result);
-  bool GetUserValues(const Session& Progress, const string& Noun,
-                     Properties& Result);
+private:
+    string PrependPattern(const string& Keyword, const string& PageText,
+                          const string& PatternName, const string& PatternText);
 
 private:
   map<string, Page*> Pages;

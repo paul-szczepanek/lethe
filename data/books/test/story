@@ -1,10 +1,3 @@
-[<story>]
-
-[:begin]
-  [!your room:go]
-[:about]
-  This is a test story.
-
 //***************************** Lethe Language *********************************
 //
 // Whitespace is ignored but the noun definition needs to start on a new line.
@@ -103,8 +96,8 @@
 // If there are multiple values it will execute them all in sequence.
 //
 // You can nest @ evaluations:
-// [!@@noun:verb] - will go to value:verb, if noun has a value called noun2
-// and there is a noun2 that has a value called value.
+// [!@@noun1:verb] - will go to noun3:verb, if noun1 has a value called noun2
+//                   and there is a noun2 that has a value called noun3.
 //
 // ******** Arithmetic *************** ( ) - + * /
 //
@@ -139,41 +132,54 @@
 // [!<<<] - breaks up three levels up (and so on, add more <).
 // Note that a single < as in [!<] is illegal (and would be pointless).
 //
-// ******** Printing text ************
+// ******** Printing text ************ \n text <keyword>
 //
 // Text written outside of [ ] will be printed to the screen. Text needs to be
 // placed under a verb definition.
 //
-// Text can contain <keywords> inlined with text.
+// Text can contain <keywords> inlined with text. Clicking creats a menu with
+// a list of possiblee verbs the user can click on.
 // <visual name[real name]> - keyword for the noun [<real name>].
 // <name> - keyword where the visual and real name are the same.
+// <name[noun:verb]> - keyword which acts immediately when clicked (no menu).
 //
-// Multiple newlines are contracted to a single newline. You can force a newline
-// by using \n in text. These are treated as text and retained.
+// Newlines are considered whitespace and replaced with a space before the
+// next line. You can force a newline to be retained by using \n in text.
+//
 // Whitespace around newlines is ignored so you can indent text in the file.
-// You can use the escape character \ to ignore that and force whitespaces
+// You can use the escape character \ to ignore that and force whitespaces.
 //
-// Reserved characters that need to be esacped with \ in text are:
+// Reserved characters that need to be escaped with \ in text are:
 // < > [ ] { } \ & | //
 // & and | will work unescaped but will contract whitespace around them.
 // A combination of two / is used for comments so you'll have to escape one
 // if you want to use // in text.
 //
 // All other characters are legal and only treated as special characters
-// if within [ ] or < >.
+// if within [ ].
 //
 // ******** Special noun names ******* [<story>]
 //
-// These nouns are treated differently by the reader (not all are required).
-// [<story>] - how the story starts, at the verb [:begin] (this is essential).
-// [<place>] - where we are.
-// [<exits>] - where we can go.
-// [<nouns>] - list of always accessible nouns, like an inventory.
-// [<verbs>] - the list of choices that are noun:verb combinations.
-// [<calls>] - all values get executed every turn as instructions.
+// These nouns are treated differently by the reader (not all are required):
+// BEGIN, PLACE, EXITS, NOUNS, CALLS, QUICK
+//
+// [<BEGIN>] - how the story starts, expects noun:verb (this is essential).
+//
+// [<PLACE>] - where we are.
+// [<EXITS>] - where we can go.
+//
+// [<NOUNS>] - a noun must be here to remain clickable in the main pane.
+//             text from the previous action will lose keywords unless they
+/              are here.
+// [<QUICK>] - expects values of noun:verb that will print the quick menu.
+//             Values here don't need to be in NOUNS to remain clickable.
+//
+// [<CALLS>] - expects values of noun:verb, all values get executed every
+//             turn as instructions.
+//
 //
 // The absolute minimum is:
-// [<story>] [:begin] [!noun:verb]
+// [<STORY>] [:begin] [!noun:verb]
 // This will be called when starting the story and will tell the reader to go to
 // verb in noun and execute that block.
 //
@@ -192,6 +198,7 @@
 // Play(asset) - returns true if played
 // Stop(asset) - returns true if stopped
 // Size(noun) - returns number of values of a noun (not counting the integer)
+// List(noun) - prints a list of text values as keywords (like so: <n1>, <n2>)
 //
 // ******** Media Assets ************* [$ = type()]
 //
@@ -212,13 +219,12 @@
 
 //***************** starting place, exits, inventory and tools *****************
 
-[<place>] // we start nowhere
-[<exits> = your room] // so we can enter our starting room
-
-[<nouns> = self, pen] //assign default values
-[<verbs> = @place:look]
-
-[<calls>]
+[<BEGIN> = your room:go]
+[<PLACE>] // we start nowhere
+[<EXITS> = your room] //assign default value so we can enter our starting room
+[<NOUNS>]
+[<QUICK> = self:visible, self:list]
+[<CALLS>]
 
 //******************** background setting **************************************
 
@@ -233,7 +239,7 @@
     [!Play(voiceroom)]
     // [!calls+=your room media:autohide] // this gets evaluated each turn
   [:autohide] // and will hide the background if we leave
-    [?@place-=your room]
+    [?@PLACE-=your room]
       [!calls-=your room media:autohide]
       [!Stop(bgroom)]
       [!Stop(musicroom)]
@@ -244,30 +250,52 @@
 [<self>]
   [:look]
     You are tired.
+  [:list]
+    \nInventory:\n
+    [!List(self)] // show keywords for items we have
+  [:visible]
+    [!List(PLACE)] // show the keyword for the location we are in
+    \nObjects:\n
+    [!List(@PLACE)] // and all the things that are there
 
-//******************************************************************************
-
-[<pen>]
-  [:look]
-    Black ink pen.
-
+// These patterns are defined per story.
+// This way you can define the game to work like a regular IF with places and
+// an inventory.
 //************************ pattern for places  *********************************
 
 [<[room]>] // pattern definition because noun after [< is blank
+           // we will store items here
 
 // top level conditions are the ones placed above the verb definition
-[?@exits+=room] & [?@place-=room] { // two conditions, both need to be met to access
+[?@EXITS+=room] & [?@PLACE-=room] { // both conditions need to be met
   [:go] // verb, this is where the excutions goes upon calling [!room:go]
     // these instruction get executed when room:go gets called,
-    [!exits=] // this one clears exits
-    [!place=room] // change place to the room we're entering
+    [!EXITS=] // this one clears exits
+    [!PLACE=room] // change location to the room we're entering
+    [!nouns]
     [!:look] // look at the room we're in now
 }
 
-[?@place+=room] { // rest of the actions are available when we are in the room
+[?@PLACE+=room] { // rest of the actions are available when we are in the room
   // this is a cheat, if there is no closing } it's assumed to be at the end
   // of the definition rather then at the next top level condition
   // rest gets appended here
+
+//************************ pattern for items  **********************************
+
+[<[item]>]
+
+[?@@PLACE+=item] { // if the item is the location we are in
+  [:take]
+    [!@PLACE-=item]
+    [!self+=item]
+    Taken.
+
+//******************************************************************************
+
+[<pen[item]>]
+  [:look]
+    Black ink pen.
 
 //******************************************************************************
 
@@ -276,14 +304,15 @@
 
 [:look] // because we appended the room definition these are only visible
         // when we're in the room
-  You are sitting in your <room[your room]> <programming[program]>. 
-
-[?+=tea] {A cup of <tea> is on the desk.}
-  The room has only one <door>.\n
-  Items:[!@your room*:look].
+  You are sitting in your <room[your room]> <programming[program]>.
+  A cup of <tea> is on the desk.
+  [?+=pen] {
+    A <pen> is lying on the desk.
+  }
+  The room has only one <door>.
 
   [?@door=open] // if the door is open
-    [!exits+=staircase] // add the staircase as a possible exit
+    [!EXITS+=staircase] // add the staircase as a possible exit
     You can see the <staircase> through the open <door>.
 
 //******************************************************************************
@@ -293,7 +322,7 @@
 [?-=open] // if the door is not open
   [:open] [:use] // only the first one is visible, but both will work
     You open the door. You may now exit to the <staircase>.
-    [!exits+=staircase]
+    [!EXITS+=staircase]
     [!door=open]
 
 [?+=open] // if the door is open (door is implied)
@@ -361,4 +390,4 @@
 
 [:look]
   You are outside your <room[your room]>.
-  [!exits+=your room]
+  [!EXITS+=your room]

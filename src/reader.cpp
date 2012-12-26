@@ -55,12 +55,8 @@ bool Reader::Init(int width,
     std::cout << "Error: " << TTF_GetError() << std::endl;
   }
 
-  // create or lead progress
-  Progress.Name = "FirstRead";
-  Progress.BookName = "test";
-
   MyBook = new Book();
-  MyBook->Open(Progress.BookName);
+  MyBook->Open("test");
 
   // read layout
   // TODO: read defaults from file
@@ -82,19 +78,22 @@ bool Reader::Init(int width,
   boxSize.Y = 0;
   SideMenu.SetSize(boxSize);
 
-  PageSource = MyBook->Read(Progress, "story", "begin");
+  PageSource = MyBook->Start();
+  QuickMenuSource = MyBook->QuickMenu();
 
   MainText.SetText(PageSource, FontMain);
   MainText.Visible = true;
   ChoiceMenu.SetText("choice", FontMain);
   ChoiceMenu.Visible = true;
-  SideMenu.SetText("", FontMain);
+  SideMenu.SetText(QuickMenuSource, FontMain);
   SideMenu.Visible = true;
 
 #ifdef LOGGER
   GLog = "Log";
   Logger = new TextBox();
   Logger->Visible = true;
+  boxSize.Y += boxSize.H / 2;
+  boxSize.H = boxSize.Y;
   Logger->SetSize(boxSize);
   Logger->SetText("", FontMain);
 #endif
@@ -122,10 +121,9 @@ void Reader::ProcessInput()
         } else if (event.key.keysym.sym == SDLK_r) {
           // temp for debug help
           delete MyBook;
-          Progress.UserValues.clear();
           MyBook = new Book();
-          MyBook->Open(Progress.BookName);
-          PageSource = MyBook->Read(Progress, "story", "begin");
+          MyBook->Open("test");
+          PageSource = MyBook->Start();
           MainText.SetText(PageSource, FontMain);
         }
         break;
@@ -186,8 +184,11 @@ bool Reader::Tick(real DeltaTime)
     if (VerbMenu.Visible) {
       if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
         VerbMenu.Visible = false;
-        PageSource += MyBook->Read(Progress, NounKeyword, VerbKeyword);
+        PageSource += MyBook->Read(NounKeyword, VerbKeyword);
         MainText.SetText(PageSource, FontMain);
+
+        QuickMenuSource = MyBook->QuickMenu();
+        SideMenu.SetText(QuickMenuSource, FontMain);
       }
       VerbMenu.Deselect();
     }
@@ -197,7 +198,7 @@ bool Reader::Tick(real DeltaTime)
       if (MainText.GetSelectedKeyword(keyword)) {
         NounKeyword = keyword;
         // we clicked on a keyword, create a menu full of verbs
-        string VerbsText = MyBook->GetVerbList(Progress, NounKeyword);
+        string VerbsText = MyBook->GetVerbList(NounKeyword);
 
         Rect boxSize(400, 400, Mouse.X, Mouse.Y);
         VerbMenu.Visible = true;

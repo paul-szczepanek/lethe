@@ -8,8 +8,8 @@ namespace token
 
 const size_t NUM_TOKENS_INSTRUCTION = 4;
 const size_t NUM_TOKENS_CONDITION = 8;
-const size_t NUM_SPACE_REMOVERS = 6;
-const size_t NUM_EXPRESSION_SPACE_REMOVERS = 20;
+const size_t NUM_SPACE_REMOVERS = 4;
+const size_t NUM_EXPRESSION_SPACE_REMOVERS = 18;
 
 const uint isPaired = 0x0001;
 const uint isWide   = 0x0002;
@@ -216,31 +216,27 @@ const tokenName Instructions[NUM_TOKENS_INSTRUCTION] = {
 };
 
 const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
-  '[',
-  ']',
   '{',
-  '}',//4
+  '}',
   '&',
   '|',
 };
 
 const char ExpressionWhitespaceRemovers[NUM_EXPRESSION_SPACE_REMOVERS] = {
-  '[',
-  ']',
   '{',
-  '}',//4
+  '}',
   '<',
   '>',
   '&',
-  '|',//8
+  '|',
   '+',
   '=',
   '?',
-  '!',//12
+  '!',
   '#',
   '@',
   '-',
-  ':',//16
+  ':',
   ',',
   '$',
   '(',

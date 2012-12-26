@@ -1,19 +1,5 @@
 #include "book.h"
 #include "tokens.h"
-#include "story.h"
-#include "session.h"
-
-Book::Book()
-{
-  StoryDefinition = new Story();
-  //ctor
-}
-
-Book::~Book()
-{
-  delete StoryDefinition;
-  //dtor
-}
 
 /** @brief Open book of agiven title
   *
@@ -51,11 +37,11 @@ bool Book::Open(string Title)
         storyText = buffer;
       } else {
         // parse the text and start a new run
-        StoryDefinition->ParseKeywordDefinition(storyText);
+        StoryDefinition.ParseKeywordDefinition(storyText);
         storyText = buffer;
       }
     } else if (FindTokenStart(buffer, token::assetBlockMark) != string::npos) {
-      StoryDefinition->AddAssetDefinition(buffer);
+      StoryDefinition.AddAssetDefinition(buffer);
     } else if (!storyText.empty()) {
       // we didn't find a keyword, keep adding lines if we already hit one
       storyText += "\n";
@@ -65,11 +51,15 @@ bool Book::Open(string Title)
 
   // last keyword definition
   if (!storyText.empty()) {
-    StoryDefinition->ParseKeywordDefinition(storyText);
+    StoryDefinition.ParseKeywordDefinition(storyText);
   }
 
   //finished reading the file
   story.close();
+
+  // read progress here
+  Progress.Name = "FirstRead";
+  Progress.BookName = Title;
 
   return true;
 }
@@ -79,54 +69,42 @@ bool Book::Open(string Title)
   * return the verbs which do not fail their top level conditions
   * \return string with verbs as keywords
   */
-string Book::GetVerbList(Session& Progress,
-                         const string& Noun)
+string Book::GetVerbList(const string& Noun)
 {
   string Text;
-  vector<string> Verbs = StoryDefinition->GetVerbs(Progress, Noun);
+  vector<string> Verbs = StoryDefinition.GetVerbs(Progress, Noun);
   for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
     Text = Text + "\n- <" + Verbs[i] + ">";
   }
   return Text;
 }
 
-/** @brief Same as above except parses the Progress first
-  *
-  */
-string Book::GetVerbList(const string& Progress,
-                         const string& Noun)
-{
-  Session tempSession;
-  tempSession.SetUserValues(Progress);
-
-  return GetVerbList(tempSession, Noun);
-}
-
 /** @brief Read
   *
   * this is what the reader sends to the book to get the resulting text
   */
-string Book::Read(Session& Progress,
-                  const string& Noun,
+string Book::Read(const string& Noun,
                   const string& VerbName)
 {
-  const string pageSource = StoryDefinition->Read(Progress, Noun, VerbName);
+  const string pageSource = StoryDefinition.Read(Progress, Noun, VerbName);
 
   return pageSource + "\n";
 }
 
-/** @brief Same as above except parses the Progress first
-  *
+/** @brief Read the start of the book
   */
-string Book::Read(string& Progress,
-                  const string& Noun,
-                  const string& VerbName)
+string Book::Start()
 {
-  Session tempSession;
-  tempSession.SetUserValues(Progress);
+  const string pageSource = StoryDefinition.Start(Progress);
 
-  const string pageSource = StoryDefinition->Read(tempSession, Noun, VerbName);
+  return pageSource + "\n";
+}
 
-  Progress = tempSession.GetUserValues();
+/** @brief Read the start of the book
+  */
+string Book::QuickMenu()
+{
+  const string pageSource = StoryDefinition.QuickMenu(Progress);
+
   return pageSource + "\n";
 }

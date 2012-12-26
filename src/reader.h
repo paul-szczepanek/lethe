@@ -2,7 +2,6 @@
 #define READER_H
 
 #include "main.h"
-#include "session.h"
 #include "textbox.h"
 
 class Session;
@@ -41,11 +40,10 @@ public:
   bool ProcessEvents();
 
   string PageSource;
+  string QuickMenuSource;
 
 private:
   bool Quit;
-
-  Session Progress;
 
   MouseState Mouse;
 
