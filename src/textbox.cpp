@@ -352,6 +352,32 @@ void TextBox::Scroll()
   }
 }
 
+uint_pair TextBox::GetMaxSize()
+{
+  uint_pair maxSize;
+  uint lineSkip = TTF_FontLineSkip(FontMain);
+  LineHeight = TTF_FontHeight(FontMain) + lineSkip;
+  int height, width;
+  string text;
+  size_t newline = 0, pos = 0;
+
+  while (newline != string::npos) {
+    newline = FindCharacter(Text, '\n', pos);
+    text = cutString(Text, pos, newline+1);
+    text += "M"; // pad with an extra char to avoid text wrapping
+    TTF_SizeText(FontMain, text.c_str(), &width ,&height);
+    maxSize.X = max(maxSize.X, (uint)width);
+    maxSize.Y += LineHeight;
+    pos = newline;
+    ++pos;
+  }
+
+  maxSize.X += BLOCK_SIZE;
+  maxSize.Y += BLOCK_SIZE + lineSkip;
+
+  return maxSize;
+}
+
 /** @brief word wrap and find keywords
   *
   * fills in Lines and Keywords

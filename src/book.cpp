@@ -74,19 +74,43 @@ string Book::GetVerbList(const string& Noun)
   string Text;
   vector<string> Verbs = StoryDefinition.GetVerbs(Progress, Noun);
   for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
-    Text = Text + "\n- <" + Verbs[i] + ">";
+    if (i) {
+      Text += "\n- <";
+    } else {
+      Text += "- <";
+    }
+    Text += Verbs[i];
+    Text += ">";
   }
+
   return Text;
+}
+
+/** @brief Get list of verbs of the noun
+  *
+  * return the verbs which do not fail their top level conditions
+  * \return string with verbs as keywords
+  */
+bool Book::GetChoice(string_pair& Choice)
+{
+  // is it a noun:verb?
+  size_t scopePos = FindTokenEnd(Choice.X, token::scope);
+  if (scopePos != string::npos) {
+    // rearange the noun:verb into proper places
+    Choice.Y = cutString(Choice.X, scopePos+1, Choice.X.size());
+    Choice.X = cutString(Choice.X, 0, scopePos);
+    return true;
+  }
+  return false;
 }
 
 /** @brief Read
   *
   * this is what the reader sends to the book to get the resulting text
   */
-string Book::Read(const string& Noun,
-                  const string& VerbName)
+string Book::Read(const string_pair& Choice)
 {
-  const string pageSource = StoryDefinition.Read(Progress, Noun, VerbName);
+  const string pageSource = StoryDefinition.Read(Progress, Choice.X, Choice.Y);
 
   return pageSource + "\n";
 }

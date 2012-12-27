@@ -16,10 +16,11 @@ public:
 
   bool Open(string Title);
 
-  string Read(const string& Noun, const string& VerbName);
+  string Read(const string_pair& Choice);
   string Start();
   string QuickMenu();
   string GetVerbList(const string& Noun);
+  bool GetChoice(string_pair& Choice);
 
 private:
   Session Progress;

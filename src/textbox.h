@@ -36,6 +36,7 @@ public:
 
   void Init(TTF_Font* Font = NULL, const string& Frame = "", int Bpp = 32);
   void SetSize(Rect& NewSize);
+  uint_pair GetMaxSize();
   void SetText(string NewText);
 
   void Draw(SDL_Surface* Screen);

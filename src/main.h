@@ -82,6 +82,14 @@ typedef struct size_t_pair {
   size_t Y;
 } size_t_pair;
 
+typedef struct string_pair {
+  string_pair() { }
+  bool clear() { X.clear(); Y.clear(); }
+  bool empty() { return (X.empty() || Y.empty()); }
+  bool full() { return (!X.empty() && !Y.empty()); }
+  string X;
+  string Y;
+} string_pair;
 typedef struct int_pair {
   int_pair() : X(0), Y(0) { };
   int X;
@@ -121,6 +129,8 @@ typedef struct Rect {
   }
   // align size to block size
   void Blockify() {
+    W = max(W, 3u*(uint)BLOCK_SIZE);
+    H = max(H, 3u*(uint)BLOCK_SIZE);
     uint newW = W - (W % BLOCK_SIZE);
     uint newH = H - (H % BLOCK_SIZE);
     X += (W - newW) / (uint)2;

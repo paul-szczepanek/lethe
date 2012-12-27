@@ -61,8 +61,7 @@ private:
   TextBox SideMenu;
   TextBox MainText;
 
-  string NounKeyword;
-  string VerbKeyword;
+  string_pair KeywordAction;
 
   uint SplitH;
   uint SplitV;

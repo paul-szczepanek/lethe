@@ -6,7 +6,7 @@
 			<Cursor1 position="3212" topLine="59" />
 		</Cursor>
 	</File>
-	<File name="src/book.cpp" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/book.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="2257" topLine="39" />
 		</Cursor>
@@ -16,7 +16,7 @@
 			<Cursor1 position="587" topLine="7" />
 		</Cursor>
 	</File>
-	<File name="src/story.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
+	<File name="src/story.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="4639" topLine="101" />
 		</Cursor>
@@ -46,12 +46,12 @@
 			<Cursor1 position="7958" topLine="113" />
 		</Cursor>
 	</File>
-	<File name="src/main.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/main.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1330" topLine="51" />
+			<Cursor1 position="2471" topLine="96" />
 		</Cursor>
 	</File>
-	<File name="src/story.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/story.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1092" topLine="0" />
 		</Cursor>
@@ -66,12 +66,12 @@
 			<Cursor1 position="672" topLine="20" />
 		</Cursor>
 	</File>
-	<File name="src/tokens.cpp" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/tokens.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="288" topLine="3" />
 		</Cursor>
 	</File>
-	<File name="src/reader.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/reader.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="810" topLine="0" />
 		</Cursor>
@@ -81,7 +81,7 @@
 			<Cursor1 position="192" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="src/book.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="src/book.h" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="175" topLine="0" />
 		</Cursor>

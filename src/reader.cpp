@@ -191,7 +191,7 @@ bool Reader::Tick(real DeltaTime)
       ChoiceMenu.Select(Mouse, DeltaTime);
     } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
       VerbMenu.Visible = false;
-      NounKeyword.clear();
+      KeywordAction.clear();
     } else if (!SideMenu.Select(Mouse, DeltaTime)) {
       SideMenu.Deselect();
       MainText.Select(Mouse, DeltaTime);
@@ -204,32 +204,35 @@ bool Reader::Tick(real DeltaTime)
       // todo: make choice
     } else {
       if (VerbMenu.Visible) {
-        if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
+        if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
           ReadBook();
-          QuickMenuSource = MyBook->QuickMenu();
-          MainText.SetText(PageSource);
-          SideMenu.SetText(QuickMenuSource);
         }
         VerbMenu.Visible = false;
-        NounKeyword.clear();
+        KeywordAction.clear();
         VerbMenu.Deselect();
-      } else if (SideMenu.GetSelectedKeyword(NounKeyword)) {
+      } else if (SideMenu.GetSelectedKeyword(KeywordAction.X)) {
 
-      } else if (MainText.GetSelectedKeyword(NounKeyword)) {
+      } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
 
       }
 
       SideMenu.Deselect();
       MainText.Deselect();
 
-      if (!NounKeyword.empty()) {
-        // we clicked on a keyword, create a menu full of verbs
-        string VerbsText = MyBook->GetVerbList(NounKeyword);
-
-        Rect boxSize(400, 400, Mouse.X, Mouse.Y);
-        VerbMenu.Visible = true;
-        VerbMenu.SetSize(boxSize);
-        VerbMenu.SetText(VerbsText);
+      if (!KeywordAction.X.empty()) {
+        if (MyBook->GetChoice(KeywordAction)) {
+          ReadBook();
+        } else {
+          // we clicked on a keyword, create a menu full of verbs
+          string VerbsText = MyBook->GetVerbList(KeywordAction.X);
+          if (!VerbsText.empty()) {
+            VerbMenu.Visible = true;
+            VerbMenu.SetText(VerbsText);
+            const uint_pair& maxSize = VerbMenu.GetMaxSize();
+            Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
+            VerbMenu.SetSize(boxSize);
+          }
+        }
       }
     }
   }
@@ -250,15 +253,18 @@ bool Reader::ReadBook()
 {
   // clear out old keywords
   // PageSource;
-  if (NounKeyword.empty() || VerbKeyword.empty()) {
-    return false;
+  if (KeywordAction.full()) {
+    PageSource += MyBook->Read(KeywordAction);
+    KeywordAction.clear();
+
+    QuickMenuSource = MyBook->QuickMenu();
+    MainText.SetText(PageSource);
+    SideMenu.SetText(QuickMenuSource);
+
+    return true;
   }
 
-  PageSource += MyBook->Read(NounKeyword, VerbKeyword);
-  NounKeyword.clear();
-  VerbKeyword.clear();
-
-  return true;
+  return false;
 }
 
 void Reader::RedrawScreen(real DeltaTime)
