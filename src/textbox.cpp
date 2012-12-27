@@ -1,63 +1,256 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 
 #include "textbox.h"
 #include "reader.h"
 #include "tokens.h"
 
-const Uint16 RIGHT_MARGIN = 20;
-const real DRAG_TIMEOUT = 0.25;
-
-TextBox::TextBox()
-  : Active(false), Visible(false), PageDirty(false), PageHeight(0)
-{
-  PageSurface = NULL;
-  PageTextSurface = NULL;
-  FontMain = NULL;
-}
+const Uint16 RIGHT_MARGIN = BLOCK_SIZE;
+const real DRAG_TIMEOUT = 0.1;
 
 TextBox::~TextBox()
 {
+  ResetPage();
+}
+
+/** @brief Create all the assets required by the text box
+  *
+  * builds the image slice array for the frame building
+  */
+void TextBox::Init(TTF_Font* Font,
+                   const string& Frame,
+                   int Bpp)
+{
+  if (Font) {
+    FontMain = Font;
+  }
+
+  if (!Frame.empty()) {
+    FrameName = Frame;
+  }
+
+  BPP = Bpp;
+
+  ResetPage();
+}
+
+
+/** @brief Set Size of the textbox
+  *
+  * resets the page as well
+  */
+void TextBox::SetSize(Rect& NewSize)
+{
+  NewSize.Blockify();
+  if (Size != NewSize) {
+    Size = NewSize;
+    FrameDst.w = Size.W;
+    FrameDst.h = Size.H;
+    FrameDst.x = Size.X;
+    FrameDst.y = Size.Y;
+    TextClip.w = Size.W - BLOCK_SIZE;
+    TextClip.h = Size.H - BLOCK_SIZE;
+    TextDst.x = Size.X + BLOCK_SIZE / (uint)2;
+    TextDst.y = Size.Y + BLOCK_SIZE / (uint)2;
+    TextDst.w = TextClip.w;
+    TextDst.h = TextClip.h;
+
+    ResetPage();
+  }
+}
+
+/** @brief Set page text
+  *
+  * resets the cached pages
+  */
+void TextBox::SetText(string NewText)
+{
+  if (FontMain) {
+    Text = NewText;
+    ResetPage();
+  } else {
+    LOG("Font not set in textbox!");
+  }
+}
+
+/** @brief Reset Page
+  *
+  * clears cached surfaces
+  */
+void TextBox::ResetPage()
+{
+  TextClip.x = TextClip.y = PageHeight = 0;
+
   if (PageSurface) {
     SDL_FreeSurface(PageSurface);
+    PageSurface = NULL;
   }
 
   if (PageTextSurface) {
     SDL_FreeSurface(PageTextSurface);
+    PageTextSurface = NULL;
+  }
+
+  if (FrameSurface) {
+    SDL_FreeSurface(FrameSurface);
+    FrameSurface = NULL;
+  }
+
+  if (FrameDown) {
+    SDL_FreeSurface(FrameDown);
+    FrameDown = NULL;
+  }
+
+  if (FrameUp) {
+    SDL_FreeSurface(FrameUp);
+    FrameUp = NULL;
+  }
+
+  if (FrameIcon) {
+    SDL_FreeSurface(FrameIcon);
+    FrameIcon = NULL;
   }
 }
 
-
-/** @brief Scroll
-  *
-  * @todo: document this function
+/** @brief Draw page onto passed in surface
   */
-void TextBox::Scroll()
+void TextBox::Draw(SDL_Surface* Screen)
 {
-  if (Pane.PaneScroll != 0) {
-    // only scroll if the page is bigger than box
-    if ((Pane.PaneScroll != 0) && (PageHeight > ClipRect.h)) {
-      int pagePosition = Pane.PaneScroll + ClipRect.y;
+  if (Screen) {
+    SDL_Surface* page = GetPageSurface();
+    SDL_Surface* text = GetPageTextSurface();
+    DrawFrame(Screen);
+    if (page && text) {
+      SDL_BlitSurface(page, &TextClip, Screen, &TextDst);
+      SDL_BlitSurface(text, &TextClip, Screen, &TextDst);
+    }
+  }
+}
 
-      if (pagePosition < 0) {
-        ClipRect.y = 0;
+bool TextBox::DrawFrame(SDL_Surface* Screen)
+{
+  // only bother if we have a frame template
+  if (FrameName.empty()) {
+    return false;
+  }
 
-      } else {
-        if ((usint)pagePosition > PageHeight - ClipRect.h) {
-          pagePosition = PageHeight - ClipRect.h;
+  if (!FrameSurface) {
+    FrameSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, Size.W, Size.H, BPP,
+                                        MASK_R, MASK_G, MASK_B, MASK_A);
+
+    SDL_Surface* spritePage = IMG_Load((FRAMES_DIR+FrameName+".png").c_str());
+
+    if (!spritePage) {
+      LOG(FrameName+" - frame image missing");
+      FrameName.clear();
+      return false;
+    } else if (spritePage->w != BLOCK_SIZE * 4) {
+      //TODO: stretch SpritePage if needed
+      LOG("frame image size incorrect");
+      return false;
+    }
+
+    // sprite image layout
+    // 00C 01M 02E 03C   corner middle edge corner
+    // 04M 05M 06I 07M   middle middle icon middle
+    // 08E 09D 10U 11E   edge    down   up   edge
+    // 12C 13M 14E 15C   corner middle edge corner
+
+    SDL_Rect src = { 0, 0, BLOCK_SIZE, BLOCK_SIZE };
+    SDL_Rect dst = { 0, 0, BLOCK_SIZE, BLOCK_SIZE };
+
+    for (size_t i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
+      for (size_t j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
+        size_t index;
+        if (j == 0) {
+          if (i == 0) {
+            index = 0;
+          } else if (i == colS / 2) {
+            index = 1;
+          } else if (i < colS - 1) {
+            index = 2;
+          } else {
+            index = 3;
+          }
+        } else if (j < rowS - 1) {
+          if (i == 0) {
+            if (j == rowS / 2) {
+              index = 4;
+            } else {
+              index = 8;
+            }
+          } else if (i < colS - 1) {
+            index = 5;
+          } else {
+            if (j == rowS / 2) {
+              index = 7;
+            } else {
+              index = 11;
+            }
+          }
+        } else {
+          if (i == 0) {
+            index = 12;
+          } else if (i == colS / 2) {
+            index = 13;
+          } else if (i < colS - 1) {
+            index = 14;
+          } else {
+            index = 15;
+          }
         }
 
-        ClipRect.y = pagePosition;
+        src.x = BLOCK_SIZE * (index % 4);
+        src.y = BLOCK_SIZE * (index / 4);
+        dst.x = BLOCK_SIZE * i;
+        dst.y = BLOCK_SIZE * j;
+        SDL_BlitSurface(spritePage, &src, FrameSurface, &dst);
       }
     }
 
-    Pane.PaneScroll = 0;
+    FrameUp = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
+                                   MASK_R, MASK_G, MASK_B, MASK_A);
+    FrameIcon = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
+                                     MASK_R, MASK_G, MASK_B, MASK_A);
+    FrameDown = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
+                                     MASK_R, MASK_G, MASK_B, MASK_A);
+
+    src.x = BLOCK_SIZE * 2;
+    src.y = BLOCK_SIZE * 2;
+    SDL_BlitSurface(spritePage, &src, FrameUp, 0);
+    src.x = BLOCK_SIZE * 2;
+    src.y = BLOCK_SIZE * 1;
+    SDL_BlitSurface(spritePage, &src, FrameIcon, 0);
+    src.x = BLOCK_SIZE * 1;
+    src.y = BLOCK_SIZE * 2;
+    SDL_BlitSurface(spritePage, &src, FrameDown, 0);
+
+    UpDst = { 0, 0, 0, 0 };
+    UpDst.x = FrameDst.x + FrameDst.w - 2 * BLOCK_SIZE;
+    UpDst.y = FrameDst.y;
+    DownDst = { 0, 0, 0, 0 };
+    DownDst.x = UpDst.x;
+    DownDst.y = FrameDst.y + FrameDst.h - BLOCK_SIZE;
+
+    SDL_FreeSurface(spritePage);
   }
+
+  if (FrameSurface) {
+    SDL_BlitSurface(FrameSurface, 0, Screen, &FrameDst);
+    if (TextClip.y > 1) {
+      SDL_BlitSurface(FrameUp, 0, Screen, &UpDst);
+    }
+    if ((usint)TextClip.y + 1u + TextClip.h < PageHeight ) {
+      SDL_BlitSurface(FrameDown, 0, Screen, &DownDst);
+    }
+    return true;
+  }
+
+  return false;
 }
 
-/** @brief GetKeyword
-  *
-  * @todo: document this function
+/** @brief Get selected keyword
   */
 bool TextBox::GetSelectedKeyword(string& Keyword)
 {
@@ -78,35 +271,33 @@ bool TextBox::Deselect()
   const size_t oldSelectedKeyword = SelectedKeyword;
   SelectedKeyword = Keywords.size();
   PageDirty = true;
-  Pane.PaneDrag = false;
+  Pane.DragTimeout = DRAG_TIMEOUT;
 
   return (oldSelectedKeyword != SelectedKeyword);
 }
 
 /** @brief Select keywords
   *
-  * returns true if we hit a keyword
+  * \return true if we hit a keyword
   */
 bool TextBox::Select(MouseState& Mouse,
                      real DeltaTime)
 {
-  if (Pane.DragTimeout > 0.f) {
-    Pane.DragTimeout -= DeltaTime;
-  }
-
   if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
       || (Mouse.Y < Size.Y) || (Mouse.Y > Size.Y + Size.H)) {
     Pane.DragTimeout = DRAG_TIMEOUT;
     return false;
   }
 
+  // keyword selection
   size_t oldSelectedKeyword = SelectedKeyword;
   size_t keywordsNum = Keywords.size();
 
   SelectedKeyword = keywordsNum;
 
-  const Uint16 X = Mouse.X - DstRect.x;
-  const Uint16 Y = Mouse.Y - (DstRect.y - ClipRect.y);
+  // translate coords to text surface coords
+  const Uint16 X = Mouse.X - TextDst.x;
+  const Uint16 Y = Mouse.Y - (TextDst.y - TextClip.y );
 
   for (size_t i = 0, forSize = keywordsNum; i < forSize; ++i) {
     if ((Keywords[i].X < X)
@@ -125,31 +316,39 @@ bool TextBox::Select(MouseState& Mouse,
 
   if (SelectedKeyword < keywordsNum) {
     Pane.DragTimeout = DRAG_TIMEOUT;
-  } else if (Pane.PaneDrag && (Pane.DragTimeout<=0.f)) {
+  } else if (Pane.DragTimeout <= 0.f) {
     Pane.PaneScroll = Pane.PaneDragY - Mouse.Y;
     Pane.PaneDragY = Mouse.Y;
+    Scroll();
   } else {
-    Pane.PaneDrag = true;
     Pane.PaneDragY = Mouse.Y;
+    Pane.DragTimeout -= DeltaTime;
   }
-
-  Scroll();
 
   return true;
 }
 
-/** @brief Draw page onto passed in surface
-  *
-  * draws the backdrop and text onto the screen passed into the function
+/** @brief Scroll the page by moving the text clipping rectangle
   */
-void TextBox::Draw(SDL_Surface* Screen)
+void TextBox::Scroll()
 {
-  SDL_Surface* page = GetPageSurface();
-  SDL_Surface* text = GetPageTextSurface();
+  if (Pane.PaneScroll != 0) {
+    // only scroll if the page is bigger than box
+    if ((Pane.PaneScroll != 0) && (PageHeight > TextClip.h)) {
+      int pagePosition = Pane.PaneScroll + TextClip.y;
 
-  if (page && text && Screen) {
-    SDL_BlitSurface(page, &ClipRect, Screen, &DstRect);
-    SDL_BlitSurface(text, &ClipRect, Screen, &DstRect);
+      if (pagePosition < 0) {
+        TextClip.y = 0;
+      } else {
+        if ((usint)pagePosition > PageHeight - TextClip.h) {
+          pagePosition = PageHeight - TextClip.h;
+        }
+
+        TextClip.y = pagePosition;
+      }
+    }
+
+    Pane.PaneScroll = 0;
   }
 }
 
@@ -226,7 +425,7 @@ bool TextBox::BreakText()
       if (++pos < length) {
         cleaned[pos - skip] = Text[pos];
       }
-      // ifx the  keyword positions that are beyond this pos
+      // fix the  keyword positions that are beyond this pos
       for (size_t i = 0, for_size = keywordPos.size(); i < for_size; ++i) {
         if (keywordPos[i].X > pos) {
           --keywordPos[i].X;
@@ -293,7 +492,7 @@ bool TextBox::BreakText()
     TTF_SizeText(FontMain, line.c_str(), &width ,&height);
 
     // did we fit in?
-    if (width < ClipRect.w - RIGHT_MARGIN || firstWord) {
+    if (width < TextClip.w || firstWord) {
       lastPos = pos;
     } else {
       // overflow, revert to last position and print that
@@ -361,7 +560,7 @@ bool TextBox::BreakText()
   SelectedKeyword = Keywords.size();
 
   // scroll to end
-  ClipRect.y = PageHeight > ClipRect.h? (PageHeight - ClipRect.h) : 0;
+  TextClip.y = PageHeight > TextClip.h? (PageHeight - TextClip.h) : 0;
 
   return (PageHeight > 0);
 }
@@ -384,10 +583,9 @@ SDL_Surface* TextBox::GetPageTextSurface()
     return NULL;
   }
 
-  PageTextSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, ClipRect.w,
-                                         max(PageHeight, uint(ClipRect.h)),
-                                         32, 0x000000FF, 0x0000FF00,
-                                         0x00FF0000, 0xFF000000);
+  PageTextSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, TextClip.w,
+                                         max(PageHeight, uint(TextClip.h)),
+                                         BPP, MASK_R, MASK_G, MASK_B, MASK_A);
 
   SDL_Color white;
   white.r = white.g = white.b = 255;
@@ -424,10 +622,9 @@ SDL_Surface* TextBox::GetPageSurface()
       BreakText();
     }
 
-    PageSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, ClipRect.w,
-                                       max(PageHeight, uint(ClipRect.h)),
-                                       32, 0x000000FF, 0x0000FF00,
-                                       0x00FF0000, 0xFF000000);
+    PageSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, TextDst.w,
+                                       max(PageHeight, uint(TextDst.h)),
+                                       BPP, MASK_R, MASK_G, MASK_B, MASK_A);
   }
 
   for (size_t i = 0, forSize = Keywords.size(); i < forSize; ++i) {
@@ -444,57 +641,4 @@ SDL_Surface* TextBox::GetPageSurface()
   }
 
   return PageSurface;
-}
-
-/** @brief Set Size of the textbox
-  *
-  * resets the page as well
-  */
-void TextBox::SetSize(Rect& NewSize)
-{
-  Size = NewSize;
-
-  ClipRect.w = Size.W;
-  ClipRect.h = Size.H;
-  DstRect.x = Size.X;
-  DstRect.y = Size.Y;
-
-  ResetPage();
-}
-
-/** @brief Reset Page
-  *
-  * clears cached surfaces
-  */
-void TextBox::ResetPage()
-{
-  ClipRect.x = ClipRect.y = PageHeight = 0;
-
-  if (PageSurface) {
-    SDL_FreeSurface(PageSurface);
-    PageSurface = NULL;
-  }
-
-  if (PageTextSurface) {
-    SDL_FreeSurface(PageTextSurface);
-    PageTextSurface = NULL;
-  }
-}
-
-/** @brief Set page text
-  *
-  * resets the cached pages
-  */
-void TextBox::SetText(string NewText, TTF_Font* Font)
-{
-  if (Font) {
-    FontMain = Font;
-  }
-
-  if (FontMain) {
-    Text = NewText;
-    ResetPage();
-  } else {
-    LOG("Font not set in textbox!");
-  }
 }

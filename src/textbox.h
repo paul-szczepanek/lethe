@@ -5,15 +5,14 @@
 
 struct PaneState {
   PaneState ()
-    : PaneDragY(0), PaneScroll(0), DragTimeout(0),
-      PaneDown(false), PaneUp(false), PaneDrag(false) { };
+    : PaneDragY(0), PaneScroll(0), DragTimeout(0.25),
+      PaneDown(false), PaneUp(false) { };
   ~PaneState () { };
   Uint16 PaneDragY;
   int PaneScroll;
   real DragTimeout;
   bool PaneDown;
   bool PaneUp;
-  bool PaneDrag;
 };
 
 struct KeywordMap {
@@ -32,46 +31,57 @@ class MouseState;
 class TextBox
 {
 public:
-  TextBox();
+  TextBox() { };
   virtual ~TextBox();
 
-  void Draw(SDL_Surface* Screen);
-
+  void Init(TTF_Font* Font = NULL, const string& Frame = "", int Bpp = 32);
   void SetSize(Rect& NewSize);
-  void SetText(string NewText, TTF_Font* Font = NULL);
-  void Scroll();
+  void SetText(string NewText);
+
+  void Draw(SDL_Surface* Screen);
 
   bool Select(MouseState& Mouse, real DeltaTime);
   bool Deselect();
   bool GetSelectedKeyword(string& Keyword);
 
+private:
+  bool DrawFrame(SDL_Surface* Screen);
+  void Scroll();
+  bool BreakText();
+  void ResetPage();
   SDL_Surface* GetPageSurface();
   SDL_Surface* GetPageTextSurface();
 
-private:
-  bool BreakText();
-  void ResetPage();
-
 public:
-  bool Active;
-  bool Visible;
-  bool PageDirty;
+  bool Active = false;
+  bool Visible = false;
+  bool PageDirty = false;
 
   PaneState Pane;
 
 private:
   Rect Size;
+  int BPP;
 
+  string FrameName;
   string Text;
-  TTF_Font* FontMain;
+  TTF_Font* FontMain = NULL;
 
-  SDL_Surface* PageSurface;
-  SDL_Surface* PageTextSurface;
+  SDL_Surface* PageSurface = NULL;
+  SDL_Surface* PageTextSurface = NULL;
+  SDL_Surface* FrameSurface = NULL;
+  SDL_Surface* FrameDown = NULL;
+  SDL_Surface* FrameUp = NULL;
+  SDL_Surface* FrameIcon = NULL;
 
-  SDL_Rect DstRect;
-  SDL_Rect ClipRect;
-  uint PageHeight;
-  uint LineHeight;
+  SDL_Rect FrameDst;
+  SDL_Rect TextClip;
+  SDL_Rect TextDst;
+  SDL_Rect UpDst;
+  SDL_Rect DownDst;
+
+  uint PageHeight = 0;
+  uint LineHeight = 0;
 
   vector<string> Lines;
   vector<KeywordMap> Keywords;

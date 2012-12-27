@@ -16,12 +16,18 @@ Reader::Reader() : Quit(false), RedrawPending(true)
 
 Reader::~Reader()
 {
-  TTF_CloseFont(FontMain);
-  TTF_CloseFont(FontSys);
-  SDL_FreeSurface(Backdrop);
-
-  delete MyBook;
-
+  if (FontMain) {
+    TTF_CloseFont(FontMain);
+  }
+  if (FontSys) {
+    TTF_CloseFont(FontSys);
+  }
+  if (Backdrop) {
+    SDL_FreeSurface(Backdrop);
+  }
+  if (MyBook) {
+    delete MyBook;
+  }
 #ifdef LOGGER
   if (Logger) {
     delete Logger;
@@ -29,58 +35,63 @@ Reader::~Reader()
 #endif
 }
 
-bool Reader::Init(int width,
-                  int height,
-                  int bpp)
+bool Reader::Init(int Width,
+                  int Height,
+                  int Bpp)
 {
+  BPP = Bpp;
   // create a new window
-  Screen = SDL_SetVideoMode(width, height, bpp, SDL_HWSURFACE|SDL_DOUBLEBUF);
+  Screen = SDL_SetVideoMode(Width, Height, BPP, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
   if (!Screen) {
-    printf("Unable to set video: %s\n", SDL_GetError());
+    std::cout << "Unable to set video: " << SDL_GetError() << std::endl;
     return false;
   }
 
-  SDL_SetAlpha(Screen, SDL_SRCALPHA, 255);
+  FontSys = TTF_OpenFont("data/font/mono.ttf", 16);
+  FontMain = TTF_OpenFont("data/font/mono.ttf", 20);
+
+  if (!FontSys || !FontMain) {
+    std::cout << "Fonts failed to load" << std::endl;
+    return false;
+  }
 
   // load an image
   Backdrop = IMG_Load("data/default_bg.png");
 
   if (!Backdrop) {
-    printf("Unable to load bitmap: %s\n", SDL_GetError());
-    Backdrop = SDL_SetVideoMode(width, height, 32, 0);
-  }
-
-  FontSys = TTF_OpenFont("data/font/mono.ttf", 20);
-  FontMain = TTF_OpenFont("data/font/mono.ttf", 20);
-
-  if (!(FontSys && FontMain)) {
-    TTF_SetError("Loading failed :( (code: %d)", 142);
-    std::cout << "Error: " << TTF_GetError() << std::endl;
+    Backdrop = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height, BPP, MASK_R,
+                                    MASK_G, MASK_B, MASK_A);
+    LOG("default - bg image missing");
   }
 
   MyBook = new Book();
   MyBook->Open("test");
 
+  ChoiceMenu.Init(FontMain, "default", BPP);
+  VerbMenu.Init(FontMain, "default", BPP);
+  SideMenu.Init(FontMain, "default", BPP);
+  MainText.Init(FontMain, "default", BPP);
+
   // read layout
   // TODO: read defaults from file
-  SplitH = height;
-  SplitV = height - 200;
+  SplitH = Height;
+  SplitV = Height - (Width - Height);
 
   // calculate positions of text boxes
   Rect boxSize;
-  boxSize.W = width - SplitH;
-  boxSize.H = height - SplitV;
+  boxSize.W = Width - SplitH;
+  boxSize.H = Height - SplitV;
   boxSize.X = SplitH;
   boxSize.Y = SplitV;
   ChoiceMenu.SetSize(boxSize);
-  boxSize.W = width - SplitH;
+  boxSize.W = Width - SplitH;
   boxSize.H = SplitV;
   boxSize.X = SplitH;
   boxSize.Y = 0;
   SideMenu.SetSize(boxSize);
   boxSize.W = SplitH;
-  boxSize.H = height/2;
+  boxSize.H = Height/2;
   boxSize.X = 0;
   boxSize.Y = 0;
   MainText.SetSize(boxSize);
@@ -88,19 +99,20 @@ bool Reader::Init(int width,
   PageSource = MyBook->Start();
   QuickMenuSource = MyBook->QuickMenu();
 
-  MainText.SetText(PageSource, FontMain);
+  MainText.SetText(PageSource);
   MainText.Visible = true;
-  SideMenu.SetText(QuickMenuSource, FontMain);
+  SideMenu.SetText(QuickMenuSource);
   SideMenu.Visible = true;
 
 #ifdef LOGGER
   GLog = "Log";
   Logger = new TextBox();
   Logger->Visible = true;
-  boxSize.Y += height / 2;
-  boxSize.H = height / 2;
+  Logger->Init(FontSys, "default", BPP);
+  boxSize.Y += Height / 2;
+  boxSize.H = Height / 2;
   Logger->SetSize(boxSize);
-  Logger->SetText("", FontMain);
+  Logger->SetText("LOG");
 #endif
 
   return true;
@@ -129,7 +141,7 @@ void Reader::ProcessInput()
           MyBook = new Book();
           MyBook->Open("test");
           PageSource = MyBook->Start();
-          MainText.SetText(PageSource, FontMain);
+          MainText.SetText(PageSource);
         }
         break;
 
@@ -193,18 +205,22 @@ bool Reader::Tick(real DeltaTime)
     } else {
       if (VerbMenu.Visible) {
         if (VerbMenu.GetSelectedKeyword(VerbKeyword)) {
-          VerbMenu.Visible = false;
           ReadBook();
           QuickMenuSource = MyBook->QuickMenu();
-          MainText.SetText(PageSource, FontMain);
-          SideMenu.SetText(QuickMenuSource, FontMain);
+          MainText.SetText(PageSource);
+          SideMenu.SetText(QuickMenuSource);
         }
+        VerbMenu.Visible = false;
+        NounKeyword.clear();
         VerbMenu.Deselect();
       } else if (SideMenu.GetSelectedKeyword(NounKeyword)) {
-        SideMenu.Deselect();
+
       } else if (MainText.GetSelectedKeyword(NounKeyword)) {
-        MainText.Deselect();
+
       }
+
+      SideMenu.Deselect();
+      MainText.Deselect();
 
       if (!NounKeyword.empty()) {
         // we clicked on a keyword, create a menu full of verbs
@@ -213,7 +229,7 @@ bool Reader::Tick(real DeltaTime)
         Rect boxSize(400, 400, Mouse.X, Mouse.Y);
         VerbMenu.Visible = true;
         VerbMenu.SetSize(boxSize);
-        VerbMenu.SetText(VerbsText, FontMain);
+        VerbMenu.SetText(VerbsText);
       }
     }
   }

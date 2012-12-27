@@ -27,7 +27,7 @@ public:
   Reader();
   virtual ~Reader();
 
-  bool Init(int width, int height, int bpp);
+  bool Init(int Width, int Height, int Bpp);
   bool Tick(real DeltaTime);
 
   void RedrawScreen(real DeltaTime);
@@ -43,6 +43,7 @@ public:
   string QuickMenuSource;
 
 private:
+  int BPP;
   bool Quit;
 
   MouseState Mouse;

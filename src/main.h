@@ -59,7 +59,14 @@ extern string GLog;
 #endif
 
 const string STORY_DIR = "data/books/";
+const string FRAMES_DIR = "data/frames/";
 const string KEYWORDS_DIR = "data/cache/keywords/";
+
+const uint32_t MASK_R = 0x000000FF;
+const uint32_t MASK_G = 0x0000FF00;
+const uint32_t MASK_B = 0x00FF0000;
+const uint32_t MASK_A = 0xFF000000;
+const int BLOCK_SIZE = 32;
 
 typedef float real;
 typedef unsigned short int usint;
@@ -106,6 +113,21 @@ typedef struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
   Rect(uint _W, uint _H, uint _X = 0, uint _Y = 0)
     : W(_W), H(_H), X(_X), Y(_Y) { };
+  bool operator!= (const Rect& other) const {
+    return !(*this == other);
+  }
+  bool operator== (const Rect& other) const {
+    return W == other.W && H == other.H && X == other.X && Y == other.Y;
+  }
+  // align size to block size
+  void Blockify() {
+    uint newW = W - (W % BLOCK_SIZE);
+    uint newH = H - (H % BLOCK_SIZE);
+    X += (W - newW) / (uint)2;
+    Y += (H - newH) / (uint)2;
+    W = newW;
+    H = newH;
+  }
   uint W;
   uint H;
   uint X;
