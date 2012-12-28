@@ -7,26 +7,27 @@ The language drives the text adventure by serving text interspersed with
 keywords that are highlighted. The user clicks on the keyword to gain access
 to actions possible on that keyword which when executed serve further text.
 
-Internal logic relies on **noun**s which are represented by keywords in the
-text and **verb**s belonging to that noun that are represented by the possible
-actions. Nouns may contain text values and an integer value. Verbs that define
-available actions may contain instructions and conditions that provide logic
-for the action.
+Internal logic relies on nouns which are represented by keywords in the text and
+verbs belonging to that noun that are represented by the possible actions. Nouns
+may contain text values and an integer value. Verbs that define available
+actions may contain instructions and conditions that provide logic for the
+action.
 
 Logic syntax is enclosed in square `[ ]` brackets. Keyword syntax is enclosed
 in angled `< >` brackets. Whitespace is ignored and may be used for
 indentation to aid readability.
 
-> Comments like these are notes mentioning things that are explained
-> fully in subsequent sections.
+> Comments like this one may mention things that are explained fully in
+> subsequent sections.
 
 ---
 
 ### `Noun Definition ___________________________________________ [<>] [<[]>]`
 
-`[<noun>]` - this delimits noun definitions and needs to start on a new line.
+`[<noun>]` - begin definition of the noun. This delimits noun definitions and
+             needs to start on a new line.
 
-Keywords can't start with numbers (`1noun` would be an illegal name) but may
+Nouns can't start with numbers (`1noun` would be an illegal name) but may
 contain numbers and spaces. Leading and trailing spaces will be ignored. Use
 alphanumeric characters. Nouns need to have unique names.
 
@@ -170,7 +171,7 @@ Then the following statements are all true:
 Order of operations is left to right regardless of type so if you need
 a different order of evaluation you can use parenthesis `( )`.
 
-### `Code blocks _____________________________________________ { } & | [!<<]`
+### `Code Blocks _____________________________________________ { } & | [!<<]`
 
 `{ }` are used for blocks. If no `{ }` are used then the code block is assumed
 to end at the next condition. Implied block of a top level condition
@@ -200,7 +201,7 @@ You can use `&` and `|` to create series of conditions or instructions:
 - `[] & []` - will short circuit, first negative result stops.
 - `[] | []` - will short circuit, first positive result stops.
 
-> (Don't mix `!` and `?` within these series, results are undefined.)
+> Don't mix `!` and `?` within these series, results are undefined.
 
 Execution will continue to the end of the brace and return to the parent block
 unless a break instruction `[!<<]` is encountered.
@@ -211,7 +212,7 @@ unless a break instruction `[!<<]` is encountered.
 
 > Note that a single `<` as in `[!<]` is illegal (and would be pointless).
 
-### `Printing text _______________________________________ \n text <keyword>`
+### `Printing Text _______________________________________ \n text <keyword>`
 
 Text written outside of `[ ]` will be printed to the screen. Text needs to be
 placed under a verb definition.
@@ -243,7 +244,7 @@ you'll have to escape one if you want to use in text.
 All other characters are legal and only treated as special characters
 if within `[ ]`.
 
-### `Special noun names __________________________________________ [<BEGIN>]`
+### `Special Noun Names __________________________________________ [<BEGIN>]`
 
 These nouns are treated differently by the reader (not all are required):
 `BEGIN, PLACE, EXITS, NOUNS, CALLS, QUICK`
@@ -264,7 +265,7 @@ The absolute minimum is: `[<BEGIN> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
 that block.
 
-### `Function calls _________________________________________________ name()`
+### `Function Calls _________________________________________________ name()`
 
 Function calls can also be used wherever a value can be used.
 
