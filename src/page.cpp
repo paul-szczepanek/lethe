@@ -300,18 +300,9 @@ void Page::NewVerb(size_t_pair& TokenPos,
     AddVerb(VerbBlock);
   }
 
-  size_t_pair realPos = FindToken(Text, token::expression,
-                                  TokenPos.X+1, TokenPos.Y);
-
-  // deal with a different visual name [:visual name[name]]
-  if (realPos.Y < TokenPos.Y) {
-    VerbBlock.VisualName = cutString(Text, TokenPos.X+2, realPos.X);
-    VerbBlock.Names.push_back(cutString(Text, realPos.X+1, realPos.Y));
-  } else {
-    string name = cutString(Text, TokenPos.X+2, TokenPos.Y);
-    VerbBlock.VisualName = name;
-    VerbBlock.Names.push_back(name);
-  }
+  const string& name = cutString(Text, TokenPos.X+2, TokenPos.Y);
+  VerbBlock.VisualName = name;
+  VerbBlock.Names.push_back(name);
 
   // add all chained [:verb1][:verb2] into Names
   while (TokenPos.Y+2 < Text.size() &&
@@ -319,14 +310,7 @@ void Page::NewVerb(size_t_pair& TokenPos,
          Text[TokenPos.Y+2] == token::Start[token::scope]) {
     // get the next alias of the verb
     TokenPos = FindToken(Text, token::expression, TokenPos.Y+1);
-    // in case it's got a distinct visual name by mistake
-    realPos = FindToken(Text, token::expression, TokenPos.X+1, TokenPos.Y);
-
-    if (realPos.Y < TokenPos.Y) {
-      VerbBlock.Names.push_back(cutString(Text, realPos.X+1, realPos.Y));
-    } else {
-      VerbBlock.Names.push_back(cutString(Text, TokenPos.X+2, TokenPos.Y));
-    }
+    VerbBlock.Names.push_back(cutString(Text, TokenPos.X+2, TokenPos.Y));
   }
 
   // pop old conditions that no longer apply
