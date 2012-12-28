@@ -84,7 +84,7 @@ typedef struct size_t_pair {
 
 typedef struct string_pair {
   string_pair() { }
-  bool clear() { X.clear(); Y.clear(); }
+  void clear() { X.clear(); Y.clear(); }
   bool empty() { return (X.empty() || Y.empty()); }
   bool full() { return (!X.empty() && !Y.empty()); }
   string X;

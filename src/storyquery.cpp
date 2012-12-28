@@ -85,9 +85,11 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       FunctionArgs.TextValues.clear();
     } else if (func == "Play") {
       for (const string& arg : FunctionArgs.TextValues) {
+        LOG(arg + " - play");
       }
     } else if (func == "Stop") {
       for (const string& arg : FunctionArgs.TextValues) {
+        LOG(arg + " - stop");
       }
     } else if (func == "List") { // print a list of values
       FunctionArgs.IntValue = 0;
@@ -396,14 +398,13 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
     }
 
     const char c = Expression[tokenPos.X+1];
-    token::tokenName op;
+    token::tokenName op = token::add;
 
     if (c == token::Start[token::instruction]) { // [!var=value]
       // check which assignment operation it is
-      op = token::remove;
       size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
       if (opPos.X == string::npos) {
-        op = token::add;
+        op = token::remove;
         opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
         if (opPos.X == string::npos) {
           op = token::assign;
