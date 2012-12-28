@@ -22,7 +22,7 @@ indentation to aid readability.
 
 ---
 
-### Noun Definition ` ___________________________________________ [<>] [<[]>]`
+### `Noun Definition ___________________________________________ [<>] [<[]>]`
 
 `[<noun>]` - this delimits noun definitions and needs to start on a new line.
 
@@ -44,7 +44,7 @@ string gets replaced with the noun string of the noun being defined.
 They are not evaluated and need to be defined before they are used.
 They are essentially macros that get prepended to a noun definition.
 
-### Values ` ________________________________________________________ [<> = ]`
+### `Values ________________________________________________________ [<> = ]`
 
 `[<noun> = value1, value2, #9]` - sets the initial values of the noun.
 
@@ -58,7 +58,7 @@ doesn't count as a regular text value.
 
 > In the initial assignment, you can't force noun evaluations with @.
 
-### Verb Definition ` ___________________________________________________ [:]`
+### `Verb Definition ___________________________________________________ [:]`
 
 Verbs define the actions possible in the keyword menu.
 
@@ -71,7 +71,7 @@ Verbs define the actions possible in the keyword menu.
 You can have multiple verb definitions of the same name. First one with true
 top level condition will activate upon being called.
 
-### Conditions ` ________________________________________________________ [?]`
+### `Conditions ________________________________________________________ [?]`
 
 Value comparisons:
 
@@ -98,7 +98,7 @@ If no comparison is present it will return true if it has any contents.
 Conditions may be placed above verb definitions. They will work by
 hiding the verb if the condition is not met.
 
-### Instructions ` ______________________________________________________ [!]`
+### `Instructions ______________________________________________________ [!]`
 
 `[!b:verb]` - go to and execute `[b:verb]` (then return and continue).
 
@@ -119,9 +119,11 @@ What is on the left side is the name of the noun you want to assign to.
 
 Instructions need to be below a verb definition.
 
-### Evaluation ` ________________________________________________________ @ #`
+### `Evaluation ________________________________________________________ @ #`
 
-#noun evaluates to integer, @noun to string values of the noun.
+Rather than using value literals (numbers and strings) for an instruction or
+condition you can get the values contained in a noun. `#noun` evaluates to the
+integer value and `@noun` to string values of the noun.
 
 - `[!noun = string]` - assign the value string to noun.
 - `[!noun1 = @noun2]` - assign the text values of noun2 to noun1
@@ -146,7 +148,7 @@ You can nest @ evaluations.
 `[!@@noun1:verb]` - will go to noun3:verb, if noun1 has a value called noun2
                     and there is a noun2 that has a value called noun3.
 
-### Arithmetic ` ________________________________________________ ( ) - + * /`
+### `Arithmetic ________________________________________________ ( ) - + * /`
 
 You can do arithmetic operations on numbers with `+ - / * ( )`.
 
@@ -168,7 +170,7 @@ Then the following statements are all true:
 Order of operations is left to right regardless of type so if you need
 a different order of evaluation you can use parenthesis `( )`.
 
-### Code blocks ` _____________________________________________ { } & | [!<<]`
+### `Code blocks _____________________________________________ { } & | [!<<]`
 
 `{ }` are used for blocks. If no `{ }` are used then the code block is assumed
 to end at the next condition. Implied block of a top level condition
@@ -209,7 +211,7 @@ unless a break instruction `[!<<]` is encountered.
 
 > Note that a single `<` as in `[!<]` is illegal (and would be pointless).
 
-### Printing text ` _______________________________________ \n text <keyword>`
+### `Printing text _______________________________________ \n text <keyword>`
 
 Text written outside of `[ ]` will be printed to the screen. Text needs to be
 placed under a verb definition.
@@ -241,7 +243,7 @@ you'll have to escape one if you want to use in text.
 All other characters are legal and only treated as special characters
 if within `[ ]`.
 
-### Special noun names ` __________________________________________ [<BEGIN>]`
+### `Special noun names __________________________________________ [<BEGIN>]`
 
 These nouns are treated differently by the reader (not all are required):
 `BEGIN, PLACE, EXITS, NOUNS, CALLS, QUICK`
@@ -262,7 +264,7 @@ The absolute minimum is: `[<BEGIN> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
 that block.
 
-### Function calls ` _________________________________________________ name()`
+### `Function calls _________________________________________________ name()`
 
 Function calls can also be used wherever a value can be used.
 
@@ -283,7 +285,7 @@ Currently available functions:
 - `Size(noun)` - return number of values of a noun (not counting the integer).
 - `List(noun)` - print a list of text values as keywords: `<v1>, <v2>`.
 
-### Media Assets ` _____________________________________________ [$ = type()]`
+### `Media Assets _____________________________________________ [$ = type()]`
 
 Assets need to be defined before play starts.
 
@@ -301,7 +303,7 @@ Calling Stop on a stopped asset is safe and will do nothing.
 Supported types are:
 
 - `BG(filename)` - background, always to fit the window and behind all else
-- `Image(filename, position x%, position y%, size x%, size y%)
+- `Image(filename, position x%, position y%, size x%, size y%) - image float 
 - `Music(filename)` - sound that loops
 - `Voice(filename)` - sound that plays once and only one voice at a time
 
