@@ -1,5 +1,5 @@
-S.K.I.M.
-========
+SKIM
+====
 Simple Keyword Interaction Markup
 ---------------------------------
 
@@ -239,7 +239,7 @@ Reserved characters that need to be escaped with `\` in text are:
 
 `&` and `|` will work unescaped but will contract whitespace around them
 (changing `R & R` to `R&R`). A combination of two `/` is used for comments so
-you'll have to escape one if you want to use in text.
+you'll have to escape one if you want to use them in text.
 
 All other characters are legal and only treated as special characters
 if within `[ ]`.
@@ -304,7 +304,7 @@ Calling Stop on a stopped asset is safe and will do nothing.
 Supported types are:
 
 - `BG(filename)` - background, always to fit the window and behind all else
-- `Image(filename, position x%, position y%, size x%, size y%) - image float 
+- `Image(filename, position X%, position Y%, width%, height%)` - image float 
 - `Music(filename)` - sound that loops
 - `Voice(filename)` - sound that plays once and only one voice at a time
 
