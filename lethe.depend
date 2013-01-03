@@ -311,7 +311,7 @@
 	"story.h"
 	"session.h"
 
-1356690827 /home/paul/lethe/lethe/src/main.h
+1357240707 /home/paul/lethe/lethe/src/main.h
 	<cstdlib>
 	<iostream>
 	<fstream>
@@ -333,7 +333,7 @@
 1356524012 /home/paul/lethe/lethe/src/tokens.h
 	"main.h"
 
-1356536105 /home/paul/lethe/lethe/src/story.h
+1357240707 /home/paul/lethe/lethe/src/story.h
 	"main.h"
 
 1356096871 /home/paul/lethe/lethe/src/properties.h
@@ -346,21 +346,23 @@
 1346603456 source:/home/paul/lethe/lethe/src/keywordsmap.cpp
 	"keywordsmap.h"
 
-1346603456 /home/paul/lethe/lethe/src/keywordsmap.h
+1357240707 /home/paul/lethe/lethe/src/keywordsmap.h
 
-1356097889 source:/home/paul/lethe/lethe/src/main.cpp
+1357160206 source:/home/paul/lethe/lethe/src/main.cpp
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
 	"main.h"
 	"reader.h"
 
-1356648670 /home/paul/lethe/lethe/src/reader.h
+1357240508 /home/paul/lethe/lethe/src/reader.h
 	"main.h"
 	"textbox.h"
+	"imagebox.h"
+	"layout.h"
 
-1356650358 /home/paul/lethe/lethe/src/textbox.h
-	"main.h"
+1357240707 /home/paul/lethe/lethe/src/textbox.h
+	"windowbox.h"
 
 1356708205 source:/home/paul/lethe/lethe/src/page.cpp
 	"page.h"
@@ -374,9 +376,7 @@
 	"properties.h"
 	"tokens.h"
 
-1356650365 source:/home/paul/lethe/lethe/src/reader.cpp
-	<SDL.h>
-	<SDL_ttf.h>
+1357240844 source:/home/paul/lethe/lethe/src/reader.cpp
 	<SDL_image.h>
 	<SDL_rotozoom.h>
 	"reader.h"
@@ -394,7 +394,7 @@
 	"storyquery.h"
 	"properties.h"
 
-1356651254 source:/home/paul/lethe/lethe/src/textbox.cpp
+1357231390 source:/home/paul/lethe/lethe/src/textbox.cpp
 	<SDL.h>
 	<SDL_ttf.h>
 	<SDL_image.h>
@@ -405,7 +405,7 @@
 1356565632 source:/home/paul/lethe/lethe/src/tokens.cpp
 	"tokens.h"
 
-1356534820 /home/paul/lethe/lethe/src/storyquery.h
+1357240707 /home/paul/lethe/lethe/src/storyquery.h
 	"main.h"
 	"properties.h"
 
@@ -416,4 +416,29 @@
 	"page.h"
 	"story.h"
 	"session.h"
+
+1357230008 /home/paul/lethe/lethe/src/layout.h
+	"main.h"
+
+1357239864 /home/paul/lethe/lethe/src/windowbox.h
+	<SDL.h>
+	<SDL_ttf.h>
+	"main.h"
+
+1357231385 source:/home/paul/lethe/lethe/src/imagebox.cpp
+	"imagebox.h"
+	<SDL_image.h>
+	<SDL_rotozoom.h>
+
+1357170896 /home/paul/lethe/lethe/src/imagebox.h
+	"main.h"
+	"windowbox.h"
+
+1357235544 source:/home/paul/lethe/lethe/src/layout.cpp
+	"layout.h"
+
+1357239864 source:/home/paul/lethe/lethe/src/windowbox.cpp
+	"windowbox.h"
+	<SDL_image.h>
+	<SDL_rotozoom.h>
 

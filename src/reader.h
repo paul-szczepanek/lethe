@@ -3,8 +3,19 @@
 
 #include "main.h"
 #include "textbox.h"
+#include "imagebox.h"
+#include "layout.h"
+
+const size_t NUM_LAYOUTS = 2;
+const real REDRAW_TIMEOUT = 1.0;
 
 class Book;
+
+enum orientation {
+  landscape,
+  portrait,
+  ORIENTATION_MAX
+};
 
 struct MouseState {
   MouseState ()
@@ -24,27 +35,40 @@ struct MouseState {
 class Reader
 {
 public:
-  Reader();
+  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP);
   virtual ~Reader();
 
-  bool Init(int Width, int Height, int Bpp);
+  bool Init();
   bool Tick(real DeltaTime);
 
   void RedrawScreen(real DeltaTime);
   void PrintFPS(real DeltaTime);
-  void DrawPage();
+  void DrawWindows();
   void DrawBackdrop();
 
   void ProcessInput();
 
   bool ReadBook();
 
+  size_t SetLayout(size_t LayoutIndex = NUM_LAYOUTS);
+  size_t FixLayout();
+  Layout& GetCurrentLayout();
+
   string PageSource;
   string QuickMenuSource;
 
 private:
+  bool Quit = false;
+  bool RedrawPending = true;
+
+  orientation CurrentOrientation = landscape;
+  size_t CurrentLayout = 0;
+
+  Layout Layouts[ORIENTATION_MAX][NUM_LAYOUTS];
+
   int BPP;
-  bool Quit;
+  size_t Width;
+  size_t Height;
 
   MouseState Mouse;
 
@@ -56,24 +80,22 @@ private:
 
   Book* MyBook;
 
+  // part of the main layout
+  ImageBox MainImage;
+  TextBox MainText;
+  TextBox QuickMenu;
+  WindowBox MainMenu;
+
+  // popups
   TextBox ChoiceMenu;
   TextBox VerbMenu;
-  TextBox SideMenu;
-  TextBox MainText;
 
   string_pair KeywordAction;
 
-  uint SplitH;
-  uint SplitV;
-
-  bool RedrawPending;
-  float RedrawCountdown;
+  float RedrawCountdown = REDRAW_TIMEOUT;
 
 #ifdef LOGGER
-private:
-  TextBox* Logger;
-public:
-  //static string GLog;
+  TextBox* Logger = NULL;
 #endif
 };
 

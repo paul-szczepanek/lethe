@@ -9,57 +9,6 @@
 const Uint16 RIGHT_MARGIN = BLOCK_SIZE;
 const real DRAG_TIMEOUT = 0.1;
 
-TextBox::~TextBox()
-{
-  ResetPage();
-}
-
-/** @brief Create all the assets required by the text box
-  *
-  * builds the image slice array for the frame building
-  */
-void TextBox::Init(TTF_Font* Font,
-                   const string& Frame,
-                   int Bpp)
-{
-  if (Font) {
-    FontMain = Font;
-  }
-
-  if (!Frame.empty()) {
-    FrameName = Frame;
-  }
-
-  BPP = Bpp;
-
-  ResetPage();
-}
-
-
-/** @brief Set Size of the textbox
-  *
-  * resets the page as well
-  */
-void TextBox::SetSize(Rect& NewSize)
-{
-  NewSize.Blockify();
-  if (Size != NewSize) {
-    Size = NewSize;
-    FrameDst.w = Size.W;
-    FrameDst.h = Size.H;
-    FrameDst.x = Size.X;
-    FrameDst.y = Size.Y;
-    TextClip.w = Size.W - BLOCK_SIZE;
-    TextClip.h = Size.H - BLOCK_SIZE;
-    TextDst.x = Size.X + BLOCK_SIZE / (uint)2;
-    TextDst.y = Size.Y + BLOCK_SIZE / (uint)2;
-    TextDst.w = TextClip.w;
-    TextDst.h = TextClip.h;
-
-    ResetPage();
-  }
-}
-
 /** @brief Set page text
   *
   * resets the cached pages
@@ -72,6 +21,14 @@ void TextBox::SetText(string NewText)
   } else {
     LOG("Font not set in textbox!");
   }
+}
+
+/** @brief free the SDL surfaces
+  */
+void TextBox::Reset()
+{
+  ResetPage();
+  ResetFrame();
 }
 
 /** @brief Reset Page
@@ -91,33 +48,13 @@ void TextBox::ResetPage()
     SDL_FreeSurface(PageTextSurface);
     PageTextSurface = NULL;
   }
-
-  if (FrameSurface) {
-    SDL_FreeSurface(FrameSurface);
-    FrameSurface = NULL;
-  }
-
-  if (FrameDown) {
-    SDL_FreeSurface(FrameDown);
-    FrameDown = NULL;
-  }
-
-  if (FrameUp) {
-    SDL_FreeSurface(FrameUp);
-    FrameUp = NULL;
-  }
-
-  if (FrameIcon) {
-    SDL_FreeSurface(FrameIcon);
-    FrameIcon = NULL;
-  }
 }
 
 /** @brief Draw page onto passed in surface
   */
 void TextBox::Draw(SDL_Surface* Screen)
 {
-  if (Screen) {
+  if (Visible && Screen) {
     SDL_Surface* page = GetPageSurface();
     SDL_Surface* text = GetPageTextSurface();
     DrawFrame(Screen);
@@ -126,128 +63,6 @@ void TextBox::Draw(SDL_Surface* Screen)
       SDL_BlitSurface(text, &TextClip, Screen, &TextDst);
     }
   }
-}
-
-bool TextBox::DrawFrame(SDL_Surface* Screen)
-{
-  // only bother if we have a frame template
-  if (FrameName.empty()) {
-    return false;
-  }
-
-  if (!FrameSurface) {
-    FrameSurface = SDL_CreateRGBSurface(SDL_HWSURFACE, Size.W, Size.H, BPP,
-                                        MASK_R, MASK_G, MASK_B, MASK_A);
-
-    SDL_Surface* spritePage = IMG_Load((FRAMES_DIR+FrameName+".png").c_str());
-
-    if (!spritePage) {
-      LOG(FrameName+" - frame image missing");
-      FrameName.clear();
-      return false;
-    } else if (spritePage->w != BLOCK_SIZE * 4) {
-      //TODO: stretch SpritePage if needed
-      LOG("frame image size incorrect");
-      return false;
-    }
-
-    // sprite image layout
-    // 00C 01M 02E 03C   corner middle edge corner
-    // 04M 05M 06I 07M   middle middle icon middle
-    // 08E 09D 10U 11E   edge    down   up   edge
-    // 12C 13M 14E 15C   corner middle edge corner
-
-    SDL_Rect src = { 0, 0, BLOCK_SIZE, BLOCK_SIZE };
-    SDL_Rect dst = { 0, 0, BLOCK_SIZE, BLOCK_SIZE };
-
-    for (size_t i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
-      for (size_t j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
-        size_t index;
-        if (j == 0) {
-          if (i == 0) {
-            index = 0;
-          } else if (i == colS / 2) {
-            index = 1;
-          } else if (i < colS - 1) {
-            index = 2;
-          } else {
-            index = 3;
-          }
-        } else if (j < rowS - 1) {
-          if (i == 0) {
-            if (j == rowS / 2) {
-              index = 4;
-            } else {
-              index = 8;
-            }
-          } else if (i < colS - 1) {
-            index = 5;
-          } else {
-            if (j == rowS / 2) {
-              index = 7;
-            } else {
-              index = 11;
-            }
-          }
-        } else {
-          if (i == 0) {
-            index = 12;
-          } else if (i == colS / 2) {
-            index = 13;
-          } else if (i < colS - 1) {
-            index = 14;
-          } else {
-            index = 15;
-          }
-        }
-
-        src.x = BLOCK_SIZE * (index % 4);
-        src.y = BLOCK_SIZE * (index / 4);
-        dst.x = BLOCK_SIZE * i;
-        dst.y = BLOCK_SIZE * j;
-        SDL_BlitSurface(spritePage, &src, FrameSurface, &dst);
-      }
-    }
-
-    FrameUp = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
-                                   MASK_R, MASK_G, MASK_B, MASK_A);
-    FrameIcon = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
-                                     MASK_R, MASK_G, MASK_B, MASK_A);
-    FrameDown = SDL_CreateRGBSurface(SDL_HWSURFACE, BLOCK_SIZE, BLOCK_SIZE, BPP,
-                                     MASK_R, MASK_G, MASK_B, MASK_A);
-
-    src.x = BLOCK_SIZE * 2;
-    src.y = BLOCK_SIZE * 2;
-    SDL_BlitSurface(spritePage, &src, FrameUp, 0);
-    src.x = BLOCK_SIZE * 2;
-    src.y = BLOCK_SIZE * 1;
-    SDL_BlitSurface(spritePage, &src, FrameIcon, 0);
-    src.x = BLOCK_SIZE * 1;
-    src.y = BLOCK_SIZE * 2;
-    SDL_BlitSurface(spritePage, &src, FrameDown, 0);
-
-    UpDst = { 0, 0, 0, 0 };
-    UpDst.x = FrameDst.x + FrameDst.w - 2 * BLOCK_SIZE;
-    UpDst.y = FrameDst.y;
-    DownDst = { 0, 0, 0, 0 };
-    DownDst.x = UpDst.x;
-    DownDst.y = FrameDst.y + FrameDst.h - BLOCK_SIZE;
-
-    SDL_FreeSurface(spritePage);
-  }
-
-  if (FrameSurface) {
-    SDL_BlitSurface(FrameSurface, 0, Screen, &FrameDst);
-    if (TextClip.y > 1) {
-      SDL_BlitSurface(FrameUp, 0, Screen, &UpDst);
-    }
-    if ((usint)TextClip.y + 1u + TextClip.h < PageHeight ) {
-      SDL_BlitSurface(FrameDown, 0, Screen, &DownDst);
-    }
-    return true;
-  }
-
-  return false;
 }
 
 /** @brief Get selected keyword
@@ -348,6 +163,9 @@ void TextBox::Scroll()
       }
     }
 
+    ShowUp = (TextClip.y > 1);
+    ShowDown = ((usint)TextClip.y + 1u + TextClip.h < PageHeight);
+
     Pane.PaneScroll = 0;
   }
 }
@@ -363,8 +181,8 @@ uint_pair TextBox::GetMaxSize()
 
   while (newline != string::npos) {
     newline = FindCharacter(Text, '\n', pos);
-    text = cutString(Text, pos, newline+1);
-    text += "M"; // pad with an extra char to avoid text wrapping
+    text = cutString(Text, pos, newline + 1);
+    text += "MW"; // pad to avoid text wrapping
     TTF_SizeText(FontMain, text.c_str(), &width ,&height);
     maxSize.X = max(maxSize.X, (uint)width);
     maxSize.Y += LineHeight;
@@ -387,9 +205,16 @@ bool TextBox::BreakText()
   vector<size_t_pair> keywordPos;
   vector<string> keywordNames;
 
+  TextClip.w = Size.W - BLOCK_SIZE;
+  TextClip.h = Size.H - BLOCK_SIZE;
+  TextDst.x = Size.X + BLOCK_SIZE / (uint)2;
+  TextDst.y = Size.Y + BLOCK_SIZE / (uint)2;
+  TextDst.w = TextClip.w;
+  TextDst.h = TextClip.h;
+
   size_t pos = 0;
   size_t length = Text.size();
-  size_t skip = 0; //characters skipped
+  size_t skip = 0; // characters skipped
 
   string cleaned;
 

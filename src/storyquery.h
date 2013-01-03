@@ -12,7 +12,7 @@ class StoryQuery
 {
 public:
   StoryQuery(Session& _Progress, string& _Text, Story& _StoryDefinition)
-  : Text(_Text), Progress(_Progress), StoryDef(_StoryDefinition)
+    : Text(_Text), Progress(_Progress), StoryDef(_StoryDefinition)
   { };
   virtual ~StoryQuery() { };
 

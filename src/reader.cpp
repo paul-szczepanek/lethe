@@ -1,5 +1,3 @@
-#include <SDL.h>
-#include <SDL_ttf.h>
 #include <SDL_image.h>
 #include <SDL_rotozoom.h>
 
@@ -7,11 +5,13 @@
 #include "book.h"
 #include "keywordsmap.h"
 
-const real REDRAW_TIMEOUT = 1.0;
-
-Reader::Reader() : Quit(false), RedrawPending(true)
+Reader::Reader(int ReaderWidth,
+               int ReaderHeight,
+               int ReaderBPP)
 {
-
+  BPP = ReaderBPP;
+  Width = ReaderWidth;
+  Height = ReaderHeight;
 }
 
 Reader::~Reader()
@@ -35,12 +35,8 @@ Reader::~Reader()
 #endif
 }
 
-bool Reader::Init(int Width,
-                  int Height,
-                  int Bpp)
+bool Reader::Init()
 {
-  BPP = Bpp;
-  // create a new window
   Screen = SDL_SetVideoMode(Width, Height, BPP, SDL_HWSURFACE|SDL_DOUBLEBUF);
 
   if (!Screen) {
@@ -56,7 +52,6 @@ bool Reader::Init(int Width,
     return false;
   }
 
-  // load an image
   Backdrop = IMG_Load("data/default_bg.png");
 
   if (!Backdrop) {
@@ -65,53 +60,65 @@ bool Reader::Init(int Width,
     LOG("default - bg image missing");
   }
 
-  MyBook = new Book();
-  MyBook->Open("test");
+  // load layouts
+
+  // TODO: read from file
+  string layoutStrings[ORIENTATION_MAX][NUM_LAYOUTS] = {
+    {
+      "0132 3111 1111 0 +000",
+      "1032 3311 1111 0 +001"
+    },
+    {
+      "0132 3111 1111 0 -001",
+      "0132 3111 1111 0 -002"
+    }
+  };
+
+  for (size_t i = 0, for_size = ORIENTATION_MAX; i < for_size; ++i) {
+    for (size_t j = 0, for_size = NUM_LAYOUTS; j < for_size; ++j) {
+      Layouts[i][j].Init(layoutStrings[i][j]);
+    }
+  }
+
+  QuickMenu.Init(FontMain, "default", BPP);
+  MainText.Init(FontMain, "default", BPP);
+  MainImage.Init(FontMain, "default", BPP);
+  MainMenu.Init(FontMain, "default", BPP);
+
+  MainMenu.AspectW = 100;
+  MainMenu.AspectH = 2;
+  MainText.AspectW = 4;
+  QuickMenu.AspectW = 4;
+  MainImage.AspectW = 4;
+  MainImage.AspectH = 2;
+
+  SetLayout();
+
+  MainText.Visible = true;
+  QuickMenu.Visible = true;
+  MainMenu.Visible = true;
+  MainImage.Visible = true;
 
   ChoiceMenu.Init(FontMain, "default", BPP);
   VerbMenu.Init(FontMain, "default", BPP);
-  SideMenu.Init(FontMain, "default", BPP);
-  MainText.Init(FontMain, "default", BPP);
 
-  // read layout
-  // TODO: read defaults from file
-  SplitH = Height;
-  SplitV = Height - (Width - Height);
+  // start reading the book TODO: move this to a menu
 
-  // calculate positions of text boxes
-  Rect boxSize;
-  boxSize.W = Width - SplitH;
-  boxSize.H = Height - SplitV;
-  boxSize.X = SplitH;
-  boxSize.Y = SplitV;
-  ChoiceMenu.SetSize(boxSize);
-  boxSize.W = Width - SplitH;
-  boxSize.H = SplitV;
-  boxSize.X = SplitH;
-  boxSize.Y = 0;
-  SideMenu.SetSize(boxSize);
-  boxSize.W = SplitH;
-  boxSize.H = Height/2;
-  boxSize.X = 0;
-  boxSize.Y = 0;
-  MainText.SetSize(boxSize);
+  MyBook = new Book();
+  MyBook->Open("test");
 
   PageSource = MyBook->Start();
   QuickMenuSource = MyBook->QuickMenu();
 
   MainText.SetText(PageSource);
-  MainText.Visible = true;
-  SideMenu.SetText(QuickMenuSource);
-  SideMenu.Visible = true;
+  QuickMenu.SetText(QuickMenuSource);
 
 #ifdef LOGGER
   GLog = "Log";
   Logger = new TextBox();
   Logger->Visible = true;
-  Logger->Init(FontSys, "default", BPP);
-  boxSize.Y += Height / 2;
-  boxSize.H = Height / 2;
-  Logger->SetSize(boxSize);
+  Logger->Init(FontSys, "", BPP);
+  Logger->SetSize(MainImage.Size);
   Logger->SetText("LOG");
 #endif
 
@@ -131,6 +138,14 @@ void Reader::ProcessInput()
         RedrawPending = true;
         if (event.key.keysym.sym == SDLK_ESCAPE) {
           Quit = true;
+        } else if (event.key.keysym.sym == SDLK_LEFTBRACKET) {
+          --(GetCurrentLayout().Split);
+          SetLayout();
+        } else if (event.key.keysym.sym == SDLK_RIGHTBRACKET) {
+          ++(GetCurrentLayout().Split);
+          SetLayout();
+        } else if (event.key.keysym.sym == SDLK_l) {
+          SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
         } else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
           MainText.Pane.PaneScroll = 100;
         } else if (event.key.keysym.sym == SDLK_PAGEUP) {
@@ -192,8 +207,8 @@ bool Reader::Tick(real DeltaTime)
     } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
       VerbMenu.Visible = false;
       KeywordAction.clear();
-    } else if (!SideMenu.Select(Mouse, DeltaTime)) {
-      SideMenu.Deselect();
+    } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
+      QuickMenu.Deselect();
       MainText.Select(Mouse, DeltaTime);
     }
     RedrawPending = true;
@@ -210,13 +225,13 @@ bool Reader::Tick(real DeltaTime)
         VerbMenu.Visible = false;
         KeywordAction.clear();
         VerbMenu.Deselect();
-      } else if (SideMenu.GetSelectedKeyword(KeywordAction.X)) {
+      } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
 
       } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
 
       }
 
-      SideMenu.Deselect();
+      QuickMenu.Deselect();
       MainText.Deselect();
 
       if (!KeywordAction.X.empty()) {
@@ -259,7 +274,7 @@ bool Reader::ReadBook()
 
     QuickMenuSource = MyBook->QuickMenu();
     MainText.SetText(PageSource);
-    SideMenu.SetText(QuickMenuSource);
+    QuickMenu.SetText(QuickMenuSource);
 
     return true;
   }
@@ -271,7 +286,7 @@ void Reader::RedrawScreen(real DeltaTime)
 {
   DrawBackdrop();
 
-  DrawPage();
+  DrawWindows();
 
   PrintFPS(DeltaTime);
 
@@ -318,27 +333,21 @@ void Reader::DrawBackdrop()
   SDL_BlitSurface(Backdrop, 0, Screen, &dstRect);
 }
 
-/** @brief DrawPage
-  *
-  * @todo: document this function
+/** @brief Draw All visible windows on the screen
   */
-void Reader::DrawPage()
+void Reader::DrawWindows()
 {
-  if (MainText.Visible) {
-    MainText.Draw(Screen);
-  }
+  MainText.Draw(Screen);
 
-  if (ChoiceMenu.Visible) {
-    ChoiceMenu.Draw(Screen);
-  }
+  ChoiceMenu.Draw(Screen);
 
-  if (SideMenu.Visible) {
-    SideMenu.Draw(Screen);
-  }
+  QuickMenu.Draw(Screen);
 
-  if (VerbMenu.Visible) {
-    VerbMenu.Draw(Screen);
-  }
+  VerbMenu.Draw(Screen);
+
+  MainMenu.Draw(Screen);
+
+  MainImage.Draw(Screen);
 }
 
 void Reader::PrintFPS(real DeltaTime)
@@ -358,3 +367,174 @@ void Reader::PrintFPS(real DeltaTime)
   SDL_FreeSurface(textSurface);
 }
 
+// Layout
+
+/** @brief Try to fix the layout that failed to fit by evening out the split
+  */
+size_t Reader::FixLayout()
+{
+  Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
+  // can't fit, abort and try a smaller split
+  if (layout.Split < 0) {
+    ++layout.Split;
+    return SetLayout();
+  } else if (layout.Split > 0) {
+    --layout.Split;
+    return SetLayout();
+  } else {
+    LOG("layout impossible on this screen");
+    return CurrentLayout;
+    // TODO: try a fallback
+  }
+}
+
+size_t Reader::SetLayout(size_t LayoutIndex)
+{
+  CurrentOrientation = Width > Height? landscape : portrait;
+
+  if (LayoutIndex < NUM_LAYOUTS) {
+    CurrentLayout = LayoutIndex;
+  }
+
+  Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
+
+  WindowBox* boxes[BOX_TYPE_MAX];
+
+  for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
+    switch (layout.Order[i]) {
+      case boxMain:
+        boxes[i] = &MainText;
+        break;
+      case boxBG:
+        boxes[i] = &MainImage;
+        break;
+      case boxQuick:
+        boxes[i] = &QuickMenu;
+        break;
+      case boxMenu:
+        boxes[i] = &MainMenu;
+        break;
+
+      default:
+        boxes[i] = &MainText;
+        break;
+    }
+  }
+
+  size_t splitH = 0, splitV = 0;
+  Rect boxSize; // we retain certain position data in the loop between boxes
+
+  for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
+    // check if neighbours are on the same side
+    const side pos = layout.Side[i];
+    bool first = (i == 0) || (pos != layout.Side[i-1]);
+    //bool last = (i == for_size-1) || (where != layout.Side[i+1]);
+
+    if (pos == left || (first && (pos == top || pos == bottom))) {
+      boxSize.X = 0;
+    } else if (!first && (pos == right)) {
+      // retain the last X position
+    } else {
+      boxSize.X = splitH;
+    }
+
+    if (pos == top || (first && (pos == left || pos == right))) {
+      boxSize.Y = 0;
+    } else if (!first && (pos == bottom)) {
+      // retain the last Y position
+    } else {
+      boxSize.Y = splitV;
+    }
+
+    if (pos == top || pos == bottom) {
+      // horizontal fill
+      if (Width >= boxSize.X + BLOCK_SIZE * 2) {
+        boxSize.W = Width - boxSize.X;
+      } else {
+        return FixLayout();
+      }
+
+      if (layout.SizeSpan == i && pos == top && first) {
+        // this element determines the size of the split
+        size_t halfH = Height / 2;
+        // make sure the requested split is viable
+        if ((uint)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
+          return FixLayout();
+        }
+        boxSize.H = halfH - (halfH % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
+      } else {
+        // find how much vertical space is left
+        if (first) {
+          if (Height > splitV + BLOCK_SIZE * 2) {
+            boxSize.H = Height - splitV;
+          } else {
+            return FixLayout();
+          }
+        } else {
+          if (splitV > boxSize.Y + BLOCK_SIZE * 2) {
+            boxSize.H = splitV - boxSize.Y;
+          } else {
+            return FixLayout();
+          }
+        }
+      }
+    } else {
+      // vertical fill
+      if (Height >= boxSize.Y + BLOCK_SIZE * 2) {
+        boxSize.H = Height - boxSize.Y;
+      } else {
+        return FixLayout();
+      }
+
+      if (layout.SizeSpan == i && pos == left && first) {
+        // this element determines the size of the split
+        size_t halfW = Width / 2;
+        // make sure the requested split is viable
+        if ((uint)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
+          return FixLayout();
+        }
+        boxSize.W = halfW - (halfW % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
+      } else {
+        // find how much horizontal space is left
+        if (first) {
+          if (Width > splitH + BLOCK_SIZE * 2) {
+            boxSize.W = Width - splitH;
+          } else {
+            return FixLayout();
+          }
+        } else {
+          if (splitH > boxSize.X + BLOCK_SIZE * 2) {
+            boxSize.W = splitH - boxSize.X;
+          } else {
+            return FixLayout();
+          }
+        }
+      }
+    }
+
+    boxes[i]->SetSize(boxSize);
+
+    // resizing is allowed only vertically
+    if (boxSize.W < boxes[i]->Size.W) {
+      return FixLayout();
+    }
+
+    boxSize = boxes[i]->Size;
+
+    splitH = boxSize.X + boxSize.W;
+    splitV = boxSize.Y + boxSize.H;
+  }
+
+#ifdef LOGGER
+  if (Logger) {
+    Logger->SetSize(MainImage.Size);
+  }
+#endif
+
+  return CurrentLayout;
+}
+
+Layout& Reader::GetCurrentLayout()
+{
+  return Layouts[CurrentOrientation][CurrentLayout];
+}

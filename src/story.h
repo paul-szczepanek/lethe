@@ -24,8 +24,8 @@ public:
   inline Page& FindPage(const string& Noun);
 
 private:
-    string PrependPattern(const string& Keyword, const string& PageText,
-                          const string& PatternName, const string& PatternText);
+  string PrependPattern(const string& Keyword, const string& PageText,
+                        const string& PatternName, const string& PatternText);
 
 private:
   map<string, Page*> Pages;

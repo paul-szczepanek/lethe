@@ -45,8 +45,12 @@
 		</Linker>
 		<Unit filename="src/book.cpp" />
 		<Unit filename="src/book.h" />
+		<Unit filename="src/imagebox.cpp" />
+		<Unit filename="src/imagebox.h" />
 		<Unit filename="src/keywordsmap.cpp" />
 		<Unit filename="src/keywordsmap.h" />
+		<Unit filename="src/layout.cpp" />
+		<Unit filename="src/layout.h" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/main.h" />
 		<Unit filename="src/page.cpp" />
@@ -65,6 +69,8 @@
 		<Unit filename="src/textbox.h" />
 		<Unit filename="src/tokens.cpp" />
 		<Unit filename="src/tokens.h" />
+		<Unit filename="src/windowbox.cpp" />
+		<Unit filename="src/windowbox.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />

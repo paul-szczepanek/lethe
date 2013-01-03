@@ -58,9 +58,9 @@ int main (int argc, char** argv)
   atexit(SDL_Quit);
   atexit(TTF_Quit);
 
-  Reader* reader = new Reader();
+  Reader* reader = new Reader(1000, 800, 32);
 
-  if (reader->Init(1000, 800, 32)) {
+  if (reader->Init()) {
     Uint32 lastTime = 0.f;
     real deltaTime = 1.f;
 
