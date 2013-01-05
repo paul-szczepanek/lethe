@@ -5,6 +5,9 @@
 #include "textbox.h"
 #include "imagebox.h"
 #include "layout.h"
+#include "mediamanager.h"
+#include "surface.h"
+#include "font.h"
 
 const size_t NUM_LAYOUTS = 2;
 const real REDRAW_TIMEOUT = 1.0;
@@ -58,29 +61,32 @@ public:
   string QuickMenuSource;
 
 private:
-  bool Quit = false;
-  bool RedrawPending = true;
-
-  orientation CurrentOrientation = landscape;
-  size_t CurrentLayout = 0;
-
-  Layout Layouts[ORIENTATION_MAX][NUM_LAYOUTS];
-
   int BPP;
   size_t Width;
   size_t Height;
+  float RedrawCountdown = REDRAW_TIMEOUT;
+  bool RedrawPending = true;
+  // screen
+  Surface Screen;
+  Surface Backdrop;
 
-  MouseState Mouse;
+  // media
+  MediaManager Media;
+  Font FontMain;
+  Font FontSys;
 
-  SDL_Surface* Screen;
-  SDL_Surface* Backdrop;
-
-  TTF_Font* FontMain;
-  TTF_Font* FontSys;
-
+  // logic
   Book* MyBook;
+  string_pair KeywordAction;
+  MouseState Mouse;
+  bool Quit = false;
 
-  // part of the main layout
+  // layout
+  orientation CurrentOrientation = landscape;
+  size_t CurrentLayout = 0;
+  Layout Layouts[ORIENTATION_MAX][NUM_LAYOUTS];
+
+  // main windows
   ImageBox MainImage;
   TextBox MainText;
   TextBox QuickMenu;
@@ -89,10 +95,6 @@ private:
   // popups
   TextBox ChoiceMenu;
   TextBox VerbMenu;
-
-  string_pair KeywordAction;
-
-  float RedrawCountdown = REDRAW_TIMEOUT;
 
 #ifdef LOGGER
   TextBox* Logger = NULL;

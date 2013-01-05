@@ -302,16 +302,16 @@
 	"properties.h"
 	"tokens.h"
 
-1356651430 source:/home/paul/lethe/lethe/src/book.cpp
+1357312914 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"tokens.h"
 
-1356648645 /home/paul/lethe/lethe/src/book.h
+1357314207 /home/paul/lethe/lethe/src/book.h
 	"main.h"
 	"story.h"
 	"session.h"
 
-1357240707 /home/paul/lethe/lethe/src/main.h
+1357342442 /home/paul/lethe/lethe/src/main.h
 	<cstdlib>
 	<iostream>
 	<fstream>
@@ -330,10 +330,10 @@
 	<cassert>
 	<stack>
 
-1356524012 /home/paul/lethe/lethe/src/tokens.h
+1357342442 /home/paul/lethe/lethe/src/tokens.h
 	"main.h"
 
-1357240707 /home/paul/lethe/lethe/src/story.h
+1357312903 /home/paul/lethe/lethe/src/story.h
 	"main.h"
 
 1356096871 /home/paul/lethe/lethe/src/properties.h
@@ -348,20 +348,23 @@
 
 1357240707 /home/paul/lethe/lethe/src/keywordsmap.h
 
-1357160206 source:/home/paul/lethe/lethe/src/main.cpp
+1357342442 source:/home/paul/lethe/lethe/src/main.cpp
 	<SDL.h>
-	<SDL_ttf.h>
-	<SDL_image.h>
 	"main.h"
 	"reader.h"
+	"surface.h"
+	"font.h"
 
-1357240508 /home/paul/lethe/lethe/src/reader.h
+1357334599 /home/paul/lethe/lethe/src/reader.h
 	"main.h"
 	"textbox.h"
 	"imagebox.h"
 	"layout.h"
+	"mediamanager.h"
+	"surface.h"
+	"font.h"
 
-1357240707 /home/paul/lethe/lethe/src/textbox.h
+1357344813 /home/paul/lethe/lethe/src/textbox.h
 	"windowbox.h"
 
 1356708205 source:/home/paul/lethe/lethe/src/page.cpp
@@ -376,17 +379,15 @@
 	"properties.h"
 	"tokens.h"
 
-1357240844 source:/home/paul/lethe/lethe/src/reader.cpp
-	<SDL_image.h>
-	<SDL_rotozoom.h>
+1357342442 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"book.h"
-	"keywordsmap.h"
+	<SDL.h>
 
 1355841943 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
 
-1356536173 source:/home/paul/lethe/lethe/src/story.cpp
+1357312903 source:/home/paul/lethe/lethe/src/story.cpp
 	"story.h"
 	"page.h"
 	"tokens.h"
@@ -394,22 +395,19 @@
 	"storyquery.h"
 	"properties.h"
 
-1357231390 source:/home/paul/lethe/lethe/src/textbox.cpp
-	<SDL.h>
-	<SDL_ttf.h>
-	<SDL_image.h>
+1357345116 source:/home/paul/lethe/lethe/src/textbox.cpp
 	"textbox.h"
 	"reader.h"
 	"tokens.h"
 
-1356565632 source:/home/paul/lethe/lethe/src/tokens.cpp
+1357342442 source:/home/paul/lethe/lethe/src/tokens.cpp
 	"tokens.h"
 
-1357240707 /home/paul/lethe/lethe/src/storyquery.h
+1357342442 /home/paul/lethe/lethe/src/storyquery.h
 	"main.h"
 	"properties.h"
 
-1356690827 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1357344034 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"properties.h"
@@ -420,25 +418,71 @@
 1357230008 /home/paul/lethe/lethe/src/layout.h
 	"main.h"
 
-1357239864 /home/paul/lethe/lethe/src/windowbox.h
-	<SDL.h>
-	<SDL_ttf.h>
+1357344390 /home/paul/lethe/lethe/src/windowbox.h
 	"main.h"
+	"font.h"
+	"surface.h"
 
-1357231385 source:/home/paul/lethe/lethe/src/imagebox.cpp
+1357342476 source:/home/paul/lethe/lethe/src/imagebox.cpp
 	"imagebox.h"
-	<SDL_image.h>
-	<SDL_rotozoom.h>
 
-1357170896 /home/paul/lethe/lethe/src/imagebox.h
+1357338473 /home/paul/lethe/lethe/src/imagebox.h
 	"main.h"
 	"windowbox.h"
+	"surface.h"
 
 1357235544 source:/home/paul/lethe/lethe/src/layout.cpp
 	"layout.h"
 
-1357239864 source:/home/paul/lethe/lethe/src/windowbox.cpp
+1357344440 source:/home/paul/lethe/lethe/src/windowbox.cpp
 	"windowbox.h"
+
+1357311181 source:/home/paul/lethe/lethe/src/asset.cpp
+	"asset.h"
+
+1357315655 /home/paul/lethe/lethe/src/asset.h
+	"main.h"
+
+1357315655 source:/home/paul/lethe/lethe/src/image.cpp
+	"image.h"
+
+1357340329 /home/paul/lethe/lethe/src/image.h
+	"asset.h"
+	"surface.h"
+
+1357340329 /home/paul/lethe/lethe/src/mediamanager.h
+	"main.h"
+	"surface.h"
+
+1357341539 source:/home/paul/lethe/lethe/src/mediamanager.cpp
+	"mediamanager.h"
+	"tokens.h"
+	"image.h"
+	"sound.h"
+
+1357328874 source:/home/paul/lethe/lethe/src/sound.cpp
+	"sound.h"
+
+1357324712 /home/paul/lethe/lethe/src/sound.h
+	"asset.h"
+
+1357345329 /home/paul/lethe/lethe/src/surface.h
+	"main.h"
+
+1357342226 source:/home/paul/lethe/lethe/src/font.cpp
+	"font.h"
+	<SDL.h>
+	<SDL_ttf.h>
+
+1357340602 /home/paul/lethe/lethe/src/font.h
+	"main.h"
+	<SDL.h>
+
+1357343663 source:/home/paul/lethe/lethe/src/surface.cpp
+	"surface.h"
+	"font.h"
+	<SDL.h>
 	<SDL_image.h>
 	<SDL_rotozoom.h>
+	<SDL_ttf.h>
 

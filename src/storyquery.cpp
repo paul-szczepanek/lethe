@@ -15,8 +15,8 @@
  * \param the resulting text of the story
  * \return how many parents up do we break with [!<<]
  */
-uint StoryQuery::ExecuteBlock(const string& Noun,
-                              const Block& CurBlock)
+size_t StoryQuery::ExecuteBlock(const string& Noun,
+                                const Block& CurBlock)
 {
   const string& expression = CurBlock.Expression;
   const size_t length = expression.size();
@@ -38,7 +38,7 @@ uint StoryQuery::ExecuteBlock(const string& Noun,
     if (c == token::Start[token::instruction]) {
       // this is a [!<<] (this will work for for [!anything<<])
       if (FindTokenStart(expression, token::stop) != string::npos) {
-        const uint breakUp = tokenPos.Y - tokenPos.X - 2;
+        const size_t breakUp = tokenPos.Y - tokenPos.X - 2;
         return breakUp; // this breaks out of n loops above
       } else {
         ExecuteExpression(Noun, expression);
@@ -53,7 +53,7 @@ uint StoryQuery::ExecuteBlock(const string& Noun,
       // if the condition is true, execute all the child blocks
       for (size_t i = 0, forSz = CurBlock.Blocks.size(); i < forSz; ++i) {
         // if [!<<] used to escape parent break from loop
-        uint backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
+        size_t backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
         if (backUp > 0) {
           // so the parent remains unaffected
           return --backUp;

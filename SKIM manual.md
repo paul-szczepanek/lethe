@@ -1,7 +1,7 @@
-SKIM
-====
-Simple Keyword Interaction Markup
----------------------------------
+`S.K.I.M.`
+==========
+Selectable Keyword Interaction Markup
+-------------------------------------
 
 The language drives the text adventure by serving text interspersed with
 keywords that are highlighted. The user clicks on the keyword to gain access
@@ -295,7 +295,8 @@ Assets need to be defined before play starts.
 Asset definitions need to be outside noun definitions and start on a new
 line. No linebreaks are allowed within definitions.
 
-> These are not function calls, and the syntax is different.
+> These are not function calls and the syntax is different. You can't
+> use nouns or arithmetic on values - you need to use commas.
 
 Each needs a unique name and only one instance of each is allowed. Calling
 `Play(asset)` whist the asset is already active will restart the asset.
@@ -306,5 +307,6 @@ Supported types are:
 - `BG(filename)` - background, always to fit the window and behind all else
 - `Image(filename, position X%, position Y%, width%, height%)` - image float 
 - `Music(filename)` - sound that loops
+- `Sound(filename)` - sound that plays once
 - `Voice(filename)` - sound that plays once and only one voice at a time
 

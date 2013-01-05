@@ -22,7 +22,13 @@ public:
   string GetVerbList(const string& Noun);
   bool GetChoice(string_pair& Choice);
 
+  bool AddAssetDefinition(const string& StoryText);
+  inline const vector<string_pair>& GetAssetDefinitions() {
+    return Assets;
+  };
+
 private:
+  vector<string_pair> Assets;
   Session Progress;
   Story StoryDefinition;
 };

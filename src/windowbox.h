@@ -1,28 +1,23 @@
 #ifndef WINDOWBOX_H
 #define WINDOWBOX_H
 
-#include <SDL.h>
-#include <SDL_ttf.h>
 #include "main.h"
-
-class SDL_Surface;
+#include "font.h"
+#include "surface.h"
 
 class WindowBox
 {
 public:
   WindowBox() { };
-  virtual ~WindowBox() {
-    ResetFrame();
-  };
+  virtual ~WindowBox() { };
 
-  void Init(TTF_Font* Font = NULL, const string& Frame = "", int Bpp = 32);
+  void Init(Font& NewFont, const string& Frame = "", int Bpp = 32);
   void SetSize(Rect NewSize);
 
-  virtual void Draw(SDL_Surface* Screen);
-  bool DrawFrame(SDL_Surface* Screen);
-
+  virtual void Draw();
   virtual void Reset();
-  void ResetFrame();
+  bool DrawFrame();
+  bool BuildFrame();
 
 public:
   int BPP;
@@ -35,7 +30,7 @@ public:
   bool ShowDown = false;
   bool ShowIcon = false;
 
-  TTF_Font* FontMain = NULL;
+  Font* FontMain;
 
   size_t AspectW = 0;
   size_t AspectH = 0;
@@ -43,15 +38,14 @@ public:
 private:
   string FrameName;
 
-  SDL_Rect FrameDst;
-  SDL_Rect UpDst;
-  SDL_Rect DownDst;
-  SDL_Rect IconDst;
+  Rect UpDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
+  Rect DownDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
+  Rect IconDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
 
-  SDL_Surface* FrameSurface = NULL;
-  SDL_Surface* FrameDown = NULL;
-  SDL_Surface* FrameUp = NULL;
-  SDL_Surface* FrameIcon = NULL;
+  Surface FrameSurface;
+  Surface FrameDown;
+  Surface FrameUp;
+  Surface FrameIcon;
 };
 
 #endif // WINDOWBOX_H

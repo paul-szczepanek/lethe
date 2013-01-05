@@ -21,28 +21,6 @@ Story::~Story()
   }
 }
 
-/** @brief AddAssetDefinition
-  *
-  * This saves the asset definition which is parsed later by the reader
-  */
-bool Story::AddAssetDefinition(const string& StoryText)
-{
-  string text = CleanWhitespace(StoryText);
-
-  const size_t_pair namePos = FindToken(text, token::expression); // []
-  const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
-                                     namePos.Y);
-  if (namePos.Y == string::npos || defPos == string::npos) {
-    return false;
-  }
-
-  // get the strings [$name=def]
-  string assetName = cutString(text, namePos.X+2, defPos);
-  string assetDefinition = cutString(text, defPos+1, namePos.Y);
-
-  return true;
-}
-
 /** @brief ParseKeywordDefinition
   *
   * this expects a single keyword definition block

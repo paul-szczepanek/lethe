@@ -134,7 +134,7 @@ size_t_pair FindToken(const string& Text,
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  uint type = token::Type[TokenName];
+  size_t type = token::Type[TokenName];
 
   while (pos < End) {
     if (isSpecial(Text, pos, tokenA)) {
@@ -186,7 +186,7 @@ size_t FindTokenStart(const string& Text,
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  uint type = token::Type[TokenName];
+  size_t type = token::Type[TokenName];
 
   while (pos < End) {
     if (isSpecial(Text, pos, tokenA)) {
@@ -238,7 +238,7 @@ size_t FindTokenEnd(const string& Text,
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  uint type = token::Type[TokenName];
+  size_t type = token::Type[TokenName];
 
   while (pos < End) {
     if (isSpecial(Text, pos, tokenA)) {

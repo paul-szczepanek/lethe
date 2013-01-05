@@ -3,26 +3,24 @@
 
 #include "main.h"
 #include "windowbox.h"
+#include "surface.h"
 
 class ImageBox : public WindowBox
 {
 public:
   ImageBox() { };
-  virtual ~ImageBox() {
-    ResetImage();
-  };
+  virtual ~ImageBox() { };
 
   bool SetImage(const string& Image);
 
-  void Draw(SDL_Surface* Screen);
-  void Reset();
+  void Draw();
 
 private:
   void ResetImage();
 
 private:
-  SDL_Rect ImageDst;
-  SDL_Surface* ImageSurface = NULL;
+  Rect Dst;
+  Surface ImageSurface;
 };
 
 #endif // IMAGEBOX_H

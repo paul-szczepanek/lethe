@@ -1,9 +1,6 @@
-#include <SDL_image.h>
-#include <SDL_rotozoom.h>
-
 #include "reader.h"
 #include "book.h"
-#include "keywordsmap.h"
+#include <SDL.h>
 
 Reader::Reader(int ReaderWidth,
                int ReaderHeight,
@@ -16,15 +13,6 @@ Reader::Reader(int ReaderWidth,
 
 Reader::~Reader()
 {
-  if (FontMain) {
-    TTF_CloseFont(FontMain);
-  }
-  if (FontSys) {
-    TTF_CloseFont(FontSys);
-  }
-  if (Backdrop) {
-    SDL_FreeSurface(Backdrop);
-  }
   if (MyBook) {
     delete MyBook;
   }
@@ -37,26 +25,18 @@ Reader::~Reader()
 
 bool Reader::Init()
 {
-  Screen = SDL_SetVideoMode(Width, Height, BPP, SDL_HWSURFACE|SDL_DOUBLEBUF);
-
-  if (!Screen) {
-    std::cout << "Unable to set video: " << SDL_GetError() << std::endl;
+  if (!Screen.InitScreen(Width, Height, BPP)) {
     return false;
   }
 
-  FontSys = TTF_OpenFont("data/font/mono.ttf", 16);
-  FontMain = TTF_OpenFont("data/font/mono.ttf", 20);
-
-  if (!FontSys || !FontMain) {
+  if (!FontSys.Init("data/font/mono.ttf", 16)
+      || !FontMain.Init("data/font/mono.ttf", 20)) {
     std::cout << "Fonts failed to load" << std::endl;
     return false;
   }
 
-  Backdrop = IMG_Load("data/default_bg.png");
-
-  if (!Backdrop) {
-    Backdrop = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height, BPP, MASK_R,
-                                    MASK_G, MASK_B, MASK_A);
+  if (!Backdrop.LoadImage("data/default_bg.png")) {
+    Backdrop.Init(Width, Height);
     LOG("default - bg image missing");
   }
 
@@ -106,6 +86,8 @@ bool Reader::Init()
 
   MyBook = new Book();
   MyBook->Open("test");
+
+  Media.CreateAssets(MyBook->GetAssetDefinitions());
 
   PageSource = MyBook->Start();
   QuickMenuSource = MyBook->QuickMenu();
@@ -243,7 +225,7 @@ bool Reader::Tick(real DeltaTime)
           if (!VerbsText.empty()) {
             VerbMenu.Visible = true;
             VerbMenu.SetText(VerbsText);
-            const uint_pair& maxSize = VerbMenu.GetMaxSize();
+            const size_t_pair& maxSize = VerbMenu.GetMaxSize();
             Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
             VerbMenu.SetSize(boxSize);
           }
@@ -296,12 +278,12 @@ void Reader::RedrawScreen(real DeltaTime)
     GLog = GLog.substr(GLog.size() - maxlog, maxlog);
   }
   Logger->SetText(GLog);
-  Logger->Draw(NULL); // so we can scroll it first
+  Logger->Draw(); // so we can scroll it first
   Logger->Pane.PaneScroll = 10000;
-  Logger->Draw(Screen);
+  Logger->Draw();
 #endif
 
-  SDL_Flip(Screen);
+  Surface::SystemDraw();
 }
 
 /** @brief DrawBackdrop
@@ -312,59 +294,48 @@ void Reader::DrawBackdrop()
 {
   double zoom;
 
-  if (Screen->w > Screen->h) {
-    zoom = (Screen->w) / double(Backdrop->w);
+  if (Screen.W > Screen.H) {
+    zoom = (Screen.W) / double(Backdrop.W);
   } else {
-    zoom = (Screen->h) / double(Backdrop->w);
+    zoom = (Screen.H) / double(Backdrop.W);
   }
 
   if (zoom > 1.01d || zoom < 0.99d) {
-    SDL_Surface* temp = zoomSurface(Backdrop, zoom, zoom, 1);
-    SDL_FreeSurface(Backdrop);
-    Backdrop = temp;
-    SDL_SetAlpha(Backdrop, SDL_SRCALPHA, 32);
+    Backdrop.Zoom(zoom, zoom);
+    Backdrop.SetAlpha(32);
   }
 
-  SDL_Rect dstRect;
-  dstRect.x = (Screen->w - Backdrop->w) / 2;
-  dstRect.y = (Screen->h - Backdrop->h) / 2;
+  Rect dst(Backdrop.W, Backdrop.H,
+           (Screen.W - Backdrop.W) / 2, (Screen.H - Backdrop.H) / 2);
 
-  SDL_FillRect(Screen, 0, SDL_MapRGB(Screen->format, 0, 0, 0));
-  SDL_BlitSurface(Backdrop, 0, Screen, &dstRect);
+  Screen.Blank();
+  Backdrop.Draw(dst);
 }
 
 /** @brief Draw All visible windows on the screen
   */
 void Reader::DrawWindows()
 {
-  MainText.Draw(Screen);
+  MainText.Draw();
 
-  ChoiceMenu.Draw(Screen);
+  ChoiceMenu.Draw();
 
-  QuickMenu.Draw(Screen);
+  QuickMenu.Draw();
 
-  VerbMenu.Draw(Screen);
+  VerbMenu.Draw();
 
-  MainMenu.Draw(Screen);
+  MainMenu.Draw();
 
-  MainImage.Draw(Screen);
+  MainImage.Draw();
 }
 
 void Reader::PrintFPS(real DeltaTime)
 {
   const string& text = realIntoString(1.f / DeltaTime);
-  SDL_Color white;
-  white.r = white.g = white.b = 255;
-
-  SDL_Surface* textSurface = TTF_RenderText_Solid(FontSys, text.c_str(), white);
-  SDL_SetAlpha(textSurface, SDL_SRCALPHA, 128);
-
-  SDL_Rect dstRect;
-  dstRect.x = 10;
-  dstRect.y = 10;
-
-  SDL_BlitSurface(textSurface, 0, Screen, &dstRect);
-  SDL_FreeSurface(textSurface);
+  Surface textSurface;
+  textSurface.CreateText(FontSys, text, 255, 255, 255);
+  textSurface.SetAlpha(128);
+  textSurface.Draw(10, 10);
 }
 
 // Layout
@@ -458,7 +429,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
         // this element determines the size of the split
         size_t halfH = Height / 2;
         // make sure the requested split is viable
-        if ((uint)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
+        if ((size_t)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
           return FixLayout();
         }
         boxSize.H = halfH - (halfH % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
@@ -490,7 +461,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
         // this element determines the size of the split
         size_t halfW = Width / 2;
         // make sure the requested split is viable
-        if ((uint)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
+        if ((size_t)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
           return FixLayout();
         }
         boxSize.W = halfW - (halfW % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;

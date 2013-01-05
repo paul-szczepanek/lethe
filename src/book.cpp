@@ -41,7 +41,7 @@ bool Book::Open(string Title)
         storyText = buffer;
       }
     } else if (FindTokenStart(buffer, token::assetBlockMark) != string::npos) {
-      StoryDefinition.AddAssetDefinition(buffer);
+      AddAssetDefinition(buffer);
     } else if (!storyText.empty()) {
       // we didn't find a keyword, keep adding lines if we already hit one
       storyText += "\n";
@@ -60,6 +60,33 @@ bool Book::Open(string Title)
   // read progress here
   Progress.Name = "FirstRead";
   Progress.BookName = Title;
+
+  return true;
+}
+
+
+/** @brief AddAssetDefinition
+  *
+  * This saves the asset definition which is parsed later by the reader
+  */
+bool Book::AddAssetDefinition(const string& StoryText)
+{
+  string text = CleanWhitespace(StoryText);
+
+  const size_t_pair namePos = FindToken(text, token::expression); // []
+  const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
+                                     namePos.Y);
+  if (namePos.Y == string::npos || defPos == string::npos) {
+    return false;
+  }
+
+  // get the strings [$name=def]
+  string assetName = cutString(text, namePos.X+2, defPos);
+  string assetDefinition = cutString(text, defPos+1, namePos.Y);
+
+  if (!assetName.empty() && !assetDefinition.empty()) {
+    Assets.push_back(string_pair(assetName, assetDefinition));
+  }
 
   return true;
 }

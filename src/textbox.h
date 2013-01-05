@@ -8,7 +8,7 @@ struct PaneState {
     : PaneDragY(0), PaneScroll(0), DragTimeout(0.25),
       PaneDown(false), PaneUp(false) { };
   ~PaneState () { };
-  Uint16 PaneDragY;
+  size_t PaneDragY;
   int PaneScroll;
   real DragTimeout;
   bool PaneDown;
@@ -17,13 +17,10 @@ struct PaneState {
 
 struct KeywordMap {
   KeywordMap(const string& keyName)
-    : Keyword(keyName), X(0), Y(0), W(0), H(0) { };
+    : Keyword(keyName) { };
   ~KeywordMap() { };
   string Keyword;
-  uint X;
-  uint Y;
-  uint W;
-  uint H;
+  Rect Size;
 };
 
 class MouseState;
@@ -32,16 +29,13 @@ class TextBox : public WindowBox
 {
 public:
   TextBox() { };
-  virtual ~TextBox() {
-    ResetPage();
-  };
+  virtual ~TextBox() { };
 
-  uint_pair GetMaxSize();
+  size_t_pair GetMaxSize();
   void SetText(string NewText);
 
-  void Draw(SDL_Surface* Screen);
+  void Draw();
   void Reset();
-  void ResetPage();
 
   bool Select(MouseState& Mouse, real DeltaTime);
   bool Deselect();
@@ -50,25 +44,26 @@ public:
 private:
   void Scroll();
   bool BreakText();
-  SDL_Surface* GetPageSurface();
-  SDL_Surface* GetPageTextSurface();
+  void RefreshPage();
+  void RefreshHighlights();
 
 public:
-  bool PageDirty = false;
+  bool HighlightsDirty = true;
+  bool PageDirty = true;
 
   PaneState Pane;
 
 private:
   string Text;
+  string CleanText;
+  Rect PageSize;
+  Rect PageClip;
 
-  SDL_Surface* PageSurface = NULL;
-  SDL_Surface* PageTextSurface = NULL;
+  Surface Highlights;
+  Surface PageSurface;
 
-  SDL_Rect TextClip;
-  SDL_Rect TextDst;
-
-  uint PageHeight = 0;
-  uint LineHeight = 0;
+  size_t PageHeight = 0;
+  size_t LineHeight = 0;
 
   vector<string> Lines;
   vector<KeywordMap> Keywords;

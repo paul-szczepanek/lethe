@@ -1,11 +1,9 @@
 #include <SDL.h>
-#include <SDL_ttf.h>
-#include <SDL_image.h>
 
 #include "main.h"
 #include "reader.h"
-
-typedef unsigned int uint;
+#include "surface.h"
+#include "font.h"
 
 #ifdef LOGGER
 string GLog;
@@ -38,25 +36,14 @@ int main (int argc, char** argv)
   GLog = "";
 #endif
 
-  // initialize SDL video
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf( "Unable to init SDL: %s\n", SDL_GetError() );
+
+  if (!Surface::SystemInit()) {
     return 1;
   }
 
-  if (TTF_Init() < 0) {
-    printf( "Unable to init TTF: %s\n", SDL_GetError() );
-    return 1;
+  if (!Font::SystemInit()) {
+    return 2;
   }
-
-  if (IMG_Init(IMG_INIT_PNG) < 0) {
-    printf( "Unable to init IMG: %s\n", SDL_GetError() );
-    return 1;
-  }
-
-  // make sure SDL cleans up before exit
-  atexit(SDL_Quit);
-  atexit(TTF_Quit);
 
   Reader* reader = new Reader(1000, 800, 32);
 
@@ -75,3 +62,12 @@ int main (int argc, char** argv)
   return 0;
 }
 
+const char* string_pair::c_str()
+{
+  return (X+Y).c_str();
+}
+
+size_t string_pair::size()
+{
+  return X.size() + Y.size();
+};

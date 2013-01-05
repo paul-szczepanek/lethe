@@ -11,8 +11,8 @@ const size_t NUM_TOKENS_CONDITION = 8;
 const size_t NUM_SPACE_REMOVERS = 4;
 const size_t NUM_EXPRESSION_SPACE_REMOVERS = 18;
 
-const uint isPaired = 0x0001;
-const uint isWide   = 0x0002;
+const size_t isPaired = 0x0001;
+const size_t isWide   = 0x0002;
 
 enum operationName {
   plus,
@@ -157,7 +157,7 @@ const char End[TOKEN_NAME_MAX] = {
   '$'     //assetBlockMark,
 };
 
-const uint Type[TOKEN_NAME_MAX] = {
+const size_t Type[TOKEN_NAME_MAX] = {
   isWide,    //comment,
 
   isPaired,    //keyword,

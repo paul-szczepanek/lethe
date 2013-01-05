@@ -43,16 +43,22 @@
 		<Linker>
 			<Add option="`sdl-config --libs`" />
 		</Linker>
+		<Unit filename="src/asset.cpp" />
+		<Unit filename="src/asset.h" />
 		<Unit filename="src/book.cpp" />
 		<Unit filename="src/book.h" />
+		<Unit filename="src/font.cpp" />
+		<Unit filename="src/font.h" />
+		<Unit filename="src/image.cpp" />
+		<Unit filename="src/image.h" />
 		<Unit filename="src/imagebox.cpp" />
 		<Unit filename="src/imagebox.h" />
-		<Unit filename="src/keywordsmap.cpp" />
-		<Unit filename="src/keywordsmap.h" />
 		<Unit filename="src/layout.cpp" />
 		<Unit filename="src/layout.h" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/main.h" />
+		<Unit filename="src/mediamanager.cpp" />
+		<Unit filename="src/mediamanager.h" />
 		<Unit filename="src/page.cpp" />
 		<Unit filename="src/page.h" />
 		<Unit filename="src/properties.cpp" />
@@ -61,10 +67,14 @@
 		<Unit filename="src/reader.h" />
 		<Unit filename="src/session.cpp" />
 		<Unit filename="src/session.h" />
+		<Unit filename="src/sound.cpp" />
+		<Unit filename="src/sound.h" />
 		<Unit filename="src/story.cpp" />
 		<Unit filename="src/story.h" />
 		<Unit filename="src/storyquery.cpp" />
 		<Unit filename="src/storyquery.h" />
+		<Unit filename="src/surface.cpp" />
+		<Unit filename="src/surface.h" />
 		<Unit filename="src/textbox.cpp" />
 		<Unit filename="src/textbox.h" />
 		<Unit filename="src/tokens.cpp" />

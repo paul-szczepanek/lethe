@@ -62,11 +62,7 @@ const string STORY_DIR = "data/books/";
 const string FRAMES_DIR = "data/frames/";
 const string KEYWORDS_DIR = "data/cache/keywords/";
 
-const uint32_t MASK_R = 0x000000FF;
-const uint32_t MASK_G = 0x0000FF00;
-const uint32_t MASK_B = 0x00FF0000;
-const uint32_t MASK_A = 0xFF000000;
-const int BLOCK_SIZE = 32;
+const size_t BLOCK_SIZE = 32;
 
 typedef float real;
 typedef unsigned short int usint;
@@ -83,20 +79,24 @@ typedef struct size_t_pair {
 } size_t_pair;
 
 typedef struct string_pair {
-  string_pair() { }
+  string_pair(string _X, string _Y) : X(_X), Y(_Y) { };
+  string_pair() { };
   void clear() {
     X.clear();
     Y.clear();
-  }
+  };
   bool empty() {
     return (X.empty() || Y.empty());
-  }
+  };
   bool full() {
     return (!X.empty() && !Y.empty());
-  }
+  };
+  size_t size();
+  const char* c_str();
   string X;
   string Y;
 } string_pair;
+
 typedef struct int_pair {
   int_pair() : X(0), Y(0) { };
   int X;
@@ -126,29 +126,29 @@ typedef struct real_pair {
 
 typedef struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
-  Rect(uint _W, uint _H, uint _X = 0, uint _Y = 0)
+  Rect(size_t _W, size_t _H, size_t _X = 0, size_t _Y = 0)
     : W(_W), H(_H), X(_X), Y(_Y) { };
   bool operator!= (const Rect& other) const {
     return !(*this == other);
-  }
+  };
   bool operator== (const Rect& other) const {
     return W == other.W && H == other.H && X == other.X && Y == other.Y;
-  }
+  };
   // align size to block size
   void Blockify() {
-    W = max(W, 2u*(uint)BLOCK_SIZE);
-    H = max(H, 2u*(uint)BLOCK_SIZE);
-    uint newW = W - (W % BLOCK_SIZE);
-    uint newH = H - (H % BLOCK_SIZE);
-    X += (W - newW) / (uint)2;
-    Y += (H - newH) / (uint)2;
+    W = max(W, 2u*(size_t)BLOCK_SIZE);
+    H = max(H, 2u*(size_t)BLOCK_SIZE);
+    size_t newW = W - (W % BLOCK_SIZE);
+    size_t newH = H - (H % BLOCK_SIZE);
+    X += (W - newW) / (size_t)2;
+    Y += (H - newH) / (size_t)2;
     W = newW;
     H = newH;
-  }
-  uint W;
-  uint H;
-  uint X;
-  uint Y;
+  };
+  size_t W;
+  size_t H;
+  size_t X;
+  size_t Y;
 } Rect;
 
 template <typename T> inline void clamp(T& Value, const T& Min, const T& Max)

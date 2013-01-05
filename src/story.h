@@ -13,7 +13,6 @@ public:
   virtual ~Story();
 
   bool ParseKeywordDefinition(const string& StoryText);
-  bool AddAssetDefinition(const string& StoryText);
 
   string Read(Session& Progress, const string& Noun, const string& VerbName);
   string Start(Session& Progress);
@@ -30,7 +29,6 @@ private:
 private:
   map<string, Page*> Pages;
   map<string, string> Patterns;
-  map<string, string> Assets;
 
   static Page MissingPage;
 };

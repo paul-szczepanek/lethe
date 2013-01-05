@@ -17,7 +17,7 @@ public:
   virtual ~StoryQuery() { };
 
   bool ExecuteExpression(const string& Noun, const string& Expression);
-  uint ExecuteBlock(const string& Noun, const Block& CurBlock);
+  size_t ExecuteBlock(const string& Noun, const Block& CurBlock);
 
 private:
   bool EvaluateExpression(Properties& Result, const string& Expression,
