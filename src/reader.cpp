@@ -248,15 +248,22 @@ bool Reader::Tick(real DeltaTime)
   */
 bool Reader::ReadBook()
 {
-  // clear out old keywords
-  // PageSource;
   if (KeywordAction.full()) {
-    PageSource += MyBook->Read(KeywordAction);
-    KeywordAction.clear();
+    // this is how far into the text the valid keywords get checked
+    MainText.ValidateKeywords = PageSource.size();
 
+    // get new text
+    PageSource += MyBook->Read(KeywordAction);
     QuickMenuSource = MyBook->QuickMenu();
+
+    // clear out old keywords
+    MainText.ValidKeywords.Reset();
+    MyBook->GetNouns(MainText.ValidKeywords);
+
     MainText.SetText(PageSource);
     QuickMenu.SetText(QuickMenuSource);
+
+    KeywordAction.clear();
 
     return true;
   }

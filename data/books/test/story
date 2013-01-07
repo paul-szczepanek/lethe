@@ -2,9 +2,9 @@
 
 [<BEGIN> = your room:go]
 [<PLACE>] // we start nowhere
-[<EXITS> = your room] //assign default value so we can enter our starting room
-[<NOUNS>]
-[<QUICK> = self:visible, self:list]
+[<EXITS> = your room] // assign default value so we can enter our starting room
+[<NOUNS>] // these are the nouns that stay highlighted in old text
+[<QUICK> = self:visible, self:list] // these get executed to print the quickmenu
 [<CALLS>]
 
 //******************** background setting **************************************
@@ -37,7 +37,7 @@
   [:visible]
     [!List(PLACE)] // show the keyword for the location we are in
     \nObjects:\n
-    [!List(@PLACE)] // and all the things that are there
+    [!List(NOUNS)] // and all the things that are there
 
 // These patterns are defined per story.
 // This way you can define the game to work like a regular IF with places and
@@ -53,7 +53,7 @@
     // these instruction get executed when room:go gets called,
     [!EXITS=] // this one clears exits
     [!PLACE=room] // change location to the room we're entering
-    [!nouns]
+    [!NOUNS=@room] // active nouns are listed in locations in this story
     [!:look] // look at the room we're in now
 }
 
@@ -69,6 +69,7 @@
 [?@@PLACE+=item] { // if the item is the location we are in
   [:take]
     [!@PLACE-=item]
+    [!NOUNS-=item]
     [!self+=item]
     Taken.
 
@@ -80,7 +81,7 @@
 
 //******************************************************************************
 
-[<your room[room]> = tea, pen] // noun definition for <your room>,
+[<your room[room]> = tea, pen, door] // noun definition for <your room>,
                                // uses the <room> definition as base
 
 [:look] // because we appended the room definition these are only visible

@@ -302,8 +302,10 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
         // replace the function names with the results
         target.SetValues(operand);
         target.IntValue = operand.IntValue;
+        IsNum = true;
         break;
       case token::evaluate:
+        IsText = true;
         // evaluate all text into noun values, add them up and reuse the value
         for (string text : operand.TextValues) {
           // try to find the Values of this noun, user values first

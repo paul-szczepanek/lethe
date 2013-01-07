@@ -7,6 +7,7 @@
 
 class Story;
 class Session;
+class Properties;
 
 class Book
 {
@@ -20,6 +21,8 @@ public:
   string Start();
   string QuickMenu();
   string GetVerbList(const string& Noun);
+  void GetNouns(Properties& Result);
+
   bool GetChoice(string_pair& Choice);
 
   bool AddAssetDefinition(const string& StoryText);

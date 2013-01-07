@@ -137,7 +137,7 @@ string Story::Start(Session& Progress)
   string pageText;
   StoryQuery query(Progress, pageText, *this);
 
-  query.ExecuteExpression("BEGIN", "[!@BEGIN]");
+  query.ExecuteExpression(BEGIN, BEGIN_CONTENTS);
 
   return query.Text;
 }
@@ -147,7 +147,7 @@ string Story::QuickMenu(Session& Progress)
   string pageText;
   StoryQuery query(Progress, pageText, *this);
 
-  query.ExecuteExpression("QUICK", "[!@QUICK]");
+  query.ExecuteExpression(QUICK, QUICK_CONTENTS);
 
   return query.Text;
 }

@@ -3,6 +3,20 @@
 
 #include "main.h"
 
+const string NOUNS = "NOUNS";
+const string PLACE = "PLACE";
+const string EXITS = "EXITS";
+const string CALLS = "CALLS";
+const string QUICK = "QUICK";
+const string BEGIN = "BEGIN";
+
+const string NOUNS_CONTENTS = "[!@NOUNS]";
+const string PLACE_CONTENTS = "[!@PLACE]";
+const string EXITS_CONTENTS = "[!@EXITS]";
+const string CALLS_CONTENTS = "[!@CALLS]";
+const string QUICK_CONTENTS = "[!@QUICK]";
+const string BEGIN_CONTENTS = "[!@BEGIN]";
+
 namespace token
 {
 

@@ -26,6 +26,8 @@ public:
 
   bool IsEquivalent(const Properties& Value) const;
 
+  inline void Reset();
+
 public:
   lint IntValue;
   // not using set as the number of values will usually be 1
@@ -106,6 +108,14 @@ bool Properties::SetValue(const string& Value)
   TextValues.clear();
 
   return AddValue(Value);
+}
+
+/** @brief removes values and set int to 0
+  */
+void Properties::Reset()
+{
+  IntValue = 0;
+  TextValues.clear();
 }
 
 #endif // PROPERTIES_H

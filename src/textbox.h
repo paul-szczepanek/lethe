@@ -2,6 +2,7 @@
 #define TEXTBOX_H
 
 #include "windowbox.h"
+#include "properties.h"
 
 struct PaneState {
   PaneState ()
@@ -52,6 +53,9 @@ public:
   bool PageDirty = true;
 
   PaneState Pane;
+
+  size_t ValidateKeywords = 0; // how far to check the text keywords
+  Properties ValidKeywords;
 
 private:
   string Text;

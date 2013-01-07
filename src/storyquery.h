@@ -18,13 +18,13 @@ public:
 
   bool ExecuteExpression(const string& Noun, const string& Expression);
   size_t ExecuteBlock(const string& Noun, const Block& CurBlock);
+  bool GetUserValues(const string& Noun, Properties& Result);
+  bool GetUserInteger(const string& Noun, Properties& Result);
 
 private:
   bool EvaluateExpression(Properties& Result, const string& Expression,
                           bool& IsNum, bool& IsText);
   bool ExecuteFunction(const Properties& FunctionName, Properties& FunctionArgs);
-  bool GetUserInteger(const string& Noun, Properties& Result);
-  bool GetUserValues(const string& Noun, Properties& Result);
 
 public:
   string& Text;

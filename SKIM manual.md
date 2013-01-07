@@ -49,7 +49,8 @@ They are essentially macros that get prepended to a noun definition.
 
 `[<noun> = value1, value2, #9]` - sets the initial values of the noun.
 
-Prepend integers with #. If no # is used then the number is treated as text.
+Prepend integers with `#`. If no `#` is used then the number is treated as
+text.
 
 There can only ever be one integer value. `[<noun> = #1, #7, #8]` will set the
 integer value to 8.
@@ -90,7 +91,7 @@ values that the noun currently being defined contains.
 
 These will try to compare the integer value of a:
 
-`[?#a = #4] [?#a <= #5] [?#a >= #2] [?#a < #4] [?#a > #8]`
+`[?#a = #4]` `[?#a <= #5]` `[?#a >= #2]` `[?#a < #4]` `[?#a > #8]`
 
 If no comparison is present it will return true if it has any contents.
 
@@ -131,7 +132,7 @@ integer value and `@noun` to string values of the noun.
 - `[!noun1 = #noun2]` - assign the integer value of noun1 the integer value
                         of noun2.
 
-> If letters follow # than rather than a integer literal it's assumed that 
+> If letters follow `#` than rather than a integer literal it's assumed that
 > what follows is a noun name (nouns can't start with digits).
 
 Numbers are handled wholly separate so if you wanted to copy both strings
@@ -249,17 +250,22 @@ if within `[ ]`.
 These nouns are treated differently by the reader (not all are required):
 `BEGIN, PLACE, EXITS, NOUNS, CALLS, QUICK`
 
-- `[<BEGIN>]` - how the story starts, expects noun:verb (this is essential).
+These nouns expect string values of noun:verb that point to valid verbs to execute:
+
+- `[<BEGIN>]` - how the story starts (this is essential).
+- `[<CALLS>]` - all values get executed every turn as instructions.
+- `[<QUICK>]` - like CALLS, executes every turn but is used to print the
+                quick menu. It should not contain logic as it will only
+                get executed if the quickmenu exists in the reader.
+                Values here don't need to be in NOUNS to remain clickable.
+
+These nouns expect strings that match names of other valid nouns.
+
 - `[<PLACE>]` - where we are.
 - `[<EXITS>]` - where we can go.
 - `[<NOUNS>]` - a noun must be here to remain clickable in the main pane.
                 Text from the previous action will lose keywords unless they
                 are here.
-- `[<QUICK>]` - expects values of noun:verb that will print the quick menu.
-                Values here don't need to be in NOUNS to remain clickable.
-- `[<CALLS>]` - expects values of noun:verb, all values get executed every
-                turn as instructions.
-
 
 The absolute minimum is: `[<BEGIN> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
@@ -304,9 +310,12 @@ Calling Stop on a stopped asset is safe and will do nothing.
 
 Supported types are:
 
-- `BG(filename)` - background, always to fit the window and behind all else
-- `Image(filename, position X%, position Y%, width%, height%)` - image float 
-- `Music(filename)` - sound that loops
-- `Sound(filename)` - sound that plays once
-- `Voice(filename)` - sound that plays once and only one voice at a time
+- `BG(filename)` - background, always to fit the window and behind all else.
+- `Image(filename, X, Y, zoom)` - image float centered at (X, Y) where 0 is in
+                                  the centre and (-1, -1) is the upper left
+                                  corner. Zoom is relative to the background
+                                  so 1 will match its zoom.
+- `Music(filename)` - sound that loops.
+- `Sound(filename)` - sound that plays once.
+- `Voice(filename)` - sound that plays once and only one voice at a time.
 

@@ -194,6 +194,7 @@ bool TextBox::BreakText()
   size_t skip = 0; // characters skipped
 
   string cleaned;
+  string realName;
 
   // record keywords and their positions and remove syntax symbols
   while(pos < length) {
@@ -213,10 +214,20 @@ bool TextBox::BreakText()
 
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
-      keywordNames.push_back(cutString(Text, realNamePos.X+1, realNamePos.Y));
+      realName = cutString(Text, realNamePos.X+1, realNamePos.Y);
       namePos.Y = realNamePos.X;
     } else {
-      keywordNames.push_back(cutString(Text, namePos.X+1, namePos.Y));
+      realName = cutString(Text, namePos.X+1, namePos.Y);
+    }
+
+    // check keywords found in a position lower than set threshold to see
+    // if they're still valid
+    bool validKeyword = (pos < ValidateKeywords) ?
+                        ValidKeywords.ContainsValue(realName)
+                        : true;
+
+    if (validKeyword) {
+      keywordNames.push_back(realName);
     }
 
     // copy the keyword
@@ -230,7 +241,9 @@ bool TextBox::BreakText()
     }
     ++skip; // +1 for closing >
 
-    keywordPos.push_back(namePos);
+    if (validKeyword) {
+      keywordPos.push_back(namePos);
+    }
   }
 
   // add remaining characters after the last keyword

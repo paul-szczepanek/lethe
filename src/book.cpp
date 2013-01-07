@@ -1,4 +1,5 @@
 #include "book.h"
+#include "page.h"
 #include "tokens.h"
 
 /** @brief Open book of agiven title
@@ -61,6 +62,13 @@ bool Book::Open(string Title)
   Progress.Name = "FirstRead";
   Progress.BookName = Title;
 
+  // initialise reserved keywords
+  Progress.UserValues[NOUNS] = StoryDefinition.FindPage(NOUNS).PageValues;
+  Progress.UserValues[EXITS] = StoryDefinition.FindPage(EXITS).PageValues;
+  Progress.UserValues[PLACE] = StoryDefinition.FindPage(PLACE).PageValues;
+  Progress.UserValues[CALLS] = StoryDefinition.FindPage(CALLS).PageValues;
+  // we don't need BEGIN since it never changes
+
   return true;
 }
 
@@ -90,6 +98,18 @@ bool Book::AddAssetDefinition(const string& StoryText)
 
   return true;
 }
+
+/** @brief ValidateKeywords
+  *
+  * @todo: document this function
+  */
+void Book::GetNouns(Properties& Result)
+{
+  Progress.GetUserValues(PLACE, Result);
+  Progress.GetUserValues(EXITS, Result);
+  Progress.GetUserValues(NOUNS, Result);
+}
+
 
 /** @brief Get list of verbs of the noun
   *
