@@ -153,21 +153,21 @@ size_t_pair TextBox::GetMaxSize()
   size_t_pair maxSize;
   size_t lineSkip = FontMain->GetLineSkip();
   string text;
-  size_t newline = 0, pos = 0;
+  size_t newline = 0;
+  size_t pos = 0;
 
   LineHeight = FontMain->GetHeight() + lineSkip;
 
   while (newline != string::npos) {
     newline = FindCharacter(Text, '\n', pos);
-    text = cutString(Text, pos, newline + 1);
-    text += "MW"; // pad to avoid text wrapping
+    text = cutString(Text, pos, newline);
     maxSize.X = max(maxSize.X, FontMain->GetWidth(text));
     maxSize.Y += LineHeight;
     pos = newline;
     ++pos;
   }
 
-  maxSize.X += BLOCK_SIZE;
+  maxSize.X += BLOCK_SIZE * 1.5;
   maxSize.Y += BLOCK_SIZE + lineSkip;
 
   return maxSize;

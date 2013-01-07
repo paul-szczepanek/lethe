@@ -64,7 +64,7 @@ int main (int argc, char** argv)
 
 const char* string_pair::c_str()
 {
-  return (X+Y).c_str();
+  return (X + ", " + Y).c_str();
 }
 
 size_t string_pair::size()

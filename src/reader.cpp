@@ -316,17 +316,14 @@ void Reader::DrawBackdrop()
   */
 void Reader::DrawWindows()
 {
-  MainText.Draw();
-
-  ChoiceMenu.Draw();
-
-  QuickMenu.Draw();
-
-  VerbMenu.Draw();
-
-  MainMenu.Draw();
-
+  // main layout
   MainImage.Draw();
+  MainText.Draw();
+  QuickMenu.Draw();
+  MainMenu.Draw();
+  // popups
+  VerbMenu.Draw();
+  ChoiceMenu.Draw();
 }
 
 void Reader::PrintFPS(real DeltaTime)
