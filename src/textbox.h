@@ -59,7 +59,6 @@ public:
 
 private:
   string Text;
-  string CleanText;
   Rect PageSize;
   Rect PageClip;
 

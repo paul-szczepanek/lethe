@@ -220,11 +220,11 @@ bool TextBox::BreakText()
       realName = cutString(Text, namePos.X+1, namePos.Y);
     }
 
-    // check keywords found in a position lower than set threshold to see
+    // check keywords found in a position earlier than set threshold to see
     // if they're still valid
-    bool validKeyword = (pos < ValidateKeywords) ?
-                        ValidKeywords.ContainsValue(realName)
-                        : true;
+    const bool validKeyword = (pos < ValidateKeywords) ?
+                              ValidKeywords.ContainsValue(realName)
+                              : true;
 
     if (validKeyword) {
       keywordNames.push_back(realName);
@@ -251,20 +251,16 @@ bool TextBox::BreakText()
     cleaned += cutString(Text, pos);
   }
 
-  CleanText.swap(cleaned);
-  cleaned = CleanText;
-
-  length = CleanText.size();
-  pos = 0;
-  skip = 0;
+  length = cleaned.size();
+  skip = pos = 0;
 
   // remove escape characters
   while(pos < length) {
-    const char c = CleanText[pos];
+    const char c = cleaned[pos];
     if (c == '\\') {
       ++skip;
       if (++pos < length) {
-        cleaned[pos - skip] = CleanText[pos];
+        cleaned[pos - skip] = cleaned[pos];
       }
       // fix the  keyword positions that are beyond this pos
       for (size_t i = 0, for_size = keywordPos.size(); i < for_size; ++i) {
@@ -276,13 +272,13 @@ bool TextBox::BreakText()
         }
       }
     } else {
-      cleaned[pos] = c;
+      cleaned[pos - skip] = c;
     }
     ++pos;
   }
 
   if (skip > 0) {
-    CleanText = cutString(cleaned, 0, length - skip);
+    cleaned = cutString(cleaned, 0, length - skip);
   }
 
   Lines.clear();
@@ -294,7 +290,7 @@ bool TextBox::BreakText()
   size_t lastPos = 0;
   bool firstWord = true;
 
-  length = CleanText.size();
+  length = cleaned.size();
   pos = 0;
 
   // break the text into lines that fit within the textbox width
@@ -302,7 +298,7 @@ bool TextBox::BreakText()
     bool flush = false;
 
     //find space
-    size_t space = CleanText.find(' ', pos);
+    size_t space = cleaned.find(' ', pos);
     // if end of text
     if (space == string::npos) {
       space = length;
@@ -310,7 +306,7 @@ bool TextBox::BreakText()
     }
 
     // find newline
-    size_t newline = CleanText.find('\n', pos);
+    size_t newline = cleaned.find('\n', pos);
     if (newline == string::npos) {
       newline = length;
     }
@@ -328,7 +324,7 @@ bool TextBox::BreakText()
     ++pos;
 
     // test print the line
-    string line = cutString(CleanText, lastLineEnd, pos);
+    string line = cutString(cleaned, lastLineEnd, pos);
 
     // did we fit in?
     if (FontMain->GetWidth(line) < PageClip.W || firstWord) {
@@ -337,7 +333,7 @@ bool TextBox::BreakText()
       // overflow, revert to last position and print that
       flush = true;
       pos = lastPos; // include the character so the sizes match
-      line = cutString(CleanText, lastLineEnd, pos);
+      line = cutString(cleaned, lastLineEnd, pos);
     }
 
     firstWord = false;
@@ -376,13 +372,13 @@ bool TextBox::BreakText()
 
         // find where the keyword starts
         if (beg) {
-          const string& keywordStart = cutString(CleanText, 0, beg);
+          const string& keywordStart = cutString(cleaned, 0, beg);
           newKey.Size.X = FontMain->GetWidth(keywordStart);
         }
         newKey.Size.Y = PageHeight;
 
         // find where the keyword ends
-        const string& keywordEnd = cutString(CleanText, beg, end);
+        const string& keywordEnd = cutString(cleaned, beg, end);
         newKey.Size.W = FontMain->GetWidth(keywordEnd);
         newKey.Size.H = fontHeight;
 
