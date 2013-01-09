@@ -1,7 +1,7 @@
 #include "reader.h"
 #include "book.h"
 #include "mediamanager.h"
-#include <SDL.h>
+#include "audio.h"
 
 const string FRAME_SOLID = "solid";
 const string FRAME_TEXT = "text";
@@ -36,6 +36,10 @@ bool Reader::Init()
     return false;
   }
 
+  if (!Audio::SystemInit()) {
+    return false;
+  }
+
   if (!Screen.InitScreen(Width, Height, BPP)) {
     return false;
   }
@@ -50,9 +54,8 @@ bool Reader::Init()
     return false;
   }
 
-  if (!Backdrop.LoadImage("data/default_bg.png")) {
+  if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
-    LOG("default - bg image missing");
   }
 
   // load layouts

@@ -2,6 +2,7 @@
 #define SOUND_H
 
 #include "asset.h"
+#include "audio.h"
 
 class Sound : public Asset
 {
@@ -14,6 +15,10 @@ public:
   virtual bool Tick(real DeltaTime);
 
 private:
+  real Volume;
+  Audio SoundAudio;
+  real Time;
+  bool Loop = false;
 };
 
 #endif // SOUND_H

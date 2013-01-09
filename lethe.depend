@@ -382,11 +382,11 @@
 	"properties.h"
 	"tokens.h"
 
-1357688844 source:/home/paul/lethe/lethe/src/reader.cpp
+1357753062 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"book.h"
 	"mediamanager.h"
-	<SDL.h>
+	"audio.h"
 
 1357676247 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
@@ -444,34 +444,37 @@
 1357311181 source:/home/paul/lethe/lethe/src/asset.cpp
 	"asset.h"
 
-1357685855 /home/paul/lethe/lethe/src/asset.h
+1357753321 /home/paul/lethe/lethe/src/asset.h
 	"main.h"
 
-1357689620 source:/home/paul/lethe/lethe/src/image.cpp
+1357752841 source:/home/paul/lethe/lethe/src/image.cpp
 	"image.h"
 	"tokens.h"
 	"mediamanager.h"
 
-1357688509 /home/paul/lethe/lethe/src/image.h
+1357753147 /home/paul/lethe/lethe/src/image.h
 	"asset.h"
 	"surface.h"
 
-1357688896 /home/paul/lethe/lethe/src/mediamanager.h
+1357752894 /home/paul/lethe/lethe/src/mediamanager.h
 	"main.h"
 	"surface.h"
 
-1357689620 source:/home/paul/lethe/lethe/src/mediamanager.cpp
+1357773161 source:/home/paul/lethe/lethe/src/mediamanager.cpp
 	"mediamanager.h"
 	"tokens.h"
 	"image.h"
 	"sound.h"
 	"book.h"
 
-1357689082 source:/home/paul/lethe/lethe/src/sound.cpp
+1357773613 source:/home/paul/lethe/lethe/src/sound.cpp
 	"sound.h"
+	"tokens.h"
+	"mediamanager.h"
 
-1357684699 /home/paul/lethe/lethe/src/sound.h
+1357772568 /home/paul/lethe/lethe/src/sound.h
 	"asset.h"
+	"audio.h"
 
 1357688268 /home/paul/lethe/lethe/src/surface.h
 	"main.h"
@@ -485,11 +488,31 @@
 	"main.h"
 	<SDL.h>
 
-1357689676 source:/home/paul/lethe/lethe/src/surface.cpp
+1357750713 source:/home/paul/lethe/lethe/src/surface.cpp
 	"surface.h"
 	"font.h"
 	<SDL.h>
 	<SDL_image.h>
 	<SDL_rotozoom.h>
 	<SDL_ttf.h>
+
+1357773512 source:/home/paul/lethe/lethe/src/audio.cpp
+	"audio.h"
+	<SDL.h>
+	<SDL_mixer.h>
+
+1357773503 /home/paul/lethe/lethe/src/audio.h
+	"main.h"
+
+1348410805 /usr/include/SDL/SDL_mixer.h
+	"SDL_types.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
+
+1340285254 /usr/include/SDL/SDL_types.h
+	"SDL_stdinc.h"
 

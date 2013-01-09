@@ -4,8 +4,9 @@
 #include "main.h"
 #include "surface.h"
 
-class Asset;
 class Book;
+class Sound;
+class Image;
 
 class MediaManager
 {
@@ -28,7 +29,8 @@ public:
   string AssetDir;
 
 private:
-  vector<Asset*> Assets;
+  vector<Image*> Images;
+  vector<Sound*> Sounds;
 
 };
 

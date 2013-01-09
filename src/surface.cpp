@@ -77,9 +77,7 @@ Surface::Surface(size_t Width, size_t Height)
 
 Surface::~Surface()
 {
-  if (SDLSurface) {
-    SDL_FreeSurface(SDLSurface);
-  }
+  Unload();
 }
 
 /** @brief Screen
@@ -93,9 +91,7 @@ bool Surface::InitScreen(size_t ScreenWidth,
   ScreenW = W = ScreenWidth;
   ScreenH = H = ScreenHeight;
 
-  if (SDLSurface) {
-    SDL_FreeSurface(SDLSurface);
-  }
+  Unload();
 
   BPP = ScreenBPP;
   SDLSurface = SDL_SetVideoMode(ScreenWidth, ScreenHeight, BPP,
@@ -116,9 +112,7 @@ bool Surface::InitScreen(size_t ScreenWidth,
   */
 bool Surface::LoadImage(const string& Filename)
 {
-  if (SDLSurface) {
-    SDL_FreeSurface(SDLSurface);
-  }
+  Unload();
 
   SDLSurface = IMG_Load(Filename.c_str());
   if (!SDLSurface) {
@@ -144,13 +138,10 @@ bool Surface::Init()
 bool Surface::Init(size_t Width,
                    size_t Height)
 {
-  if (SDLSurface) {
-    SDL_FreeSurface(SDLSurface);
-  }
+  Unload();
 
   SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height,
                                     BPP, MASK_R, MASK_G, MASK_B, MASK_A);
-
   return OnInit();
 }
 
@@ -306,6 +297,7 @@ bool Surface::Unload()
 {
   if (SDLSurface) {
     SDL_FreeSurface(SDLSurface);
+    SDLSurface = NULL;
     return true;
   }
   return false;
@@ -380,9 +372,7 @@ bool Surface::CreateText(const Font& TextFont,
                          usint G,
                          usint B)
 {
-  if (SDLSurface) {
-    SDL_FreeSurface(SDLSurface);
-  }
+  Unload();
 
   SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
 

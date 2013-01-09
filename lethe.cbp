@@ -45,6 +45,8 @@
 		</Linker>
 		<Unit filename="src/asset.cpp" />
 		<Unit filename="src/asset.h" />
+		<Unit filename="src/audio.cpp" />
+		<Unit filename="src/audio.h" />
 		<Unit filename="src/book.cpp" />
 		<Unit filename="src/book.h" />
 		<Unit filename="src/font.cpp" />
@@ -82,7 +84,9 @@
 		<Unit filename="src/windowbox.cpp" />
 		<Unit filename="src/windowbox.h" />
 		<Extensions>
-			<code_completion />
+			<code_completion>
+				<search_path add="src" />
+			</code_completion>
 			<envvars />
 			<debugger />
 			<lib_finder disable_auto="1">
@@ -91,6 +95,7 @@
 				<lib name="SDL_gfx" />
 				<lib name="SDL_image" />
 				<lib name="SDL_stretch" />
+				<lib name="SDL_mixer" />
 			</lib_finder>
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />

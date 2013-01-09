@@ -73,6 +73,19 @@ bool Image::Play()
   return false;
 }
 
+/** @brief Play
+  *
+  * @todo: document this function
+  */
+bool Image::Draw()
+{
+  if (Playing && Media.Visible) {
+    ImageSurface.Draw(Media.ImageWindow, Size);
+    return true;
+  }
+  return false;
+}
+
 Rect GetCrop(const Rect& Size,
              const Rect& Frame)
 {
@@ -100,9 +113,7 @@ bool Image::Tick(real DeltaTime)
     //  reload if the size of the window chaged
     if (WindowSize != Media.ImageWindowSize) {
       Playing = false;
-      Play();
-    } else {
-      ImageSurface.Draw(Media.ImageWindow, Size);
+      return Play();
     }
   }
   return false;

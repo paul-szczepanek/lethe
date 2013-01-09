@@ -307,9 +307,9 @@ line. No linebreaks are allowed within definitions.
 > order is significant
 
 Each needs a unique name (asset names have their own namespace, separate
-from nouns) and only one instance of each is allowed. Calling
-`Play(asset)` whilst the asset is already active will restart the asset.
-Calling Stop on a stopped asset is safe and will do nothing.
+from nouns) and only one instance of each is allowed. Calling `Play(asset)`
+whilst the asset is already active will do nothing. Calling Stop on a
+stopped asset is safe and will do nothing.
 
 Supported types are:
 

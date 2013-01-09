@@ -6,7 +6,10 @@
 
 MediaManager::~MediaManager()
 {
-  for (auto asset : Assets) {
+  for (auto asset : Images) {
+    delete asset;
+  }
+  for (auto asset : Sounds) {
     delete asset;
   }
 }
@@ -20,27 +23,22 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
     const string& type = cutString(assetDef.Y, 0, funcPos.X);
     const string& arguments = cutString(assetDef.Y, funcPos.X + 1, funcPos.Y);
 
-    Asset* asset = NULL;
-
     if (type == "BG" || type == "Image") {
-      asset = new Image(*this, assetDef.X, arguments);
-    }
-    if (type == "Sound") {
-      asset = new Sound(*this, assetDef.X, arguments);
-    }
-    if (type == "Voice") {
-      asset = new Sound(*this, assetDef.X, arguments);
-
-    }
-
-    if (asset) {
-      auto it = Assets.begin();
-      for (; it < Assets.end(); ++it) {
-        if ((*it)->Priority > asset->Priority) {
-          break;
+      Image* asset = new Image(*this, assetDef.X, arguments);
+      if (asset) {
+        auto it = Images.begin();
+        for (; it < Images.end(); ++it) {
+          if ((*it)->Priority > asset->Priority) {
+            break;
+          }
         }
+        Images.insert(it, asset);
       }
-      Assets.insert(it, asset);
+    }
+
+    if (type == "Sound" || type == "Voice") {
+      Sound* asset = new Sound(*this, assetDef.X, arguments);
+      Sounds.push_back(asset);
     }
   }
 
@@ -55,17 +53,41 @@ bool MediaManager::Tick(real DeltaTime,
                         Book& MyBook)
 {
   bool dirty = false;
-  ImageWindow.Blank(); //todo only draw if needed, separate sounds and images
 
-  for (Asset* asset : Assets) {
+  // first check if any of the images changed
+  for (Image* asset : Images) {
     if (MyBook.GetAssetState(asset->Name)) {
       if (asset->Playing) {
-        asset->Tick(DeltaTime);
+        dirty |= asset->Tick(DeltaTime);
       } else {
-        dirty = asset->Play();
+        dirty |= asset->Play();
       }
     } else if (asset->Playing) {
-      dirty = asset->Stop();
+      dirty |= asset->Stop();
+    }
+  }
+
+  if (dirty) {
+    // images changed so rebuild the image surface
+    ImageWindow.Blank();
+    for (Image* asset : Images) {
+      if (asset->Playing) {
+        asset->Draw();
+      }
+    }
+  }
+
+  for (Sound* asset : Sounds) {
+    if (MyBook.GetAssetState(asset->Name)) {
+      if (asset->Playing) {
+        if (!asset->Tick(DeltaTime)) {
+          MyBook.SetAssetState(asset->Name, false);
+        }
+      } else {
+        asset->Play();
+      }
+    } else if (asset->Playing) {
+      asset->Stop();
     }
   }
 

@@ -14,6 +14,8 @@ public:
   virtual bool Stop();
   virtual bool Tick(real DeltaTime);
 
+  bool Draw();
+
 private:
   Surface ImageSurface;
   Rect Size;
@@ -22,8 +24,6 @@ private:
   real X = 0;
   real Y = 0;
   real Zoom = 1.0;
-
-  string Filename;
 
   bool BG = false;
 };

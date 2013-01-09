@@ -12,20 +12,19 @@
 [$room=BG(room.png)] // this creates an asset of type BG (background)
 [$pen=Image(pen.png, -0.1, 0.5, 1.2)]
 [$musicroom=Music(musicroom.ogg)]
-[$voiceroom=Voice(voiceroom.ogg)]
+[$hello=Sound(hello.wav)]
 
 [<your room media>]
   [:show]
     [!Play(room)]
     [!Play(musicroom)]
-    [!Play(voiceroom)]
+    [!Play(hello)]
     // [!calls+=your room media:autohide] // this gets evaluated each turn
   [:autohide] // and will hide the background if we leave
     [?@PLACE-=your room]
       [!calls-=your room media:autohide]
       [!Stop(room)]
       [!Stop(musicroom)]
-      // [!Stop(voiceroom)] voice is a one off so no need to stop
 
 //******************************************************************************
 
