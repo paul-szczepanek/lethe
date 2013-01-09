@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "textbox.h"
+#include "book.h"
 #include "imagebox.h"
 #include "layout.h"
 #include "mediamanager.h"
@@ -73,10 +74,12 @@ private:
   // media
   MediaManager Media;
   Font FontMain;
+  Font FontSmall;
+  Font FontTitle;
   Font FontSys;
 
   // logic
-  Book* MyBook;
+  Book MyBook;
   string_pair KeywordAction;
   MouseState Mouse;
   bool Quit = false;

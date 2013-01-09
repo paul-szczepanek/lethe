@@ -6,13 +6,22 @@
 #include <SDL_rotozoom.h>
 #include <SDL_ttf.h>
 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+const uint32_t MASK_R = 0xFF000000;
+const uint32_t MASK_G = 0x00FF0000;
+const uint32_t MASK_B = 0x0000FF00;
+const uint32_t MASK_A = 0x000000FF;
+#else
 const uint32_t MASK_R = 0x000000FF;
 const uint32_t MASK_G = 0x0000FF00;
 const uint32_t MASK_B = 0x00FF0000;
 const uint32_t MASK_A = 0xFF000000;
+#endif
 
 SDL_Surface* Surface::Screen = NULL;
 int Surface::BPP = 32;
+size_t Surface::ScreenW = 0;
+size_t Surface::ScreenH = 0;
 
 /** @brief SystemInit
   *
@@ -21,12 +30,12 @@ int Surface::BPP = 32;
 bool Surface::SystemInit()
 {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    printf( "Unable to init SDL: %s\n", SDL_GetError() );
+    std::cout << "Unable to init SDL: " << SDL_GetError() << std::endl;
     return false;
   }
 
   if (IMG_Init(IMG_INIT_PNG) < 0) {
-    printf( "Unable to init IMG: %s\n", SDL_GetError() );
+    std::cout << "Unable to init IMG: " << SDL_GetError() << std::endl;
     return false;
   }
 
@@ -47,7 +56,6 @@ bool Surface::SystemDraw()
   }
   return false;
 }
-
 
 /** @brief Surface
   *
@@ -82,8 +90,8 @@ bool Surface::InitScreen(size_t ScreenWidth,
                          size_t ScreenHeight,
                          int ScreenBPP)
 {
-  W = ScreenWidth;
-  H = ScreenHeight;
+  ScreenW = W = ScreenWidth;
+  ScreenH = H = ScreenHeight;
 
   if (SDLSurface) {
     SDL_FreeSurface(SDLSurface);
@@ -124,6 +132,15 @@ bool Surface::LoadImage(const string& Filename)
   *
   * @todo: document this function
   */
+bool Surface::Init()
+{
+  return Init(ScreenW, ScreenH);
+}
+
+/** @brief Init
+  *
+  * @todo: document this function
+  */
 bool Surface::Init(size_t Width,
                    size_t Height)
 {
@@ -131,8 +148,8 @@ bool Surface::Init(size_t Width,
     SDL_FreeSurface(SDLSurface);
   }
 
-  SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height, BPP, MASK_R,
-                                    MASK_G, MASK_B, MASK_A);
+  SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height,
+                                    BPP, MASK_R, MASK_G, MASK_B, MASK_A);
 
   return OnInit();
 }
@@ -154,7 +171,8 @@ bool Surface::SetAlpha(size_t Alpha)
   *
   * @todo: document this function
   */
-bool Surface::Zoom(real X, real Y)
+bool Surface::Zoom(real X,
+                   real Y)
 {
   if (SDLSurface) {
     SDL_Surface* temp = zoomSurface(SDLSurface, X, Y, 1);
@@ -275,7 +293,19 @@ bool Surface::Draw()
 bool Surface::Blank()
 {
   if (SDLSurface) {
-    SDL_FillRect(SDLSurface, 0, SDL_MapRGB(SDLSurface->format, 0, 0, 0));
+    SDL_FillRect(SDLSurface, 0, SDL_MapRGBA(SDLSurface->format, 0, 0, 0, 0));
+    return true;
+  }
+  return false;
+}
+/** @brief Draw
+*
+* @todo: document this function
+*/
+bool Surface::Unload()
+{
+  if (SDLSurface) {
+    SDL_FreeSurface(SDLSurface);
     return true;
   }
   return false;
@@ -291,15 +321,15 @@ bool Surface::DrawRectangle(const Rect& Rectangle,
                             usint B)
 {
   if (SDLSurface) {
-    SDL_Rect highlight = {
+    SDL_Rect dst = {
       (Sint16)Rectangle.X,
       (Sint16)Rectangle.Y,
       (Uint16)Rectangle.W,
       (Uint16)Rectangle.H
     };
 
-    SDL_FillRect(SDLSurface, &highlight, SDL_MapRGB(SDLSurface->format,
-                 R, B, G));
+    SDL_FillRect(SDLSurface, &dst, SDL_MapRGB(SDLSurface->format, R, B, G));
+
     return true;
   }
   return false;
@@ -319,18 +349,20 @@ bool Surface::PrintText(const Rect& Position,
   if (SDLSurface) {
     SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
 
-    SDL_Surface* textSurface = TTF_RenderText_Solid(TextFont.SDLFont,
+    SDL_Surface* textSurface = TTF_RenderText_Blended(TextFont.SDLFont,
                                Text.c_str(), colour);
     if (textSurface) {
       SDL_Rect dst = {
         (Sint16)Position.X,
         (Sint16)Position.Y,
-        (Uint16)Position.W,
-        (Uint16)Position.H
+        (Uint16)0,
+        (Uint16)0
       };
 
+      SDL_SetAlpha(textSurface, 0,  SDL_ALPHA_OPAQUE);
       SDL_BlitSurface(textSurface, 0, SDLSurface, &dst);
       SDL_FreeSurface(textSurface);
+
       return true;
     }
   }
@@ -354,9 +386,22 @@ bool Surface::CreateText(const Font& TextFont,
 
   SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
 
-  SDLSurface = TTF_RenderText_Solid(TextFont.SDLFont, Text.c_str(), colour);
+  SDLSurface = TTF_RenderText_Blended(TextFont.SDLFont, Text.c_str(), colour);
 
   return OnInit();
+}
+
+/** @brief Set clip by width and height only, centering the clipped area
+  */
+void Surface::Trim(size_t ClipW,
+                   size_t ClipH)
+{
+  ClipW = min(ClipW, W);
+  ClipH = min(ClipH, H);
+  Clip.W = ClipW;
+  Clip.H = ClipH;
+  Clip.X = (W - ClipW) / 2;
+  Clip.Y = (H - ClipH) / 2;
 }
 
 /** @brief SetClip

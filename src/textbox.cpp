@@ -321,8 +321,6 @@ bool TextBox::BreakText()
       pos = space;
     }
 
-    ++pos;
-
     // test print the line
     string line = cutString(cleaned, lastLineEnd, pos);
 
@@ -335,6 +333,8 @@ bool TextBox::BreakText()
       pos = lastPos; // include the character so the sizes match
       line = cutString(cleaned, lastLineEnd, pos);
     }
+
+    ++pos;
 
     firstWord = false;
 
@@ -350,13 +350,14 @@ bool TextBox::BreakText()
 
   // record visual keyword positions
   for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
-    const size_t lineLength = Lines[i].size();
+    const string& line = Lines[i];
+    const size_t lineLength = line.size() + 1;
     const size_t lineEnd = lastLineEnd + lineLength;
 
     for (size_t j = 0, for_size = keywordPos.size(); j < for_size; ++j) {
       const size_t_pair& keyPos = keywordPos[j];
       // check if this keyword is on this line
-      if (keyPos.X > lineEnd) {
+      if (keyPos.X >= lineEnd) {
         // since this keyword begins after the current line we can stop looking
         // since the next keyword will be even farther
         break;
@@ -372,13 +373,13 @@ bool TextBox::BreakText()
 
         // find where the keyword starts
         if (beg) {
-          const string& keywordStart = cutString(cleaned, 0, beg);
+          const string& keywordStart = cutString(line, 0, beg);
           newKey.Size.X = FontMain->GetWidth(keywordStart);
         }
         newKey.Size.Y = PageHeight;
 
         // find where the keyword ends
-        const string& keywordEnd = cutString(cleaned, beg, end);
+        const string& keywordEnd = cutString(line, beg, end);
         newKey.Size.W = FontMain->GetWidth(keywordEnd);
         newKey.Size.H = fontHeight;
 

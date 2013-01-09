@@ -14,11 +14,22 @@ Story::Story()
 
 Story::~Story()
 {
+  Purge();
+}
+
+void Story::Purge()
+{
   page_it it = Pages.begin();
   while (it != Pages.end()) {
     delete it->second;
     ++it;
   }
+  Pages.clear();
+}
+
+void Story::Fixate()
+{
+  Patterns.clear();
 }
 
 /** @brief ParseKeywordDefinition

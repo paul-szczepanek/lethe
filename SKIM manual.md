@@ -290,7 +290,8 @@ Currently available functions:
 - `Play(asset)` - activate asset (returns true if played).
 - `Stop(asset)` - deactivate asset (returns true if stopped).
 - `Size(noun)` - return number of values of a noun (not counting the integer).
-- `List(noun)` - print a list of text values as keywords: `<v1>, <v2>`.
+- `Print(noun)` - print the noun as a keyword. If there are multiple
+                  values print a comma separated list: `<v1>, <v2>`.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 
@@ -302,19 +303,23 @@ Asset definitions need to be outside noun definitions and start on a new
 line. No linebreaks are allowed within definitions.
 
 > These are not function calls and the syntax is different. You can't
-> use nouns or arithmetic on values - you need to use commas.
+> use nouns or arithmetic on values, you need to use commas and parameter
+> order is significant
 
-Each needs a unique name and only one instance of each is allowed. Calling
-`Play(asset)` whist the asset is already active will restart the asset.
+Each needs a unique name (asset names have their own namespace, separate
+from nouns) and only one instance of each is allowed. Calling
+`Play(asset)` whilst the asset is already active will restart the asset.
 Calling Stop on a stopped asset is safe and will do nothing.
 
 Supported types are:
 
 - `BG(filename)` - background, always to fit the window and behind all else.
-- `Image(filename, X, Y, zoom)` - image float centered at (X, Y) where 0 is in
-                                  the centre and (-1, -1) is the upper left
-                                  corner. Zoom is relative to the background
-                                  so 1 will match its zoom.
+- `Image(filename, X, Y, zoom, order)` - image float centered at (X, Y) where
+                                         0 is in the centre and (-1, -1) is
+                                         the upper left corner. Zoom is
+                                         relative to the background so 1 will
+                                         match its zoom. Order is lowest
+                                         first and must be positive.
 - `Music(filename)` - sound that loops.
 - `Sound(filename)` - sound that plays once.
 - `Voice(filename)` - sound that plays once and only one voice at a time.

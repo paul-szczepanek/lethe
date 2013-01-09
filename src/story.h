@@ -12,6 +12,9 @@ public:
   Story();
   virtual ~Story();
 
+  void Purge();
+  void Fixate();
+
   bool ParseKeywordDefinition(const string& StoryText);
 
   string Read(Session& Progress, const string& Noun, const string& VerbName);

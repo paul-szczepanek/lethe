@@ -15,7 +15,7 @@ public:
   Book() { };
   virtual ~Book() { };
 
-  bool Open(string Title);
+  bool Open(const string& Title);
 
   string Read(const string_pair& Choice);
   string Start();
@@ -29,10 +29,22 @@ public:
   inline const vector<string_pair>& GetAssetDefinitions() {
     return Assets;
   };
+  bool GetAssetState(const string& AssetName) {
+    return Progress.AssetStates[AssetName].Playing;
+  };
+  void SetAssetState(const string& AssetName, const bool Playing) {
+    if (Progress.AssetStates[AssetName].Playing != Playing) {
+      Progress.AssetsChanged = true;
+      Progress.AssetStates[AssetName].Playing = Playing;
+    }
+  };
+
+public:
+  string BookTitle;
 
 private:
-  vector<string_pair> Assets;
   Session Progress;
+  vector<string_pair> Assets;
   Story StoryDefinition;
 };
 

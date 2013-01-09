@@ -36,15 +36,6 @@ int main (int argc, char** argv)
   GLog = "";
 #endif
 
-
-  if (!Surface::SystemInit()) {
-    return 1;
-  }
-
-  if (!Font::SystemInit()) {
-    return 2;
-  }
-
   Reader* reader = new Reader(1000, 800, 32);
 
   if (reader->Init()) {

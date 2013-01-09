@@ -13,12 +13,18 @@ struct Snapshot {
   string Verb;
 };
 
+struct AssetState {
+  bool Playing = false;
+};
+
 class Session
 {
 public:
   Session() : ValuesChanged(false) { };
   Session(const string& Text);
   virtual ~Session() { };
+
+  bool Load(const string& SessionState);
 
   string GetUserValues() const;
   void SetUserValues(const string& Text);
@@ -34,11 +40,13 @@ public:
   string Name;
   string BookName;
 
-  // only a local reader can have a state read by the book rather than sent
   map<string, Properties> UserValues;
+  map<string, AssetState> AssetStates;
+
+  bool ValuesChanged = false;
+  bool AssetsChanged = false;
 
 private:
-  bool ValuesChanged;
   vector<string> ValuesHistory;
   vector<Snapshot> History;
 

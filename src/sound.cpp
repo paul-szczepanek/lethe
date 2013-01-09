@@ -1,10 +1,10 @@
 #include "sound.h"
 
 Sound::Sound(MediaManager& Manager,
+             const string& AssetName,
              const string& Params)
-  : Asset(Manager)
+  : Asset(Manager, AssetName)
 {
-  //Image(filename, position X%, position Y%, width%, height%)
 
 }
 
@@ -12,16 +12,25 @@ Sound::Sound(MediaManager& Manager,
   *
   * @todo: document this function
   */
-void Sound::Play()
+bool Sound::Play()
 {
-
+  return false;
 }
 
 /** @brief Stop
   *
   * @todo: document this function
   */
-void Sound::Stop()
+bool Sound::Stop()
 {
+  return false;
+}
 
+/** @brief Stop
+  *
+  * @todo: document this function
+  */
+bool Sound::Tick(real DeltaTime)
+{
+  return true;
 }

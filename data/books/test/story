@@ -9,20 +9,21 @@
 
 //******************** background setting **************************************
 
-[$bgroom=BG(bgroom.png)] // this creates an asset of type BG (background)
+[$room=BG(room.png)] // this creates an asset of type BG (background)
+[$pen=Image(pen.png, -0.1, 0.5, 1.2)]
 [$musicroom=Music(musicroom.ogg)]
 [$voiceroom=Voice(voiceroom.ogg)]
 
 [<your room media>]
   [:show]
-    [!Play(bgroom)]
+    [!Play(room)]
     [!Play(musicroom)]
     [!Play(voiceroom)]
     // [!calls+=your room media:autohide] // this gets evaluated each turn
   [:autohide] // and will hide the background if we leave
     [?@PLACE-=your room]
       [!calls-=your room media:autohide]
-      [!Stop(bgroom)]
+      [!Stop(room)]
       [!Stop(musicroom)]
       // [!Stop(voiceroom)] voice is a one off so no need to stop
 
@@ -33,11 +34,11 @@
     You are tired.
   [:list]
     \nInventory:\n
-    [!List(self)] // show keywords for items we have
+    [!Print(@self)] // show keywords for items we have
   [:visible]
-    [!List(PLACE)] // show the keyword for the location we are in
+    [!Print(@PLACE)] // show the keyword for the location we are in
     \nObjects:\n
-    [!List(NOUNS)] // and all the things that are there
+    [!Print(@NOUNS)] // and all the things that are there
 
 // These patterns are defined per story.
 // This way you can define the game to work like a regular IF with places and
@@ -77,6 +78,7 @@
 
 [<pen[item]>]
   [:look]
+    [!Play(pen)]
     Black ink pen.
 
 //******************************************************************************
@@ -92,6 +94,7 @@
     A <pen> is lying on the desk.
   }
   The room has only one <door[door:open]>.
+  [!your room media:show]
 
   [?@door=open] // if the door is open
     [!EXITS+=staircase] // add the staircase as a possible exit

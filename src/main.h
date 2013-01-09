@@ -59,6 +59,7 @@ extern string GLog;
 #endif
 
 const string STORY_DIR = "data/books/";
+const string FONTS_DIR = "data/fonts/";
 const string FRAMES_DIR = "data/frames/";
 const string KEYWORDS_DIR = "data/cache/keywords/";
 

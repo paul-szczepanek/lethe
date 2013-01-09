@@ -6,11 +6,12 @@
 class Sound : public Asset
 {
 public:
-  Sound(MediaManager& Manager, const string& Params);
+  Sound(MediaManager& Manager, const string& AssetName, const string& Params);
   virtual ~Sound() { };
 
-  virtual void Play();
-  virtual void Stop();
+  virtual bool Play();
+  virtual bool Stop();
+  virtual bool Tick(real DeltaTime);
 
 private:
 };

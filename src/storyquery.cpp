@@ -85,30 +85,33 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       FunctionArgs.TextValues.clear();
     } else if (func == "Play") {
       for (const string& arg : FunctionArgs.TextValues) {
+        if (!Progress.AssetStates[arg].Playing) {
+          Progress.AssetsChanged = true;
+          Progress.AssetStates[arg].Playing = true;
+        }
         LOG(arg + " - play");
       }
     } else if (func == "Stop") {
       for (const string& arg : FunctionArgs.TextValues) {
+        if (Progress.AssetStates[arg].Playing) {
+          Progress.AssetsChanged = true;
+          Progress.AssetStates[arg].Playing = true;
+        }
         LOG(arg + " - stop");
       }
-    } else if (func == "List") { // print a list of values
+    } else if (func == "Print") { // print a list of values
       FunctionArgs.IntValue = 0;
+      bool first = true;
       for (const string& arg : FunctionArgs.TextValues) {
-        const Properties& nounValues = Progress.IsUserValues(arg)?
-                                       Progress.UserValues[arg]
-                                       : StoryDef.FindPage(arg).PageValues;
-        bool first = true;
-        for (const string& keyword : nounValues.TextValues) {
-          if (first) {
-            first = false;
-            Text += "<";
-          } else {
-            Text += ", <";
-          }
-          Text += keyword;
-          Text += ">";
-          ++FunctionArgs.IntValue;
+        if (first) {
+          first = false;
+          Text += "<";
+        } else {
+          Text += ", <";
         }
+        Text += arg;
+        Text += ">";
+        ++FunctionArgs.IntValue;
       }
     } else {
       LOG(func + " - function doesn't exist!");

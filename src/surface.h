@@ -19,6 +19,7 @@ public:
   virtual ~Surface();
 
   bool InitScreen(size_t ScreenWidth, size_t ScreenHeight, int ScreenBPP);
+  bool Init();
   bool Init(size_t Width, size_t Height);
   bool LoadImage(const string& Filename);
   bool Zoom(real X, real Y);
@@ -29,12 +30,14 @@ public:
   bool Draw(const size_t X, const size_t Y);
   bool Draw();
   bool DrawRectangle(const Rect& Rectangle, usint R, usint G, usint B);
+  void Trim(size_t ClipW, size_t ClipH);
   void SetClip(const Rect& NewClip);
   bool Blank();
+  bool Unload();
   bool CreateText(const Font& TextFont, const string& Text,
-                  usint R, usint G, usint B);
+                  usint R = 255, usint G = 255, usint B = 255);
   bool PrintText(const Rect& Position, const Font& TextFont, const string& Text,
-                 usint R, usint G, usint B);
+                 usint R = 255, usint G = 255, usint B = 255);
 
 private:
   bool OnInit();
@@ -42,11 +45,13 @@ private:
 public:
   size_t W = 0;
   size_t H = 0;
-
-  static SDL_Surface* Screen;
   static int BPP;
 
 private:
+  static size_t ScreenW;
+  static size_t ScreenH;
+  static SDL_Surface* Screen;
+
   Rect Clip = { 0, 0, 0, 0 };
   SDL_Surface* SDLSurface = NULL;
 };

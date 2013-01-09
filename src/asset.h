@@ -8,14 +8,21 @@ class MediaManager;
 class Asset
 {
 public:
-  Asset(MediaManager& Manager) : Media(Manager) { };
+  Asset(MediaManager& Manager, const string& AssetName)
+  : Name(AssetName), Media(Manager) { };
   virtual ~Asset() { };
 
-  virtual void Play() = 0;
-  virtual void Stop() = 0;
+  virtual bool Play() = 0;
+  virtual bool Stop() = 0;
+
+  virtual bool Tick(real DeltaTime) = 0;
+
+public:
+  const string Name;
+  size_t Priority = 0;
+  bool Playing = false;
 
 protected:
-  bool Playing = false;
   MediaManager& Media;
 };
 

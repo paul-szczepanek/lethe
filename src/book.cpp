@@ -7,13 +7,17 @@
   * open the file containing the story and feed it to StoryDefinition to parse
   * one keyword block at a time
   */
-bool Book::Open(string Title)
+bool Book::Open(const string& Title)
 {
-  string filename = STORY_DIR + Title + "/story";
+  BookTitle = Title;
+  string filename = STORY_DIR + BookTitle + "/story";
 
   string storyText;
   string buffer;
   ifstream story;
+
+  Assets.clear();
+  StoryDefinition.Purge();
 
   story.open(filename.c_str());
 
@@ -57,6 +61,7 @@ bool Book::Open(string Title)
 
   //finished reading the file
   story.close();
+  StoryDefinition.Fixate();
 
   // read progress here
   Progress.Name = "FirstRead";
@@ -69,9 +74,10 @@ bool Book::Open(string Title)
   Progress.UserValues[CALLS] = StoryDefinition.FindPage(CALLS).PageValues;
   // we don't need BEGIN since it never changes
 
+  Progress.Load("");
+
   return true;
 }
-
 
 /** @brief AddAssetDefinition
   *
@@ -98,6 +104,8 @@ bool Book::AddAssetDefinition(const string& StoryText)
 
   return true;
 }
+
+
 
 /** @brief ValidateKeywords
   *

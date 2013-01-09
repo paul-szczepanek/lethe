@@ -1,5 +1,14 @@
 #include "session.h"
 
+bool Session::Load(const string& SessionState)
+{
+  UserValues.clear();
+  AssetStates.clear();
+  ValuesHistory.clear();
+  History.clear();
+  return true;
+}
+
 Session::Session(const string& Text) : ValuesChanged(false)
 {
 

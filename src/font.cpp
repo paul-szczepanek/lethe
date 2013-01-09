@@ -10,7 +10,7 @@
 bool Font::SystemInit()
 {
   if (TTF_Init() < 0) {
-    printf( "Unable to init TTF: %s\n", SDL_GetError() );
+    std::cout << "Unable to init TTF: " << SDL_GetError() << std::endl;
     return false;
   }
 
@@ -37,9 +37,16 @@ bool Font::Init(const string& Filename, const size_t Size)
     TTF_CloseFont(SDLFont);
   }
 
-  SDLFont = TTF_OpenFont(Filename.c_str(), Size);
+  const string path = FONTS_DIR + Filename;
 
-  return SDLFont;
+  SDLFont = TTF_OpenFont(path.c_str(), Size);
+  if (SDLFont) {
+    return true;
+  }
+
+  std::cout << "Font: " << path << " failed to load." << std::endl;
+
+  return false;
 }
 
 /** @brief GetHeight

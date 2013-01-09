@@ -1,6 +1,12 @@
 #include "reader.h"
 #include "book.h"
+#include "mediamanager.h"
 #include <SDL.h>
+
+const string FRAME_SOLID = "solid";
+const string FRAME_TEXT = "text";
+const string FRAME_MENU = "menu";
+const string FRAME_IMAGE = "image";
 
 Reader::Reader(int ReaderWidth,
                int ReaderHeight,
@@ -13,9 +19,6 @@ Reader::Reader(int ReaderWidth,
 
 Reader::~Reader()
 {
-  if (MyBook) {
-    delete MyBook;
-  }
 #ifdef LOGGER
   if (Logger) {
     delete Logger;
@@ -25,13 +28,25 @@ Reader::~Reader()
 
 bool Reader::Init()
 {
+  if (!Surface::SystemInit()) {
+    return false;
+  }
+
+  if (!Font::SystemInit()) {
+    return false;
+  }
+
   if (!Screen.InitScreen(Width, Height, BPP)) {
     return false;
   }
 
-  if (!FontSys.Init("data/font/mono.ttf", 16)
-      || !FontMain.Init("data/font/mono.ttf", 20)) {
-    std::cout << "Fonts failed to load" << std::endl;
+  Screen.SetAlpha(255);
+
+  if (!FontSys.Init("mono.ttf", 12)
+      || !FontMain.Init("sans.ttf", 20)
+      || !FontSmall.Init("serif.ttf", 12)
+      || !FontTitle.Init("king.ttf", 24)) {
+
     return false;
   }
 
@@ -60,10 +75,10 @@ bool Reader::Init()
     }
   }
 
-  QuickMenu.Init(FontMain, "default", BPP);
-  MainText.Init(FontMain, "default", BPP);
-  MainImage.Init(FontMain, "default", BPP);
-  MainMenu.Init(FontMain, "default", BPP);
+  QuickMenu.Init(FontMain, FRAME_MENU, BPP);
+  MainText.Init(FontMain, FRAME_TEXT, BPP);
+  MainImage.Init(FontMain, FRAME_IMAGE, BPP);
+  MainMenu.Init(FontMain, FRAME_MENU, BPP);
 
   MainMenu.AspectW = 100;
   MainMenu.AspectH = 2;
@@ -74,23 +89,16 @@ bool Reader::Init()
 
   SetLayout();
 
-  MainText.Visible = true;
-  QuickMenu.Visible = true;
-  MainMenu.Visible = true;
-  MainImage.Visible = true;
-
-  ChoiceMenu.Init(FontMain, "default", BPP);
-  VerbMenu.Init(FontMain, "default", BPP);
+  ChoiceMenu.Init(FontMain, FRAME_SOLID, BPP);
+  VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
 
   // start reading the book TODO: move this to a menu
+  MyBook.Open("test");
 
-  MyBook = new Book();
-  MyBook->Open("test");
+  Media.CreateAssets(MyBook.GetAssetDefinitions(), MyBook.BookTitle);
 
-  Media.CreateAssets(MyBook->GetAssetDefinitions());
-
-  PageSource = MyBook->Start();
-  QuickMenuSource = MyBook->QuickMenu();
+  PageSource = MyBook.Start();
+  QuickMenuSource = MyBook.QuickMenu();
 
   MainText.SetText(PageSource);
   QuickMenu.SetText(QuickMenuSource);
@@ -134,10 +142,8 @@ void Reader::ProcessInput()
           MainText.Pane.PaneScroll = -100;
         } else if (event.key.keysym.sym == SDLK_r) {
           // temp for debug help
-          delete MyBook;
-          MyBook = new Book();
-          MyBook->Open("test");
-          PageSource = MyBook->Start();
+          MyBook.Open("test");
+          PageSource = MyBook.Start();
           MainText.SetText(PageSource);
         }
         break;
@@ -217,11 +223,11 @@ bool Reader::Tick(real DeltaTime)
       MainText.Deselect();
 
       if (!KeywordAction.X.empty()) {
-        if (MyBook->GetChoice(KeywordAction)) {
+        if (MyBook.GetChoice(KeywordAction)) {
           ReadBook();
         } else {
           // we clicked on a keyword, create a menu full of verbs
-          string VerbsText = MyBook->GetVerbList(KeywordAction.X);
+          string VerbsText = MyBook.GetVerbList(KeywordAction.X);
           if (!VerbsText.empty()) {
             VerbMenu.Visible = true;
             VerbMenu.SetText(VerbsText);
@@ -233,6 +239,8 @@ bool Reader::Tick(real DeltaTime)
       }
     }
   }
+
+  RedrawPending |= Media.Tick(DeltaTime, MyBook);
 
   if (RedrawPending) {
     RedrawScreen(DeltaTime);
@@ -253,12 +261,12 @@ bool Reader::ReadBook()
     MainText.ValidateKeywords = PageSource.size();
 
     // get new text
-    PageSource += MyBook->Read(KeywordAction);
-    QuickMenuSource = MyBook->QuickMenu();
+    PageSource += MyBook.Read(KeywordAction);
+    QuickMenuSource = MyBook.QuickMenu();
 
     // clear out old keywords
     MainText.ValidKeywords.Reset();
-    MyBook->GetNouns(MainText.ValidKeywords);
+    MyBook.GetNouns(MainText.ValidKeywords);
 
     MainText.SetText(PageSource);
     QuickMenu.SetText(QuickMenuSource);
@@ -274,6 +282,8 @@ bool Reader::ReadBook()
 void Reader::RedrawScreen(real DeltaTime)
 {
   DrawBackdrop();
+
+  Media.Draw();
 
   DrawWindows();
 
@@ -405,6 +415,8 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     bool first = (i == 0) || (pos != layout.Side[i-1]);
     //bool last = (i == for_size-1) || (where != layout.Side[i+1]);
 
+    boxes[i]->Visible = layout.Active[i];
+
     if (pos == left || (first && (pos == top || pos == bottom))) {
       boxSize.X = 0;
     } else if (!first && (pos == right)) {
@@ -498,6 +510,12 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
     splitH = boxSize.X + boxSize.W;
     splitV = boxSize.Y + boxSize.H;
+  }
+
+  Media.Visible = MainImage.Visible;
+
+  if (Media.Visible) {
+    Media.SetImageWindowSize(MainImage.Size);
   }
 
 #ifdef LOGGER
