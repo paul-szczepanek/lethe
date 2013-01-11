@@ -245,19 +245,34 @@ you'll have to escape one if you want to use them in text.
 All other characters are legal and only treated as special characters
 if within `[ ]`.
 
-### `Special Noun Names __________________________________________ [<BEGIN>]`
+### `Special Noun Names __________________________________________ [<QUEUE>]`
 
 These nouns are treated differently by the reader (not all are required):
-`BEGIN, PLACE, EXITS, NOUNS, CALLS, QUICK`
+`QUEUE, PLACE, EXITS, NOUNS, CALLS, QUICK`
 
-These nouns expect string values of noun:verb that point to valid verbs to execute:
+These nouns expect string values of noun:verb that point to valid verbs to
+execute:
 
-- `[<BEGIN>]` - how the story starts (this is essential).
-- `[<CALLS>]` - all values get executed every turn as instructions.
+- `[<QUEUE>]` - anything placed here will get executed and then removed
+                automatically, this is used to kickstart the story. Any
+                action taken by the player will be placed here and executed.
+- `[<CALLS>]` - all values get executed every turn as instructions and
+                remain here until removed. This happens prior to any action
+                so the value of QUEUE is available to you if you need it.
 - `[<QUICK>]` - like CALLS, executes every turn but is used to print the
                 quick menu. It should not contain logic as it will only
                 get executed if the quickmenu exists in the reader.
                 Values here don't need to be in NOUNS to remain clickable.
+
+CALLS will not get executed on the turn it is added as it needs to happen
+prior to an action. It can manipulate the QUEUE before it gets executed.
+All values in QUEUE will get executed one by one and removed after each
+execution. During execution QUEUE contains only the value currently being
+executed.
+
+> Remember that values can't store duplicate strings so you can't
+> trigger multiple calls of the same noun:verb. Use CALLS if you want to
+> keep calling the same value.
 
 These nouns expect strings that match names of other valid nouns.
 
@@ -267,7 +282,7 @@ These nouns expect strings that match names of other valid nouns.
                 Text from the previous action will lose keywords unless they
                 are here.
 
-The absolute minimum is: `[<BEGIN> = noun:verb]`. This will be called when
+The absolute minimum is: `[<QUEUE> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
 that block.
 

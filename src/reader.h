@@ -12,6 +12,7 @@
 
 const size_t NUM_LAYOUTS = 2;
 const real REDRAW_TIMEOUT = 1.0;
+const real MIN_TIMEOUT = 0.1;
 
 class Book;
 
@@ -52,7 +53,7 @@ public:
 
   void ProcessInput();
 
-  bool ReadBook();
+  void ReadBook();
 
   size_t SetLayout(size_t LayoutIndex = NUM_LAYOUTS);
   size_t FixLayout();
@@ -98,6 +99,9 @@ private:
   // popups
   TextBox ChoiceMenu;
   TextBox VerbMenu;
+
+  real Timeout = MIN_TIMEOUT;
+  real TimeoutTimer = 0;
 
 #ifdef LOGGER
   TextBox* Logger = NULL;

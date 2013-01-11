@@ -63,18 +63,19 @@ bool Book::Open(const string& Title)
   story.close();
   StoryDefinition.Fixate();
 
-  // read progress here
+  Progress.Load("");
+
   Progress.Name = "FirstRead";
   Progress.BookName = Title;
 
   // initialise reserved keywords
-  Progress.UserValues[NOUNS] = StoryDefinition.FindPage(NOUNS).PageValues;
-  Progress.UserValues[EXITS] = StoryDefinition.FindPage(EXITS).PageValues;
-  Progress.UserValues[PLACE] = StoryDefinition.FindPage(PLACE).PageValues;
-  Progress.UserValues[CALLS] = StoryDefinition.FindPage(CALLS).PageValues;
-  // we don't need BEGIN since it never changes
+  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+    const string& name = SystemNounNames[i];
+    const Properties& systemValues = StoryDefinition.FindPage(name).PageValues;
+    Progress.UserValues[SystemNounNames[i]].AddValues(systemValues);
+  }
 
-  Progress.Load("");
+  Progress.Fixate();
 
   return true;
 }
@@ -105,19 +106,25 @@ bool Book::AddAssetDefinition(const string& StoryText)
   return true;
 }
 
-
-
 /** @brief ValidateKeywords
   *
   * @todo: document this function
   */
 void Book::GetNouns(Properties& Result)
 {
-  Progress.GetUserValues(PLACE, Result);
-  Progress.GetUserValues(EXITS, Result);
-  Progress.GetUserValues(NOUNS, Result);
+  Result += Progress.GetSystemValues(systemPlace);
+  Result += Progress.GetSystemValues(systemExits);
+  Result += Progress.GetSystemValues(systemNouns);
 }
 
+/** @brief ValidateKeywords
+  *
+  * @todo: document this function
+  */
+bool Book::Tick()
+{
+  return !(Progress.GetSystemValues(systemQueue).IsEmpty());
+}
 
 /** @brief Get list of verbs of the noun
   *
@@ -163,18 +170,42 @@ bool Book::GetChoice(string_pair& Choice)
   *
   * this is what the reader sends to the book to get the resulting text
   */
-string Book::Read(const string_pair& Choice)
+void Book::SetAction(const string_pair& Choice)
 {
-  const string pageSource = StoryDefinition.Read(Progress, Choice.X, Choice.Y);
-
-  return pageSource + "\n";
+  Progress.GetSystemValues(systemQueue).AddValue(Choice.X + ":" + Choice.Y);
 }
 
-/** @brief Read the start of the book
+/** @brief Read the book by executing actions on the queue
+  * Each value on the queue get's executed one by one
+  * and during execution is the only value on the queue
+  * at the end of execution the whole queue is cleared
   */
-string Book::Start()
+string Book::Action()
 {
-  const string pageSource = StoryDefinition.Start(Progress);
+  Properties& actions = Progress.GetSystemValues(systemQueue);
+
+  string pageSource;
+  const size_t safety = 1000; // to stop user generated infite loops
+  size_t i = 0;
+  // collect all the queue values here to look for system calls
+  Properties pool;
+  pool.AddValues(actions);
+
+  while (pool.TextValues.size() > i && i < safety) {
+    const string& expression = pool.TextValues[i];
+
+    // only the currently executed call is present during execution
+    actions.Reset();
+    actions.AddValue(expression);
+
+    pageSource = StoryDefinition.Action(Progress);
+    // if the execution added more actions, add the to the pool
+    pool.AddValues(actions);
+    ++i;
+  }
+
+  actions.Reset();
+  Progress.ValuesChanged = true;
 
   return pageSource + "\n";
 }

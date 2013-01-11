@@ -100,12 +100,6 @@ bool Reader::Init()
 
   Media.CreateAssets(MyBook.GetAssetDefinitions(), MyBook.BookTitle);
 
-  PageSource = MyBook.Start();
-  QuickMenuSource = MyBook.QuickMenu();
-
-  MainText.SetText(PageSource);
-  QuickMenu.SetText(QuickMenuSource);
-
 #ifdef LOGGER
   GLog = "Log";
   Logger = new TextBox();
@@ -146,7 +140,7 @@ void Reader::ProcessInput()
         } else if (event.key.keysym.sym == SDLK_r) {
           // temp for debug help
           MyBook.Open("test");
-          PageSource = MyBook.Start();
+          PageSource = MyBook.Action();
           MainText.SetText(PageSource);
         }
         break;
@@ -184,59 +178,70 @@ void Reader::ProcessInput()
 
 bool Reader::Tick(real DeltaTime)
 {
+  if (TimeoutTimer > 0) {
+    TimeoutTimer -= DeltaTime;
+  }
+
+  if (MyBook.Tick()) {
+    TimeoutTimer = Timeout;
+    ReadBook();
+  }
+
   // do a forced update
   RedrawCountdown -= DeltaTime;
   if (RedrawCountdown < 0.f) {
     RedrawPending = true;
   }
 
-  ProcessInput();
+  if (TimeoutTimer < 0) {
+    ProcessInput();
 
-  if (Mouse.Left) {
-    if (ChoiceMenu.Visible) {
-      ChoiceMenu.Select(Mouse, DeltaTime);
-    } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
-      VerbMenu.Visible = false;
-      KeywordAction.clear();
-    } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
-      QuickMenu.Deselect();
-      MainText.Select(Mouse, DeltaTime);
-    }
-    RedrawPending = true;
-  } else if (Mouse.LeftUp) {
-    Mouse.LeftUp = false;
-    // touch released, see if we cliked on something interactive
-    if (ChoiceMenu.Visible) {
-      // todo: make choice
-    } else {
-      if (VerbMenu.Visible) {
-        if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
-          ReadBook();
-        }
+    if (Mouse.Left) {
+      if (ChoiceMenu.Visible) {
+        ChoiceMenu.Select(Mouse, DeltaTime);
+      } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
         VerbMenu.Visible = false;
         KeywordAction.clear();
-        VerbMenu.Deselect();
-      } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
-
-      } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
-
+      } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
+        QuickMenu.Deselect();
+        MainText.Select(Mouse, DeltaTime);
       }
+      RedrawPending = true;
+    } else if (Mouse.LeftUp) {
+      Mouse.LeftUp = false;
+      // touch released, see if we cliked on something interactive
+      if (ChoiceMenu.Visible) {
+        // todo: make choice
+      } else {
+        if (VerbMenu.Visible) {
+          if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
+            ReadBook();
+          }
+          VerbMenu.Visible = false;
+          KeywordAction.clear();
+          VerbMenu.Deselect();
+        } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
 
-      QuickMenu.Deselect();
-      MainText.Deselect();
+        } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
 
-      if (!KeywordAction.X.empty()) {
-        if (MyBook.GetChoice(KeywordAction)) {
-          ReadBook();
-        } else {
-          // we clicked on a keyword, create a menu full of verbs
-          string VerbsText = MyBook.GetVerbList(KeywordAction.X);
-          if (!VerbsText.empty()) {
-            VerbMenu.Visible = true;
-            VerbMenu.SetText(VerbsText);
-            const size_t_pair& maxSize = VerbMenu.GetMaxSize();
-            Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
-            VerbMenu.SetSize(boxSize);
+        }
+
+        QuickMenu.Deselect();
+        MainText.Deselect();
+
+        if (!KeywordAction.X.empty()) {
+          if (MyBook.GetChoice(KeywordAction)) {
+            ReadBook();
+          } else {
+            // we clicked on a keyword, create a menu full of verbs
+            string VerbsText = MyBook.GetVerbList(KeywordAction.X);
+            if (!VerbsText.empty()) {
+              VerbMenu.Visible = true;
+              VerbMenu.SetText(VerbsText);
+              const size_t_pair& maxSize = VerbMenu.GetMaxSize();
+              Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
+              VerbMenu.SetSize(boxSize);
+            }
           }
         }
       }
@@ -257,29 +262,27 @@ bool Reader::Tick(real DeltaTime)
   *
   * @todo: document this function
   */
-bool Reader::ReadBook()
+void Reader::ReadBook()
 {
   if (KeywordAction.full()) {
-    // this is how far into the text the valid keywords get checked
-    MainText.ValidateKeywords = PageSource.size();
-
-    // get new text
-    PageSource += MyBook.Read(KeywordAction);
-    QuickMenuSource = MyBook.QuickMenu();
-
-    // clear out old keywords
-    MainText.ValidKeywords.Reset();
-    MyBook.GetNouns(MainText.ValidKeywords);
-
-    MainText.SetText(PageSource);
-    QuickMenu.SetText(QuickMenuSource);
-
+    MyBook.SetAction(KeywordAction);
     KeywordAction.clear();
-
-    return true;
   }
 
-  return false;
+  // this is how far into the text the valid keywords get checked
+  MainText.ValidateKeywords = PageSource.size();
+
+  // get new text
+
+  PageSource += MyBook.Action();
+  QuickMenuSource = MyBook.QuickMenu();
+
+  // clear out old keywords
+  MainText.ValidKeywords.Reset();
+  MyBook.GetNouns(MainText.ValidKeywords);
+
+  MainText.SetText(PageSource);
+  QuickMenu.SetText(QuickMenuSource);
 }
 
 void Reader::RedrawScreen(real DeltaTime)

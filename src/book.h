@@ -17,8 +17,10 @@ public:
 
   bool Open(const string& Title);
 
-  string Read(const string_pair& Choice);
-  string Start();
+  bool Tick();
+
+  void SetAction(const string_pair& Choice);
+  string Action();
   string QuickMenu();
   string GetVerbList(const string& Noun);
   void GetNouns(Properties& Result);

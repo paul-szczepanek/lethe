@@ -8,18 +8,36 @@ const string PLACE = "PLACE";
 const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
-const string BEGIN = "BEGIN";
+const string QUEUE = "QUEUE";
 
 const string NOUNS_CONTENTS = "[!@NOUNS]";
 const string PLACE_CONTENTS = "[!@PLACE]";
 const string EXITS_CONTENTS = "[!@EXITS]";
 const string CALLS_CONTENTS = "[!@CALLS]";
 const string QUICK_CONTENTS = "[!@QUICK]";
-const string BEGIN_CONTENTS = "[!@BEGIN]";
+const string QUEUE_CONTENTS = "[!@QUEUE]";
+
+enum systemNoun {
+  systemNouns,
+  systemPlace,
+  systemExits,
+  systemCalls,
+  systemQuick,
+  systemQueue,
+  SYSTEM_NOUN_MAX
+};
+
+const string SystemNounNames[SYSTEM_NOUN_MAX] = {
+  NOUNS,
+  PLACE,
+  EXITS,
+  CALLS,
+  QUICK,
+  QUEUE
+};
 
 namespace token
 {
-
 const size_t NUM_TOKENS_INSTRUCTION = 4;
 const size_t NUM_TOKENS_CONDITION = 8;
 const size_t NUM_SPACE_REMOVERS = 4;

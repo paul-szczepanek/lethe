@@ -11,4 +11,6 @@ The project will ultimately consist of:
 
 This was originally being developed for an e-reader (with e-ink, I had an iRex whose screen has since died) which wouldn't cope well with typing but now I plan to release it for Android (and obviously, for Linux on which it's developed). It's using SDL and even has defines for windows as well so if anyone can be bothered it should probably compile for that as well. And since e-readers nowadays run Android anyway maybe I can get it to run there as well.
 
-Code GPLed, everything else CC.
+Code GPLed, everything else CC unless noted otherwise
+Fonts by Matthew Welch http://www.squaregear.net/fonts/
+Fonts by DejaVu http://dejavu-fonts.org/wiki/License

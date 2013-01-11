@@ -18,7 +18,7 @@ public:
   bool ParseKeywordDefinition(const string& StoryText);
 
   string Read(Session& Progress, const string& Noun, const string& VerbName);
-  string Start(Session& Progress);
+  string Action(Session& Progress);
   string QuickMenu(Session& Progress);
 
   vector<string> GetVerbs(Session& Progress, const string& Noun);

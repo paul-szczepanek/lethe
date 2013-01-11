@@ -2,10 +2,7 @@
 
 bool Session::Load(const string& SessionState)
 {
-  UserValues.clear();
-  AssetStates.clear();
-  ValuesHistory.clear();
-  History.clear();
+  Reset();
   return true;
 }
 
@@ -67,6 +64,29 @@ string Session::GetUserValues() const
   //print values to string
 
   return progress;
+}
+
+void Session::Fixate()
+{
+  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+    auto it = UserValues.find(SystemNounNames[i]);
+    if (it != UserValues.end()) {
+      SystemNouns[i] = &(it->second);
+    }
+    //SystemNouns[i] = &UserValues[SystemNounNames[i]];
+  }
+}
+
+void Session::Reset()
+{
+  Name.clear();
+  BookName.clear();
+  UserValues.clear();
+  AssetStates.clear();
+  ValuesHistory.clear();
+  History.clear();
+  ValuesChanged = false;
+  AssetsChanged = false;
 }
 
 /** @brief Make Snapshot

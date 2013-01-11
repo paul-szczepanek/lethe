@@ -59,6 +59,7 @@ bool Sound::Tick(real DeltaTime)
     if (SoundAudio.IsPlaying()) {
       SoundAudio.Play();
     }
+    return true;
   } else {
     return SoundAudio.IsPlaying();
   }

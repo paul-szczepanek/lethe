@@ -27,6 +27,8 @@ public:
   bool IsEquivalent(const Properties& Value) const;
 
   inline void Reset();
+  inline Properties& operator+=(const Properties& Value);
+  inline bool IsEmpty();
 
 public:
   lint IntValue;
@@ -35,7 +37,14 @@ public:
 
 };
 
-typedef vector<string>::iterator TextValues_it;
+Properties& Properties::operator+=(const Properties& Value) {
+  AddValues(Value);
+  return *this;
+}
+
+bool Properties::IsEmpty() {
+  return TextValues.empty();
+}
 
 /** @brief Check if a value is there
   * Done on a vector since the set will usually be small (mostly 1)
@@ -86,8 +95,8 @@ bool Properties::RemoveValue(const string& Value)
   }
   // iterators have the most annoying syntax
   // not using erase-remove because elements are unique so we can return early
-  TextValues_it it = TextValues.begin();
-  for (TextValues_it endIt = TextValues.end(); it != endIt; ++it) {
+  auto it = TextValues.begin();
+  for (auto endIt = TextValues.end(); it != endIt; ++it) {
     if (*it == Value) {
       TextValues.erase(it);
       return true;

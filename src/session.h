@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "properties.h"
+#include "tokens.h"
 
 struct Snapshot {
   Snapshot() : HistoryIndex(0) { };
@@ -25,6 +26,8 @@ public:
   virtual ~Session() { };
 
   bool Load(const string& SessionState);
+  void Fixate();
+  void Reset();
 
   string GetUserValues() const;
   void SetUserValues(const string& Text);
@@ -32,6 +35,7 @@ public:
   bool IsUserValues(const string& Noun) const;
   bool GetUserInteger(const string& Noun, Properties& ReturnValue) const;
   bool GetUserValues(const string& Noun, Properties& ReturnValue) const;
+  inline Properties& GetSystemValues(systemNoun Noun) const;
 
   void MakeSnapshot(const string& Progress, const string& Noun,
                     const string& Verb);
@@ -39,6 +43,8 @@ public:
 public:
   string Name;
   string BookName;
+
+  Properties* SystemNouns[SYSTEM_NOUN_MAX];
 
   map<string, Properties> UserValues;
   map<string, AssetState> AssetStates;
@@ -49,7 +55,11 @@ public:
 private:
   vector<string> ValuesHistory;
   vector<Snapshot> History;
-
 };
+
+Properties& Session::GetSystemValues(systemNoun Noun) const
+{
+  return *(SystemNouns[Noun]);
+}
 
 #endif // SESSION_H

@@ -143,12 +143,15 @@ string Story::Read(Session& Progress,
   return query.Text;
 }
 
-string Story::Start(Session& Progress)
+string Story::Action(Session& Progress)
 {
   string pageText;
   StoryQuery query(Progress, pageText, *this);
 
-  query.ExecuteExpression(BEGIN, BEGIN_CONTENTS);
+  // call the actions scheduled for every turn
+  query.ExecuteExpression(CALLS, CALLS_CONTENTS);
+  // only one value present during this call, unless it has been removed
+  query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);
 
   return query.Text;
 }

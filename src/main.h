@@ -200,10 +200,10 @@ inline string realIntoString(const real a_real, const usint a_precision = 3)
 }
 
 // cutString("01234", 2, 4) returns "23"
-inline string cutString(const string Text, const size_t Start,
+inline string cutString(const string Text, const size_t Action,
                         const size_t End = string::npos)
 {
-  return Text.substr(Start, End - Start);
+  return Text.substr(Action, End - Action);
 }
 
 inline bool take(bool& do_once)

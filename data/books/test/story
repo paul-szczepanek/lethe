@@ -1,6 +1,6 @@
 //***************** starting place, exits, inventory and tools *****************
 
-[<BEGIN> = your room:go]
+[<QUEUE> = your room:go] // this is what gets executed when book is opened
 [<PLACE>] // we start nowhere
 [<EXITS> = your room] // assign default value so we can enter our starting room
 [<NOUNS>] // these are the nouns that stay highlighted in old text
