@@ -33,7 +33,7 @@ public:
   virtual ~TextBox() { };
 
   size_t_pair GetMaxSize();
-  void SetText(string NewText);
+  void SetText(const string NewText);
 
   void Draw();
   void Reset();

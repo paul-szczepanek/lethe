@@ -30,19 +30,23 @@ public:
   inline Properties& operator+=(const Properties& Value);
   inline bool IsEmpty();
 
+  const string PrintKeywordList(const string& Separator = ", ") const;
+  const string PrintPlainList(const string& Separator = ", ") const;
+
 public:
   lint IntValue;
   // not using set as the number of values will usually be 1
   vector<string> TextValues;
-
 };
 
-Properties& Properties::operator+=(const Properties& Value) {
+Properties& Properties::operator+=(const Properties& Value)
+{
   AddValues(Value);
   return *this;
 }
 
-bool Properties::IsEmpty() {
+bool Properties::IsEmpty()
+{
   return TextValues.empty();
 }
 

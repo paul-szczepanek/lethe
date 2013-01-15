@@ -3,14 +3,12 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-/** @brief SystemInit
-  *
-  * @todo: document this function
+/** @brief Init the SDL
   */
 bool Font::SystemInit()
 {
   if (TTF_Init() < 0) {
-    std::cout << "Unable to init TTF: " << SDL_GetError() << std::endl;
+    cout << "Unable to init TTF: " << SDL_GetError() << endl;
     return false;
   }
 
@@ -27,11 +25,10 @@ Font::~Font()
   }
 }
 
-/** @brief Init
-  *
-  * @todo: document this function
+/** @brief Build the font
   */
-bool Font::Init(const string& Filename, const size_t Size)
+bool Font::Init(const string& Filename,
+                const size_t Size)
 {
   if (SDLFont) {
     TTF_CloseFont(SDLFont);
@@ -44,32 +41,26 @@ bool Font::Init(const string& Filename, const size_t Size)
     return true;
   }
 
-  std::cout << "Font: " << path << " failed to load." << std::endl;
+  cout << "Font: " << path << " failed to load." << endl;
 
   return false;
 }
 
-/** @brief GetHeight
-  *
-  * @todo: document this function
+/** @brief Get font height
   */
 size_t Font::GetHeight()
 {
   return TTF_FontHeight(SDLFont);
 }
 
-/** @brief GetLineSkip
-  *
-  * @todo: document this function
+/** @brief Get font line skip
   */
 size_t Font::GetLineSkip()
 {
-  return TTF_FontLineSkip(SDLFont);
+  return 0.5 * TTF_FontLineSkip(SDLFont);
 }
 
-/** @brief GetWidth
-  *
-  * @todo: document this function
+/** @brief Return the size of the surface the text would need
   */
 size_t Font::GetWidth(const string& Text)
 {
@@ -81,9 +72,7 @@ size_t Font::GetWidth(const string& Text)
   return width;
 }
 
-/** @brief GetSize
-  *
-  * @todo: document this function
+/** @brief Return the size of the surface the text would need
   */
 size_t_pair Font::GetSize(const string& Text)
 {

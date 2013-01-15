@@ -1,28 +1,75 @@
 #include "book.h"
 #include "page.h"
 #include "tokens.h"
+#include "storyquery.h"
 
 /** @brief Open book of agiven title
   *
   * open the file containing the story and feed it to StoryDefinition to parse
   * one keyword block at a time
   */
-bool Book::Open(const string& Title)
+bool Book::OpenBook(const string& Title)
 {
+  Assets.clear();
   BookTitle = Title;
   string filename = STORY_DIR + BookTitle + "/story";
 
+  BookSession.Name = "FirstRead";
+  BookSession.BookName = BookTitle;
+
+  BookOpen = OpenStory(filename, BookStory, BookSession);
+
+  Media.CreateAssets(Assets, BookTitle);
+
+  return BookOpen;
+}
+
+bool Book::ShowMenu()
+{
+  MenuOpen = true;
+  return MenuOpen;
+}
+
+bool Book::HideMenu()
+{
+  MenuOpen = !BookOpen;
+  return BookOpen;
+}
+
+bool Book::CloseBook()
+{
+  BookOpen = false;
+  // do saving here
+  return true;
+}
+
+bool Book::OpenMenu()
+{
+  GameSession.Name = "game";
+  GameSession.BookName = "menu";
+
+  return OpenStory(MENU_STORY, MenuStory, GameSession);
+}
+
+bool Book::Tick(real DeltaTime)
+{
+  return Media.Tick(DeltaTime, *this);
+}
+
+bool Book::OpenStory(const string& Filename,
+                     Story& MyStory,
+                     Session& MySession)
+{
   string storyText;
   string buffer;
   ifstream story;
 
-  Assets.clear();
-  StoryDefinition.Purge();
+  MyStory.Purge();
 
-  story.open(filename.c_str());
+  story.open(Filename.c_str());
 
   if (!story.is_open()) {
-    cout << filename << " - missing file" << endl;
+    cout << Filename << " - missing file" << endl;
     return false;
   }
 
@@ -42,7 +89,7 @@ bool Book::Open(const string& Title)
         storyText = buffer;
       } else {
         // parse the text and start a new run
-        StoryDefinition.ParseKeywordDefinition(storyText);
+        MyStory.ParseKeywordDefinition(storyText);
         storyText = buffer;
       }
     } else if (FindTokenStart(buffer, token::assetBlockMark) != string::npos) {
@@ -56,26 +103,23 @@ bool Book::Open(const string& Title)
 
   // last keyword definition
   if (!storyText.empty()) {
-    StoryDefinition.ParseKeywordDefinition(storyText);
+    MyStory.ParseKeywordDefinition(storyText);
   }
 
   //finished reading the file
   story.close();
-  StoryDefinition.Fixate();
+  MyStory.Fixate();
 
-  Progress.Load("");
-
-  Progress.Name = "FirstRead";
-  Progress.BookName = Title;
-
-  // initialise reserved keywords
-  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
-    const string& name = SystemNounNames[i];
-    const Properties& systemValues = StoryDefinition.FindPage(name).PageValues;
-    Progress.UserValues[SystemNounNames[i]].AddValues(systemValues);
+  if (!MySession.Load("")) {
+    // initialise reserved keywords
+    for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+      const string& name = SystemNounNames[i];
+      const Properties& systemValues = MyStory.FindPage(name).PageValues;
+      MySession.UserValues[SystemNounNames[i]].AddValues(systemValues);
+    }
   }
 
-  Progress.Fixate();
+  MySession.Fixate();
 
   return true;
 }
@@ -96,8 +140,8 @@ bool Book::AddAssetDefinition(const string& StoryText)
   }
 
   // get the strings [$name=def]
-  string assetName = cutString(text, namePos.X+2, defPos);
-  string assetDefinition = cutString(text, defPos+1, namePos.Y);
+  string assetName = CutString(text, namePos.X+2, defPos);
+  string assetDefinition = CutString(text, defPos+1, namePos.Y);
 
   if (!assetName.empty() && !assetDefinition.empty()) {
     Assets.push_back(string_pair(assetName, assetDefinition));
@@ -106,73 +150,99 @@ bool Book::AddAssetDefinition(const string& StoryText)
   return true;
 }
 
-/** @brief ValidateKeywords
-  *
-  * @todo: document this function
+/** @brief fill the result with nouns that should remain highlighted
   */
-void Book::GetNouns(Properties& Result)
+void Book::GetStoryNouns(Properties& Result) const
 {
-  Result += Progress.GetSystemValues(systemPlace);
-  Result += Progress.GetSystemValues(systemExits);
-  Result += Progress.GetSystemValues(systemNouns);
+  Result += BookSession.GetSystemValues(systemPlace);
+  Result += BookSession.GetSystemValues(systemExits);
+  Result += BookSession.GetSystemValues(systemNouns);
 }
 
-/** @brief ValidateKeywords
-  *
-  * @todo: document this function
+/** @brief return true if the queue has pending actions
   */
-bool Book::Tick()
+bool Book::IsActionQueueEmpty() const
 {
-  return !(Progress.GetSystemValues(systemQueue).IsEmpty());
-}
-
-/** @brief Get list of verbs of the noun
-  *
-  * return the verbs which do not fail their top level conditions
-  * \return string with verbs as keywords
-  */
-string Book::GetVerbList(const string& Noun)
-{
-  string Text;
-  vector<string> Verbs = StoryDefinition.GetVerbs(Progress, Noun);
-  for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
-    if (i) {
-      Text += "\n- <";
-    } else {
-      Text += "- <";
-    }
-    Text += Verbs[i];
-    Text += ">";
+  if (MenuOpen) {
+    return GameSession.GetSystemValues(systemQueue).IsEmpty();
+  } else {
+    return BookSession.GetSystemValues(systemQueue).IsEmpty();
   }
-
-  return Text;
 }
 
 /** @brief Get list of verbs of the noun
-  *
-  * return the verbs which do not fail their top level conditions
-  * \return string with verbs as keywords
+  * \return the verbs which do not fail their top level conditions
   */
-bool Book::GetChoice(string_pair& Choice)
+const string Book::GetStoryVerbs(const string& Noun)
+{
+  string text; // discarded
+  StoryQuery query(*this, BookStory, BookSession, text);
+  return query.GetVerbs(Noun).PrintKeywordList("\n");
+}
+
+/** @brief Get list of verbs of the noun
+  * \return the verbs which do not fail their top level conditions
+  */
+const string Book::GetMenuVerbs(const string& Noun)
+{
+  string text; // discarded
+  StoryQuery query(*this, MenuStory, GameSession, text);
+  return query.GetVerbs(Noun).PrintKeywordList("\n");
+}
+
+/** @brief If the first element of the pair is a complete action
+  * seperate it and fill the second element and return true
+  */
+bool Book::GetChoice(string_pair& Choice) const
 {
   // is it a noun:verb?
   size_t scopePos = FindTokenEnd(Choice.X, token::scope);
   if (scopePos != string::npos) {
     // rearange the noun:verb into proper places
-    Choice.Y = cutString(Choice.X, scopePos+1, Choice.X.size());
-    Choice.X = cutString(Choice.X, 0, scopePos);
+    Choice.Y = CutString(Choice.X, scopePos+1, Choice.X.size());
+    Choice.X = CutString(Choice.X, 0, scopePos);
     return true;
   }
   return false;
 }
 
-/** @brief Read
-  *
-  * this is what the reader sends to the book to get the resulting text
-  */
-void Book::SetAction(const string_pair& Choice)
+void Book::SetStoryAction(const string_pair& Choice)
 {
-  Progress.GetSystemValues(systemQueue).AddValue(Choice.X + ":" + Choice.Y);
+  SetAction(Choice, BookSession);
+}
+
+void Book::SetAction(const string_pair& Choice, Session& MySession)
+{
+  // parse [noun=value:verb] which is in pair(noun=value, verb) form
+  const size_t assignPos = FindTokenEnd(Choice.X, token::assign);
+  string action;
+  if (assignPos != string::npos) {
+    action += CutString(Choice.X, 0, assignPos);
+    action += ":";
+    action += Choice.Y;
+    MySession.GetSystemValues(systemQueue).AddValue(Choice.X);
+    MySession.GetSystemValues(systemQueue).AddValue(action);
+  } else {
+    action += Choice.X;
+    action += ":";
+    action += Choice.Y;
+  }
+  MySession.GetSystemValues(systemQueue).AddValue(action);
+}
+
+void Book::SetMenuAction(const string_pair& Choice)
+{
+  SetAction(Choice, GameSession);
+}
+
+string Book::ExecuteStoryAction()
+{
+  return ExecuteAction(BookStory, BookSession);
+}
+
+string Book::ExecuteMenuAction()
+{
+  return ExecuteAction(MenuStory, GameSession);
 }
 
 /** @brief Read the book by executing actions on the queue
@@ -180,41 +250,55 @@ void Book::SetAction(const string_pair& Choice)
   * and during execution is the only value on the queue
   * at the end of execution the whole queue is cleared
   */
-string Book::Action()
+string Book::ExecuteAction(Story& MyStory,
+                           Session& MySession)
 {
-  Properties& actions = Progress.GetSystemValues(systemQueue);
+  Properties& actions = MySession.GetSystemValues(systemQueue);
 
-  string pageSource;
+  string pageText;
+  StoryQuery query(*this, MyStory, MySession, pageText);
+
   const size_t safety = 1000; // to stop user generated infite loops
   size_t i = 0;
   // collect all the queue values here to look for system calls
   Properties pool;
   pool.AddValues(actions);
 
-  while (pool.TextValues.size() > i && i < safety) {
-    const string& expression = pool.TextValues[i];
+  while (pool.TextValues.size() > i) {
+    if (i > safety) {
+      LOG(pool.TextValues[i] + " - possible infinite loop, aborting");
+      break;
+    }
 
     // only the currently executed call is present during execution
     actions.Reset();
+    const string& expression = pool.TextValues[i];
     actions.AddValue(expression);
 
-    pageSource = StoryDefinition.Action(Progress);
+    // call the actions scheduled for every turn
+    query.ExecuteExpression(CALLS, CALLS_CONTENTS);
+    // only one value present during this call, unless it has been removed
+    query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);
+
     // if the execution added more actions, add the to the pool
     pool.AddValues(actions);
     ++i;
   }
 
   actions.Reset();
-  Progress.ValuesChanged = true;
+  MySession.ValuesChanged = true;
 
-  return pageSource + "\n";
+  return pageText + "\n";
 }
 
-/** @brief Read the start of the book
+/** @brief This returns the text for the quick menu
   */
-string Book::QuickMenu()
+string Book::GetQuickMenu()
 {
-  const string pageSource = StoryDefinition.QuickMenu(Progress);
+  string pageText;
 
-  return pageSource + "\n";
+  StoryQuery query(*this, BookStory, BookSession, pageText);
+  query.ExecuteExpression(QUICK, QUICK_CONTENTS);
+
+  return pageText + "\n";
 }

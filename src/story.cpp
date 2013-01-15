@@ -19,7 +19,7 @@ Story::~Story()
 
 void Story::Purge()
 {
-  page_it it = Pages.begin();
+  auto it = Pages.begin();
   while (it != Pages.end()) {
     delete it->second;
     ++it;
@@ -50,13 +50,13 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
                                     defPos.Y);
 
   // cut the text inside <>
-  string keyword = cutString(text, keyPos.X+1, keyPos.Y);
+  string keyword = CutString(text, keyPos.X+1, keyPos.Y);
   // and the definition that follows
-  string pageText = cutString(text, defPos.Y+1);
+  string pageText = CutString(text, defPos.Y+1);
 
   // check if the keyword contains a pattern name
   if (patPos.X != string::npos) {
-    const string pattern = cutString(text, patPos.X+1, patPos.Y);
+    const string pattern = CutString(text, patPos.X+1, patPos.Y);
     // try find the pattern in the defined patterns
     map<string, string>::iterator it = Patterns.find(pattern);
 
@@ -74,7 +74,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
       // append pattern text above page text
       if (it != Patterns.end()) {
         // exclude the pattern name from the keyword
-        keyword = cutString(text, keyPos.X+1, patPos.X);
+        keyword = CutString(text, keyPos.X+1, patPos.X);
         pageText = PrependPattern(keyword, pageText, it->first, it->second);
       } else {
         LOG(pattern + " - pattern definition missing, define before using it");
@@ -84,7 +84,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   }
 
   // check if it's already defined
-  page_it it = Pages.find(keyword);
+  auto it = Pages.find(keyword);
   if (it != Pages.end()) {
     LOG(keyword + " - already defined");
     return false;
@@ -94,7 +94,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   Page* page = new Page(pageText);
 
   if (valuesPos.X != string::npos) {
-    page->PageValues = Properties(cutString(text, valuesPos.X+1, defPos.Y));
+    page->PageValues = Properties(CutString(text, valuesPos.X+1, defPos.Y));
   }
 
   Pages[keyword] = page; // parsing done in the constructor
@@ -126,66 +126,4 @@ string Story::PrependPattern(const string& Keyword,
   }
 
   return text + PageText;
-}
-
-string Story::Read(Session& Progress,
-                   const string& Noun,
-                   const string& VerbName)
-{
-  string pageText;
-  StoryQuery query(Progress, pageText, *this);
-
-  const Page& page = FindPage(Noun);
-  const Verb& verb = page.GetVerb(VerbName);
-
-  query.ExecuteBlock(Noun, verb.BlockTree);
-
-  return query.Text;
-}
-
-string Story::Action(Session& Progress)
-{
-  string pageText;
-  StoryQuery query(Progress, pageText, *this);
-
-  // call the actions scheduled for every turn
-  query.ExecuteExpression(CALLS, CALLS_CONTENTS);
-  // only one value present during this call, unless it has been removed
-  query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);
-
-  return query.Text;
-}
-
-string Story::QuickMenu(Session& Progress)
-{
-  string pageText;
-  StoryQuery query(Progress, pageText, *this);
-
-  query.ExecuteExpression(QUICK, QUICK_CONTENTS);
-
-  return query.Text;
-}
-
-/** \brief get list of active verbs
- *
- * \return array of verbs that pass their top level condition
- */
-vector<string> Story::GetVerbs(Session& Progress,
-                               const string& Noun)
-{
-  string text; // discarded
-  StoryQuery query(Progress, text, *this);
-  vector<string> verbs;
-  const Page& page = FindPage(Noun);
-
-  for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
-    const Verb& verb = page.Verbs[i];
-    if (!verb.VisualName.empty()) {
-      if (query.ExecuteExpression(Noun, verb.BlockTree.Expression)) {
-        verbs.push_back(verb.VisualName);
-      }
-    }
-  }
-
-  return verbs;
 }

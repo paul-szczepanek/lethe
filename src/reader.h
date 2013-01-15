@@ -2,16 +2,16 @@
 #define READER_H
 
 #include "main.h"
-#include "textbox.h"
 #include "book.h"
+#include "textbox.h"
 #include "imagebox.h"
 #include "layout.h"
-#include "mediamanager.h"
 #include "surface.h"
 #include "font.h"
+#include "input.h"
 
 const size_t NUM_LAYOUTS = 2;
-const real REDRAW_TIMEOUT = 1.0;
+const real REDRAW_TIMEOUT = 5.0;
 const real MIN_TIMEOUT = 0.1;
 
 class Book;
@@ -20,21 +20,6 @@ enum orientation {
   landscape,
   portrait,
   ORIENTATION_MAX
-};
-
-struct MouseState {
-  MouseState ()
-    : X(0), Y(0), Left(false), Middle(false), Right(false),
-      LeftUp(false), MiddleUp(false), RightUp(false) { };
-  ~MouseState () { };
-  Uint16 X;
-  Uint16 Y;
-  bool Left;
-  bool Middle;
-  bool Right;
-  bool LeftUp;
-  bool MiddleUp;
-  bool RightUp;
 };
 
 class Reader
@@ -46,19 +31,23 @@ public:
   bool Init();
   bool Tick(real DeltaTime);
 
+private:
   void RedrawScreen(real DeltaTime);
-  void PrintFPS(real DeltaTime);
   void DrawWindows();
   void DrawBackdrop();
+  void PrintFPS(real DeltaTime);
 
-  void ProcessInput();
+  bool ProcessInput(real DeltaTime);
 
-  void ReadBook();
+  bool ReadBook();
+  bool ReadMenu();
 
   size_t SetLayout(size_t LayoutIndex = NUM_LAYOUTS);
   size_t FixLayout();
   Layout& GetCurrentLayout();
 
+public:
+  string MenuSource;
   string PageSource;
   string QuickMenuSource;
 
@@ -73,7 +62,6 @@ private:
   Surface Backdrop;
 
   // media
-  MediaManager Media;
   Font FontMain;
   Font FontSmall;
   Font FontTitle;
@@ -82,8 +70,7 @@ private:
   // logic
   Book MyBook;
   string_pair KeywordAction;
-  MouseState Mouse;
-  bool Quit = false;
+  MouseState Mouse; // we want to remember mouse position between clicks
 
   // layout
   orientation CurrentOrientation = landscape;
@@ -94,10 +81,10 @@ private:
   ImageBox MainImage;
   TextBox MainText;
   TextBox QuickMenu;
-  WindowBox MainMenu;
+  WindowBox ReaderButtons;
 
   // popups
-  TextBox ChoiceMenu;
+  TextBox MainMenu;
   TextBox VerbMenu;
 
   real Timeout = MIN_TIMEOUT;

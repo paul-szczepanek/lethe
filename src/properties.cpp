@@ -16,17 +16,50 @@ Properties::Properties(const string& Value) : IntValue(0)
 
     // is it a number?
     if (Value[pos] == token::Start[token::number]) {
-      IntValue = intoInt(cutString(Value, pos+1, endPos));
+      IntValue = IntoInt(CutString(Value, pos+1, endPos));
     } else {
       // in case there is an escaped # (madness)
       if (Value[pos] == '\\') {
         ++pos;
       }
-      AddValue(cutString(Value, pos, endPos));
+      AddValue(CutString(Value, pos, endPos));
     }
 
     pos = ++endPos;
   }
+}
+
+
+/** @brief return string with verbs as keywords
+  */
+const string Properties::PrintKeywordList(const string& Separator) const
+{
+  string text;
+  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+    if (i && i < for_size + 1) {
+      text += Separator;
+    }
+    text += "<";
+    text += TextValues[i];
+    text += ">";
+  }
+
+  return text;
+}
+
+/** @brief return string with verbs as keywords
+  */
+const string Properties::PrintPlainList(const string& Separator) const
+{
+  string text;
+  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+    if (i && i < for_size + 1) {
+      text += Separator;
+    }
+    text += TextValues[i];
+  }
+
+  return text;
 }
 
 /** @brief Add all TextValues from the pased in Values if needed

@@ -6,17 +6,15 @@ const Uint16 RIGHT_MARGIN = BLOCK_SIZE;
 const real DRAG_TIMEOUT = 0.1;
 
 /** @brief Set page text
-  *
   * resets the cached pages
   */
-void TextBox::SetText(string NewText)
+void TextBox::SetText(const string NewText)
 {
   Text = NewText;
   Reset();
 }
 
 /** @brief Reset Page
-  *
   * clears cached surfaces
   */
 void TextBox::Reset()
@@ -53,7 +51,6 @@ bool TextBox::GetSelectedKeyword(string& Keyword)
 }
 
 /** @brief Deselect keywords
-  *
   * reset the currently selected keyword
   */
 bool TextBox::Deselect()
@@ -67,7 +64,6 @@ bool TextBox::Deselect()
 }
 
 /** @brief Select keywords
-  *
   * \return true if we hit a keyword
   */
 bool TextBox::Select(MouseState& Mouse,
@@ -156,25 +152,25 @@ size_t_pair TextBox::GetMaxSize()
   size_t newline = 0;
   size_t pos = 0;
 
+  maxSize.Y += lineSkip;
   LineHeight = FontMain->GetHeight() + lineSkip;
 
   while (newline != string::npos) {
     newline = FindCharacter(Text, '\n', pos);
-    text = cutString(Text, pos, newline);
+    text = CutString(Text, pos, newline);
     maxSize.X = max(maxSize.X, FontMain->GetWidth(text));
     maxSize.Y += LineHeight;
     pos = newline;
     ++pos;
   }
 
-  maxSize.X += BLOCK_SIZE * 1.5;
-  maxSize.Y += BLOCK_SIZE + lineSkip;
+  maxSize.X += BLOCK_SIZE;
+  maxSize.Y += BLOCK_SIZE;
 
   return maxSize;
 }
 
 /** @brief word wrap and find keywords
-  *
   * fills in Lines and Keywords
   */
 bool TextBox::BreakText()
@@ -209,15 +205,15 @@ bool TextBox::BreakText()
                                     pos, namePos.Y);
 
     // copy up to the keyword
-    cleaned += cutString(Text, pos, namePos.X);
+    cleaned += CutString(Text, pos, namePos.X);
     pos = namePos.Y + 1;
 
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
-      realName = cutString(Text, realNamePos.X+1, realNamePos.Y);
+      realName = CutString(Text, realNamePos.X+1, realNamePos.Y);
       namePos.Y = realNamePos.X;
     } else {
-      realName = cutString(Text, namePos.X+1, namePos.Y);
+      realName = CutString(Text, namePos.X+1, namePos.Y);
     }
 
     // check keywords found in a position earlier than set threshold to see
@@ -231,7 +227,7 @@ bool TextBox::BreakText()
     }
 
     // copy the keyword
-    cleaned += cutString(Text, namePos.X+1, namePos.Y);
+    cleaned += CutString(Text, namePos.X+1, namePos.Y);
     // fix up the position for after removing the tokens and real name
     namePos.X -= skip;
     namePos.Y -= ++skip; // +1 for opening <
@@ -248,7 +244,7 @@ bool TextBox::BreakText()
 
   // add remaining characters after the last keyword
   if (pos < length) {
-    cleaned += cutString(Text, pos);
+    cleaned += CutString(Text, pos);
   }
 
   length = cleaned.size();
@@ -278,7 +274,7 @@ bool TextBox::BreakText()
   }
 
   if (skip > 0) {
-    cleaned = cutString(cleaned, 0, length - skip);
+    cleaned = CutString(cleaned, 0, length - skip);
   }
 
   Lines.clear();
@@ -322,7 +318,7 @@ bool TextBox::BreakText()
     }
 
     // test print the line
-    string line = cutString(cleaned, lastLineEnd, pos);
+    string line = CutString(cleaned, lastLineEnd, pos);
 
     // did we fit in?
     if (FontMain->GetWidth(line) < PageClip.W || firstWord) {
@@ -331,7 +327,7 @@ bool TextBox::BreakText()
       // overflow, revert to last position and print that
       flush = true;
       pos = lastPos; // include the character so the sizes match
-      line = cutString(cleaned, lastLineEnd, pos);
+      line = CutString(cleaned, lastLineEnd, pos);
     }
 
     ++pos;
@@ -373,13 +369,13 @@ bool TextBox::BreakText()
 
         // find where the keyword starts
         if (beg) {
-          const string& keywordStart = cutString(line, 0, beg);
+          const string& keywordStart = CutString(line, 0, beg);
           newKey.Size.X = FontMain->GetWidth(keywordStart);
         }
         newKey.Size.Y = PageHeight;
 
         // find where the keyword ends
-        const string& keywordEnd = cutString(line, beg, end);
+        const string& keywordEnd = CutString(line, beg, end);
         newKey.Size.W = FontMain->GetWidth(keywordEnd);
         newKey.Size.H = fontHeight;
 
@@ -391,6 +387,10 @@ bool TextBox::BreakText()
     lastLineEnd = lineEnd;
   }
 
+  if (PageHeight) {
+    PageHeight -= lineSkip;
+  }
+
   SelectedKeyword = Keywords.size();
 
   // scroll to end
@@ -400,7 +400,6 @@ bool TextBox::BreakText()
 }
 
 /** @brief returns the surface with word wrapped text of the current page
-  *
   * updates the page if needed, otherwise returns the cached page
   */
 void TextBox::RefreshPage()
@@ -420,10 +419,12 @@ void TextBox::RefreshPage()
 
     Rect dst;
     dst.X = 0;
+    dst.Y = 0;
 
     for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
-      dst.Y = LineHeight * i;
+
       PageSurface.PrintText(dst, *FontMain, Lines[i], 255, 255, 255);
+      dst.Y += LineHeight;
     }
 
     PageSurface.SetClip(PageClip);
@@ -431,7 +432,6 @@ void TextBox::RefreshPage()
 }
 
 /** @brief returns the surface with the backdrop and highligths for the keywords
-  *
   * only updates if required, otherwise returns cached
   */
 void TextBox::RefreshHighlights()

@@ -137,10 +137,10 @@ size_t_pair FindToken(const string& Text,
   size_t type = token::Type[TokenName];
 
   while (pos < End) {
-    if (isSpecial(Text, pos, tokenA)) {
+    if (IsSpecial(Text, pos, tokenA)) {
       if (type & token::isWide) {
         // if it's two char token check for other char and return if found
-        if (isSpecial(Text, pos+1, tokenB)) {
+        if (IsSpecial(Text, pos+1, tokenB)) {
           return size_t_pair(pos, pos+1);
         }
       } else if (type & token::isPaired) {
@@ -149,10 +149,10 @@ size_t_pair FindToken(const string& Text,
         size_t matchCount = 1;
 
         while (++match <= End) {
-          if (isSpecial(Text, match, tokenA)) {
+          if (IsSpecial(Text, match, tokenA)) {
             ++matchCount;
           }
-          if (isSpecial(Text, match, tokenB) && (--matchCount == 0)) {
+          if (IsSpecial(Text, match, tokenB) && (--matchCount == 0)) {
             return size_t_pair(pos, match);
           }
         }
@@ -189,10 +189,10 @@ size_t FindTokenStart(const string& Text,
   size_t type = token::Type[TokenName];
 
   while (pos < End) {
-    if (isSpecial(Text, pos, tokenA)) {
+    if (IsSpecial(Text, pos, tokenA)) {
       if (type & token::isWide) {
         // if it's two char token check for other char and return if found
-        if (isSpecial(Text, pos+1, tokenB)) {
+        if (IsSpecial(Text, pos+1, tokenB)) {
           return pos;
         }
       } else if (type & token::isPaired) {
@@ -201,10 +201,10 @@ size_t FindTokenStart(const string& Text,
         size_t matchCount = 1;
 
         while (++match <= End) {
-          if (isSpecial(Text, match, tokenA)) {
+          if (IsSpecial(Text, match, tokenA)) {
             ++matchCount;
           }
-          if (isSpecial(Text, match, tokenB) && (--matchCount == 0)) {
+          if (IsSpecial(Text, match, tokenB) && (--matchCount == 0)) {
             return pos;
           }
         }
@@ -241,10 +241,10 @@ size_t FindTokenEnd(const string& Text,
   size_t type = token::Type[TokenName];
 
   while (pos < End) {
-    if (isSpecial(Text, pos, tokenA)) {
+    if (IsSpecial(Text, pos, tokenA)) {
       if (type & token::isWide) {
         ++pos;
-        if ((pos < End) && isSpecial(Text, pos, tokenB)) {
+        if ((pos < End) && IsSpecial(Text, pos, tokenB)) {
           return pos;
         } else {
           break;
@@ -252,10 +252,10 @@ size_t FindTokenEnd(const string& Text,
       } else if (type & token::isPaired) {
         size_t matchCount = 1;
         while (++pos < End) {
-          if (isSpecial(Text, pos, tokenA)) {
+          if (IsSpecial(Text, pos, tokenA)) {
             ++matchCount;
           }
-          if (isSpecial(Text, pos, tokenB) && (--matchCount == 0)) {
+          if (IsSpecial(Text, pos, tokenB) && (--matchCount == 0)) {
             return pos;
           }
         }
@@ -286,7 +286,7 @@ size_t FindCharacter(const string& Text,
   size_t pos = Start;
 
   while (pos < End) {
-    if (isSpecial(Text, pos, Char)) {
+    if (IsSpecial(Text, pos, Char)) {
       return pos;
     }
     ++pos;
@@ -305,7 +305,7 @@ void StripComments(string& Text)
   size_t pos = 0;
 
   while (pos < length) {
-    if (isSpecial(Text, pos, token::Start[token::comment]) &&
+    if (IsSpecial(Text, pos, token::Start[token::comment]) &&
         (pos+1 < length) && Text[pos+1] == token::End[token::comment]) {
       // ignore the rest of the line
       Text = Text.substr(0, pos);

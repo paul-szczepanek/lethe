@@ -17,12 +17,6 @@ public:
 
   bool ParseKeywordDefinition(const string& StoryText);
 
-  string Read(Session& Progress, const string& Noun, const string& VerbName);
-  string Action(Session& Progress);
-  string QuickMenu(Session& Progress);
-
-  vector<string> GetVerbs(Session& Progress, const string& Noun);
-
   inline Page& FindPage(const string& Noun);
 
 private:
@@ -36,13 +30,11 @@ private:
   static Page MissingPage;
 };
 
-typedef map<string, Page*>::iterator page_it;
-
 /** @brief Return page for noun
   */
 Page& Story::FindPage(const string& Noun)
 {
-  page_it it = Pages.find(Noun);
+  auto it = Pages.find(Noun);
 
   if (it != Pages.end()) {
     return *(it->second);

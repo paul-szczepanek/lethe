@@ -58,15 +58,14 @@ void WindowBox::SetSize(Rect NewSize)
 }
 
 /** @brief Reset
-  *
-  * @todo: document this function
   */
 void WindowBox::Reset()
 {
 
 }
 
-
+/** @brief Open the frame file and construct the image of the frame
+  */
 bool WindowBox::BuildFrame()
 {
   // only bother if we have a frame template

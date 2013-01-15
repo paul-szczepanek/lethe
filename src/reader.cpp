@@ -1,7 +1,6 @@
 #include "reader.h"
-#include "book.h"
-#include "mediamanager.h"
 #include "audio.h"
+#include "input.h"
 
 const string FRAME_SOLID = "solid";
 const string FRAME_TEXT = "text";
@@ -11,10 +10,8 @@ const string FRAME_IMAGE = "image";
 Reader::Reader(int ReaderWidth,
                int ReaderHeight,
                int ReaderBPP)
+  : BPP(ReaderBPP), Width(ReaderWidth), Height(ReaderHeight)
 {
-  BPP = ReaderBPP;
-  Width = ReaderWidth;
-  Height = ReaderHeight;
 }
 
 Reader::~Reader()
@@ -36,9 +33,10 @@ bool Reader::Init()
     return false;
   }
 
+  //*
   if (!Audio::SystemInit()) {
     return false;
-  }
+  } //*/
 
   if (!Screen.InitScreen(Width, Height, BPP)) {
     return false;
@@ -59,7 +57,6 @@ bool Reader::Init()
   }
 
   // load layouts
-
   // TODO: read from file
   string layoutStrings[ORIENTATION_MAX][NUM_LAYOUTS] = {
     {
@@ -81,24 +78,26 @@ bool Reader::Init()
   QuickMenu.Init(FontMain, FRAME_MENU, BPP);
   MainText.Init(FontMain, FRAME_TEXT, BPP);
   MainImage.Init(FontMain, FRAME_IMAGE, BPP);
-  MainMenu.Init(FontMain, FRAME_MENU, BPP);
+  ReaderButtons.Init(FontMain, FRAME_MENU, BPP);
+  MainMenu.Init(FontMain, FRAME_SOLID, BPP);
+  VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
 
-  MainMenu.AspectW = 100;
-  MainMenu.AspectH = 2;
   MainText.AspectW = 4;
   QuickMenu.AspectW = 4;
   MainImage.AspectW = 4;
   MainImage.AspectH = 2;
+  ReaderButtons.AspectW = 100;
+  ReaderButtons.AspectH = 2;
 
   SetLayout();
 
-  ChoiceMenu.Init(FontMain, FRAME_SOLID, BPP);
-  VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
-
-  // start reading the book TODO: move this to a menu
-  MyBook.Open("test");
-
-  Media.CreateAssets(MyBook.GetAssetDefinitions(), MyBook.BookTitle);
+  // Main Menu window
+  MyBook.OpenMenu();
+  Rect mainWindow = { Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
+                      BLOCK_SIZE, BLOCK_SIZE
+                    };
+  MainMenu.SetSize(mainWindow);
+  MainMenu.Visible = true;
 
 #ifdef LOGGER
   GLog = "Log";
@@ -112,184 +111,184 @@ bool Reader::Init()
   return true;
 }
 
-void Reader::ProcessInput()
-{
-  SDL_Event event;
-  while (SDL_PollEvent(&event)) {
-    switch (event.type) {
-      case SDL_QUIT:
-        Quit = true;
-        break;
-
-      case SDL_KEYDOWN:
-        RedrawPending = true;
-        if (event.key.keysym.sym == SDLK_ESCAPE) {
-          Quit = true;
-        } else if (event.key.keysym.sym == SDLK_LEFTBRACKET) {
-          --(GetCurrentLayout().Split);
-          SetLayout();
-        } else if (event.key.keysym.sym == SDLK_RIGHTBRACKET) {
-          ++(GetCurrentLayout().Split);
-          SetLayout();
-        } else if (event.key.keysym.sym == SDLK_l) {
-          SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
-        } else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
-          MainText.Pane.PaneScroll = 100;
-        } else if (event.key.keysym.sym == SDLK_PAGEUP) {
-          MainText.Pane.PaneScroll = -100;
-        } else if (event.key.keysym.sym == SDLK_r) {
-          // temp for debug help
-          MyBook.Open("test");
-          PageSource = MyBook.Action();
-          MainText.SetText(PageSource);
-        }
-        break;
-
-      case SDL_MOUSEBUTTONDOWN:
-        RedrawPending = true;
-        if (event.button.button == SDL_BUTTON_LEFT) {
-          Mouse.Left = true;
-        } else if (event.button.button == SDL_BUTTON_RIGHT) {
-          Mouse.Right = true;
-        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
-          Mouse.Middle = true;
-        }
-        break;
-
-      case SDL_MOUSEBUTTONUP:
-        RedrawPending = true;
-        if (event.button.button == SDL_BUTTON_LEFT) {
-          Mouse.Left = false;
-          Mouse.LeftUp = true;
-        } else if (event.button.button == SDL_BUTTON_RIGHT) {
-          Mouse.Right = false;
-          Mouse.RightUp = true;
-        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
-          Mouse.Middle = false;
-          Mouse.MiddleUp = true;
-        }
-        break;
-    }
-
-    Mouse.X = event.button.x;
-    Mouse.Y = event.button.y;
-  }
-}
-
 bool Reader::Tick(real DeltaTime)
 {
-  if (TimeoutTimer > 0) {
+  if (TimeoutTimer >= 0) {
     TimeoutTimer -= DeltaTime;
-  }
+  } else {
+    ProcessInput(DeltaTime);
 
-  if (MyBook.Tick()) {
-    TimeoutTimer = Timeout;
-    ReadBook();
-  }
-
-  // do a forced update
-  RedrawCountdown -= DeltaTime;
-  if (RedrawCountdown < 0.f) {
-    RedrawPending = true;
-  }
-
-  if (TimeoutTimer < 0) {
-    ProcessInput();
-
-    if (Mouse.Left) {
-      if (ChoiceMenu.Visible) {
-        ChoiceMenu.Select(Mouse, DeltaTime);
-      } else if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
-        VerbMenu.Visible = false;
-        KeywordAction.clear();
-      } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
-        QuickMenu.Deselect();
-        MainText.Select(Mouse, DeltaTime);
-      }
-      RedrawPending = true;
-    } else if (Mouse.LeftUp) {
-      Mouse.LeftUp = false;
-      // touch released, see if we cliked on something interactive
-      if (ChoiceMenu.Visible) {
-        // todo: make choice
-      } else {
-        if (VerbMenu.Visible) {
-          if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
-            ReadBook();
-          }
-          VerbMenu.Visible = false;
-          KeywordAction.clear();
-          VerbMenu.Deselect();
-        } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
-
-        } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
-
-        }
-
-        QuickMenu.Deselect();
-        MainText.Deselect();
-
-        if (!KeywordAction.X.empty()) {
-          if (MyBook.GetChoice(KeywordAction)) {
-            ReadBook();
-          } else {
-            // we clicked on a keyword, create a menu full of verbs
-            string VerbsText = MyBook.GetVerbList(KeywordAction.X);
-            if (!VerbsText.empty()) {
-              VerbMenu.Visible = true;
-              VerbMenu.SetText(VerbsText);
-              const size_t_pair& maxSize = VerbMenu.GetMaxSize();
-              Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
-              VerbMenu.SetSize(boxSize);
-            }
-          }
-        }
-      }
+    if (MyBook.MenuOpen) {
+      RedrawPending |= ReadMenu();
+    } else if (MyBook.BookOpen) {
+      RedrawPending |= ReadBook();
+    } else {
+      return false;
     }
+
+    MainMenu.Visible = MyBook.MenuOpen;
   }
 
-  RedrawPending |= Media.Tick(DeltaTime, MyBook);
+  RedrawPending |= MyBook.Tick(DeltaTime);
 
-  if (RedrawPending) {
+  if (RedrawPending || RedrawCountdown < 0.f) {
     RedrawScreen(DeltaTime);
     RedrawPending = false;
     RedrawCountdown = REDRAW_TIMEOUT;
+  } else {
+    RedrawCountdown -= DeltaTime;
   }
 
-  return !Quit;
+  return true;
 }
-/** @brief ReadBook
-  *
-  * @todo: document this function
+
+/** @brief Check the story for pending actions and execute them if needed
   */
-void Reader::ReadBook()
+bool Reader::ReadBook()
 {
-  if (KeywordAction.full()) {
-    MyBook.SetAction(KeywordAction);
-    KeywordAction.clear();
+  if (MyBook.IsActionQueueEmpty()) {
+    return false;
   }
 
   // this is how far into the text the valid keywords get checked
   MainText.ValidateKeywords = PageSource.size();
 
-  // get new text
-
-  PageSource += MyBook.Action();
-  QuickMenuSource = MyBook.QuickMenu();
+  PageSource += MyBook.ExecuteStoryAction();
+  QuickMenuSource = MyBook.GetQuickMenu();
 
   // clear out old keywords
   MainText.ValidKeywords.Reset();
-  MyBook.GetNouns(MainText.ValidKeywords);
+  MyBook.GetStoryNouns(MainText.ValidKeywords);
 
   MainText.SetText(PageSource);
   QuickMenu.SetText(QuickMenuSource);
+
+  TimeoutTimer = Timeout;
+  return true;
+}
+
+/** @brief Check the menu for pending actions and execute them if needed
+  */
+bool Reader::ReadMenu()
+{
+  if (MyBook.IsActionQueueEmpty()) {
+    return false;
+  }
+
+  MenuSource = MyBook.ExecuteMenuAction();
+
+  MainMenu.SetText(MenuSource);
+
+  TimeoutTimer = Timeout;
+  return true;
+}
+
+bool Reader::ProcessInput(real DeltaTime)
+{
+  KeysState keys;
+  RedrawPending = Input::Tick(Mouse, keys);
+
+  if (keys.KeyPressed) {
+    if (keys.Escape) {
+      if (MyBook.MenuOpen) {
+        MyBook.MenuOpen  = false;
+      } else {
+        MyBook.BookOpen = false;
+      }
+    } else if (keys.SplitShrink) {
+      --(GetCurrentLayout().Split);
+      SetLayout();
+    } else if (keys.SplitGrow) {
+      ++(GetCurrentLayout().Split);
+      SetLayout();
+    } else if (keys.LayoutToggle) {
+      SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
+    } else if (keys.PgDown) {
+      MainText.Pane.PaneScroll = 100;
+    } else if (keys.PgUp) {
+      MainText.Pane.PaneScroll = -100;
+    } else if (keys.Menu) {
+      if (MyBook.MenuOpen) {
+        MyBook.HideMenu();
+      } else {
+        MyBook.ShowMenu();
+      }
+    } else if (keys.ImageZoom) {
+      //
+    } else if (keys.Bookmark) {
+      //
+    }
+  }
+
+  if (Mouse.Left) {
+    if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
+      VerbMenu.Visible = false;
+      KeywordAction.clear();
+    } else if (MainMenu.Visible) {
+      MainMenu.Select(Mouse, DeltaTime);
+    } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
+      QuickMenu.Deselect();
+      MainText.Select(Mouse, DeltaTime);
+    }
+  } else if (Mouse.LeftUp) {
+    Mouse.LeftUp = false;
+    // touch released, see if we cliked on something interactive
+    // verb menu -> main menu -> quick menu -> main text
+    if (VerbMenu.Visible) {
+      if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
+        if (MainMenu.Visible) {
+          MyBook.SetMenuAction(KeywordAction);
+        } else {
+          MyBook.SetStoryAction(KeywordAction);
+        }
+      }
+      // cleanup after action
+      VerbMenu.Visible = false;
+      KeywordAction.clear();
+      VerbMenu.Deselect();
+    } else if (MainMenu.Visible) {
+      MainMenu.GetSelectedKeyword(KeywordAction.X);
+    } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
+
+    } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
+
+    }
+
+    MainMenu.Deselect();
+    QuickMenu.Deselect();
+    MainText.Deselect();
+
+    if (!KeywordAction.X.empty()) {
+      if (MyBook.GetChoice(KeywordAction)) {
+        if (MainMenu.Visible) {
+          MyBook.SetMenuAction(KeywordAction);
+        } else {
+          MyBook.SetStoryAction(KeywordAction);
+        }
+        KeywordAction.clear();
+      } else {
+        // we clicked on a keyword, create a menu full of verbs
+        const string VerbsText = MyBook.GetStoryVerbs(KeywordAction.X);
+
+        if (!VerbsText.empty()) {
+          VerbMenu.Visible = true;
+          VerbMenu.SetText(VerbsText);
+          const size_t_pair& maxSize = VerbMenu.GetMaxSize();
+          Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
+          VerbMenu.SetSize(boxSize);
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 void Reader::RedrawScreen(real DeltaTime)
 {
   DrawBackdrop();
 
-  Media.Draw();
+  MyBook.DrawImage();
 
   DrawWindows();
 
@@ -301,7 +300,6 @@ void Reader::RedrawScreen(real DeltaTime)
     GLog = GLog.substr(GLog.size() - maxlog, maxlog);
   }
   Logger->SetText(GLog);
-  Logger->Draw(); // so we can scroll it first
   Logger->Pane.PaneScroll = 10000;
   Logger->Draw();
 #endif
@@ -309,9 +307,7 @@ void Reader::RedrawScreen(real DeltaTime)
   Surface::SystemDraw();
 }
 
-/** @brief DrawBackdrop
-  *
-  * @todo: document this function
+/** @brief Draw the backdrop image, should be called first
   */
 void Reader::DrawBackdrop()
 {
@@ -343,22 +339,21 @@ void Reader::DrawWindows()
   MainImage.Draw();
   MainText.Draw();
   QuickMenu.Draw();
-  MainMenu.Draw();
+  ReaderButtons.Draw();
   // popups
+  MainMenu.Draw();
   VerbMenu.Draw();
-  ChoiceMenu.Draw();
 }
 
 void Reader::PrintFPS(real DeltaTime)
 {
-  const string& text = realIntoString(1.f / DeltaTime);
+  const real fps = min((real)1 / DeltaTime, (real)999);
+  const string& text = RealIntoString(fps);
   Surface textSurface;
   textSurface.CreateText(FontSys, text, 255, 255, 255);
   textSurface.SetAlpha(128);
   textSurface.Draw(10, 10);
 }
-
-// Layout
 
 /** @brief Try to fix the layout that failed to fit by evening out the split
   */
@@ -403,7 +398,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
         boxes[i] = &QuickMenu;
         break;
       case boxMenu:
-        boxes[i] = &MainMenu;
+        boxes[i] = &ReaderButtons;
         break;
 
       default:
@@ -518,10 +513,10 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     splitV = boxSize.Y + boxSize.H;
   }
 
-  Media.Visible = MainImage.Visible;
-
-  if (Media.Visible) {
-    Media.SetImageWindowSize(MainImage.Size);
+  if (MainImage.Visible) {
+    MyBook.ShowImage(MainImage.Size);
+  } else {
+    MyBook.HideImage();
   }
 
 #ifdef LOGGER

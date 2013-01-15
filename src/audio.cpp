@@ -63,21 +63,21 @@ bool Audio::Unload()
 bool Audio::SystemInit()
 {
   if(SDL_Init(SDL_INIT_AUDIO) < 0) {
-    std::cout << "Unable to init SDL: " << SDL_GetError() << std::endl;
+    cout << "Unable to init SDL: " << SDL_GetError() << endl;
     return false;
   }
 
   atexit(SDL_Quit);
 
   if(Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
-    std::cout << "Unable to init Mixer: " << Mix_GetError() << std::endl;
+    cout << "Unable to init Mixer: " << Mix_GetError() << endl;
     return false;
   }
 
   atexit(Mix_Quit);
 
   if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
-    std::cout << "Unable to Open Audio: " << Mix_GetError() << std::endl;
+    cout << "Unable to Open Audio: " << Mix_GetError() << endl;
     return false;
   }
 

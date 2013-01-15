@@ -23,19 +23,17 @@ int Surface::BPP = 32;
 size_t Surface::ScreenW = 0;
 size_t Surface::ScreenH = 0;
 
-/** @brief SystemInit
-  *
-  * @todo: document this function
+/** @brief Initialise the SDL
   */
 bool Surface::SystemInit()
 {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    std::cout << "Unable to init SDL: " << SDL_GetError() << std::endl;
+    cout << "Unable to init SDL: " << SDL_GetError() << endl;
     return false;
   }
 
   if (IMG_Init(IMG_INIT_PNG) < 0) {
-    std::cout << "Unable to init IMG: " << SDL_GetError() << std::endl;
+    cout << "Unable to init IMG: " << SDL_GetError() << endl;
     return false;
   }
 
@@ -44,9 +42,7 @@ bool Surface::SystemInit()
   return true;
 }
 
-/** @brief SystemDraw
-  *
-  * @todo: document this function
+/** @brief Draw the screen surface
   */
 bool Surface::SystemDraw()
 {
@@ -57,20 +53,13 @@ bool Surface::SystemDraw()
   return false;
 }
 
-/** @brief Surface
-  *
-  * @todo: document this function
-  */
 Surface::Surface(const string& Filename)
 {
   LoadImage(Filename);
 }
 
-/** @brief Surface
-  *
-  * @todo: document this function
-  */
-Surface::Surface(size_t Width, size_t Height)
+Surface::Surface(size_t Width,
+                 size_t Height)
 {
   Init(Width, Height);
 }
@@ -80,9 +69,7 @@ Surface::~Surface()
   Unload();
 }
 
-/** @brief Screen
-  *
-  * @todo: document this function
+/** @brief Prepare the screen for drawing, needs to be called first
   */
 bool Surface::InitScreen(size_t ScreenWidth,
                          size_t ScreenHeight,
@@ -100,15 +87,13 @@ bool Surface::InitScreen(size_t ScreenWidth,
   Screen = SDLSurface;
 
   if (!SDLSurface) {
-    std::cout << "Unable to set video: " << SDL_GetError() << std::endl;
+    cout << "Unable to set video: " << SDL_GetError() << endl;
   }
 
   return OnInit();
 }
 
-/** @brief LoadImage
-  *
-  * @todo: document this function
+/** @brief Load Image
   */
 bool Surface::LoadImage(const string& Filename)
 {
@@ -122,18 +107,14 @@ bool Surface::LoadImage(const string& Filename)
   return OnInit();
 }
 
-/** @brief Init
-  *
-  * @todo: document this function
+/** @brief create an empty surface of the same size as the screen
   */
 bool Surface::Init()
 {
   return Init(ScreenW, ScreenH);
 }
 
-/** @brief Init
-  *
-  * @todo: document this function
+/** @brief create an empty surface of given size
   */
 bool Surface::Init(size_t Width,
                    size_t Height)
@@ -145,9 +126,7 @@ bool Surface::Init(size_t Width,
   return OnInit();
 }
 
-/** @brief SetAlpha
-  *
-  * @todo: document this function
+/** @brief Set global surface alpha
   */
 bool Surface::SetAlpha(size_t Alpha)
 {
@@ -158,9 +137,7 @@ bool Surface::SetAlpha(size_t Alpha)
   return false;
 }
 
-/** @brief Zoom
-  *
-  * @todo: document this function
+/** @brief Enlarge or shrink the image
   */
 bool Surface::Zoom(real X,
                    real Y)
@@ -193,10 +170,7 @@ bool Surface::OnInit()
   return false;
 }
 
-
-/** @brief DrawOnto
- *
- * @todo: document this function
+/** @brief Draw onto the passed in surface at given position
  */
 bool Surface::Draw(Surface& Destination,
                    const Rect& Position)
@@ -214,9 +188,7 @@ bool Surface::Draw(Surface& Destination,
   return false;
 }
 
-/** @brief DrawOnto
- *
- * @todo: document this function
+/** @brief Draw onto the passed in surface
  */
 bool Surface::Draw(Surface& Destination)
 {
@@ -227,9 +199,7 @@ bool Surface::Draw(Surface& Destination)
   return false;
 }
 
-/** @brief Draw
-  *
-  * @todo: document this function
+/** @brief Draw onto the screen at given position
   */
 bool Surface::Draw(const Rect& Position)
 {
@@ -248,11 +218,10 @@ bool Surface::Draw(const Rect& Position)
   return false;
 }
 
-/** @brief Draw
-  *
-  * @todo: document this function
+/** @brief Draw onto the screen at X, Y
   */
-bool Surface::Draw(const size_t X, const size_t Y)
+bool Surface::Draw(const size_t X,
+                   const size_t Y)
 {
   SDL_Rect dst = { (Sint16)X, (Sint16)Y, (Uint16)W, (Uint16)H };
   if (SDLSurface && Screen) {
@@ -263,10 +232,7 @@ bool Surface::Draw(const size_t X, const size_t Y)
   return false;
 }
 
-
-/** @brief Draw
-*
-* @todo: document this function
+/** @brief Draw onto the screen
 */
 bool Surface::Draw()
 {
@@ -277,9 +243,7 @@ bool Surface::Draw()
   return false;
 }
 
-/** @brief Draw
-*
-* @todo: document this function
+/** @brief paint the surface black and transparent but keep the surface
 */
 bool Surface::Blank()
 {
@@ -289,9 +253,8 @@ bool Surface::Blank()
   }
   return false;
 }
-/** @brief Draw
-*
-* @todo: document this function
+
+/** @brief Free up the memory
 */
 bool Surface::Unload()
 {
@@ -303,9 +266,7 @@ bool Surface::Unload()
   return false;
 }
 
-/** @brief DrawRectangle
-  *
-  * @todo: document this function
+/** @brief draw rectangle on the surface
   */
 bool Surface::DrawRectangle(const Rect& Rectangle,
                             usint R,
@@ -327,9 +288,7 @@ bool Surface::DrawRectangle(const Rect& Rectangle,
   return false;
 }
 
-/** @brief PrintText
-  *
-  * @todo: document this function
+/** @brief Print the text on the current surface without replacing it
   */
 bool Surface::PrintText(const Rect& Position,
                         const Font& TextFont,
@@ -362,9 +321,7 @@ bool Surface::PrintText(const Rect& Position,
   return false;
 }
 
-/** @brief PrintText
-  *
-  * @todo: document this function
+/** @brief replaces the surface with the printed text
   */
 bool Surface::CreateText(const Font& TextFont,
                          const string& Text,
@@ -394,9 +351,7 @@ void Surface::Trim(size_t ClipW,
   Clip.Y = (H - ClipH) / 2;
 }
 
-/** @brief SetClip
-  *
-  * @todo: document this function
+/** @brief Set the Clipping rectangle
   */
 void Surface::SetClip(const Rect& NewClip)
 {

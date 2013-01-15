@@ -13,6 +13,7 @@ class MediaManager
 public:
   MediaManager() {};
   virtual ~MediaManager();
+  void Reset();
 
   bool Tick(real DeltaTime, Book& MyBook);
   void Draw();

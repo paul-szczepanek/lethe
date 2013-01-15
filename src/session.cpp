@@ -2,8 +2,9 @@
 
 bool Session::Load(const string& SessionState)
 {
-  Reset();
-  return true;
+  // if save exists
+  // Reset();
+  return false;
 }
 
 Session::Session(const string& Text) : ValuesChanged(false)
@@ -12,18 +13,18 @@ Session::Session(const string& Text) : ValuesChanged(false)
   size_t pos = 0;
   size_t endPos = Text.find('\n', pos);
 
-  Name = cutString(Text, pos, endPos);
+  Name = CutString(Text, pos, endPos);
   pos = ++endPos;
 
   const size_t length = Text.size();
 
   if (pos < length) {
     endPos = Text.find('\n', pos);
-    BookName = cutString(Text, pos, endPos);
+    BookName = CutString(Text, pos, endPos);
     pos = ++endPos;
 
     if (pos < length) {
-      SetUserValues(cutString(Text, pos, length));
+      SetUserValues(CutString(Text, pos, length));
     }
   }
 }
@@ -39,12 +40,12 @@ void Session::SetUserValues(const string& Text)
 
   while (pos < length) {
     size_t endPos = Text.find('\n', pos);
-    const string& noun = cutString(Text, pos, endPos);
+    const string& noun = CutString(Text, pos, endPos);
     pos = ++endPos;
 
     if (pos < length) {
       endPos = Text.find('\n', pos);
-      const string& valueText = cutString(Text, pos, endPos);
+      const string& valueText = CutString(Text, pos, endPos);
 
       UserValues[noun] = Properties(valueText);
       pos = ++endPos;
@@ -53,9 +54,7 @@ void Session::SetUserValues(const string& Text)
 }
 
 
-/** @brief GetSessionText
-  *
-  * @todo: document this function
+/** @brief Return the user values ready for writing to a file
   */
 string Session::GetUserValues() const
 {
@@ -93,14 +92,14 @@ void Session::Reset()
   *
   * creates a full record of progress we can retrieve later
   */
-void Session::MakeSnapshot(const string& Progress,
+void Session::MakeSnapshot(const string& BookSession,
                            const string& Noun,
                            const string& Verb)
 {
-  if (!Progress.empty()) {
+  if (!BookSession.empty()) {
     // add a new string if needed
-    if (ValuesHistory.back() != Progress) {
-      ValuesHistory.push_back(Progress);
+    if (ValuesHistory.back() != BookSession) {
+      ValuesHistory.push_back(BookSession);
     }
     // add the command and index of the progress string
     History.push_back(Snapshot(ValuesHistory.size()-1, Noun, Verb));

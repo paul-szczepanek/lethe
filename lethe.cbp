@@ -55,6 +55,8 @@
 		<Unit filename="src/image.h" />
 		<Unit filename="src/imagebox.cpp" />
 		<Unit filename="src/imagebox.h" />
+		<Unit filename="src/input.cpp" />
+		<Unit filename="src/input.h" />
 		<Unit filename="src/layout.cpp" />
 		<Unit filename="src/layout.h" />
 		<Unit filename="src/main.cpp" />

@@ -33,11 +33,11 @@
     You are tired.
   [:list]
     \nInventory:\n
-    [!Print(@self)] // show keywords for items we have
+    [!Keyword(@self)] // show keywords for items we have
   [:visible]
-    [!Print(@PLACE)] // show the keyword for the location we are in
+    [!Keyword(@PLACE)] // show the keyword for the location we are in
     \nObjects:\n
-    [!Print(@NOUNS)] // and all the things that are there
+    [!Keyword(@NOUNS)] // and all the things that are there
 
 // These patterns are defined per story.
 // This way you can define the game to work like a regular IF with places and

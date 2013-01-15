@@ -6,6 +6,11 @@
 
 MediaManager::~MediaManager()
 {
+  Reset();
+}
+
+void MediaManager::Reset()
+{
   for (auto asset : Images) {
     delete asset;
   }
@@ -17,11 +22,12 @@ MediaManager::~MediaManager()
 bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
                                 const string& BookTitle)
 {
+  Reset();
   AssetDir = STORY_DIR + BookTitle + "/";
   for (string_pair assetDef : AssetDefs) {
     const size_t_pair& funcPos = FindToken(assetDef.Y, token::function); // ()
-    const string& type = cutString(assetDef.Y, 0, funcPos.X);
-    const string& arguments = cutString(assetDef.Y, funcPos.X + 1, funcPos.Y);
+    const string& type = CutString(assetDef.Y, 0, funcPos.X);
+    const string& arguments = CutString(assetDef.Y, funcPos.X + 1, funcPos.Y);
 
     if (type == "BG" || type == "Image") {
       Image* asset = new Image(*this, assetDef.X, arguments);
@@ -45,9 +51,7 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
   return true;
 }
 
-/** @brief Draw
-  *
-  * @todo: document this function
+/** @brief poll the session and start and stop assets as required
   */
 bool MediaManager::Tick(real DeltaTime,
                         Book& MyBook)
@@ -101,9 +105,8 @@ void MediaManager::Draw()
   }
 }
 
-/** @brief SetImageWindowSize
-  *
-  * @todo: document this function
+/** @brief Set the size of the big image
+  * assets will use this size to determine their own relative sizes
   */
 void MediaManager::SetImageWindowSize(Rect Size)
 {

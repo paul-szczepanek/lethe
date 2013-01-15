@@ -37,7 +37,7 @@ public:
   bool GetUserValues(const string& Noun, Properties& ReturnValue) const;
   inline Properties& GetSystemValues(systemNoun Noun) const;
 
-  void MakeSnapshot(const string& Progress, const string& Noun,
+  void MakeSnapshot(const string& BookSession, const string& Noun,
                     const string& Verb);
 
 public:

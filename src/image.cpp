@@ -10,24 +10,24 @@ Image::Image(MediaManager& Manager,
   const string& params = CleanWhitespace(Params);
   size_t xPos = FindCharacter(params, ',');
 
-  Filename = Media.AssetDir + cutString(params, 0, xPos);
+  Filename = Media.AssetDir + CutString(params, 0, xPos);
 
   if (xPos != string::npos) {
     Priority = 1;
     size_t yPos = FindCharacter(params, ',', ++xPos);
-    const string& x = cutString(params, xPos, yPos);
-    X = intoReal(x);
+    const string& x = CutString(params, xPos, yPos);
+    X = IntoReal(x);
     if (yPos != string::npos) {
       size_t zoomPos = FindCharacter(params, ',', ++yPos);
-      const string& y = cutString(params, yPos, zoomPos);
-      Y = intoReal(y);
+      const string& y = CutString(params, yPos, zoomPos);
+      Y = IntoReal(y);
       if (zoomPos != string::npos) {
         size_t orderPos = FindCharacter(params, ',', ++zoomPos);
-        const string& zoom = cutString(params, zoomPos, orderPos);
-        Zoom = intoReal(zoom);
+        const string& zoom = CutString(params, zoomPos, orderPos);
+        Zoom = IntoReal(zoom);
         if (orderPos != string::npos) {
-          const string& order = cutString(params, orderPos);
-          Priority = abs(intoInt(order)) + 1; //0 reserved for BG
+          const string& order = CutString(params, orderPos);
+          Priority = abs(IntoInt(order)) + 1; //0 reserved for BG
         }
       }
     }
@@ -36,13 +36,7 @@ Image::Image(MediaManager& Manager,
   }
 }
 
-Image::~Image()
-{
-}
-
-/** @brief Play
-  *
-  * @todo: document this function
+/** @brief Load the image if required, and put in correct order on the stack
   */
 bool Image::Play()
 {
@@ -67,15 +61,12 @@ bool Image::Play()
       }
       ImageSurface.Draw(Media.ImageWindow, Size);
     }
-
     return true;
   }
   return false;
 }
 
-/** @brief Play
-  *
-  * @todo: document this function
+/** @brief Draw on screen if the image window is visible in the reader
   */
 bool Image::Draw()
 {
@@ -103,9 +94,8 @@ void CentreWithin(Rect& Size,
   Size.Y = Frame.Y + Frame.H / 2 + Y * (Frame.H / 2) - Size.H / 2;
 }
 
-/** @brief Play
-  *
-  * @todo: document this function
+/** @brief Make sure the image is the correct size for the viewport
+  * If required reload the image
   */
 bool Image::Tick(real DeltaTime)
 {
@@ -119,9 +109,7 @@ bool Image::Tick(real DeltaTime)
   return false;
 }
 
-/** @brief Stop
-  *
-  * @todo: document this function
+/** @brief Unload image
   */
 bool Image::Stop()
 {

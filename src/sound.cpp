@@ -10,17 +10,15 @@ Sound::Sound(MediaManager& Manager,
   const string& params = CleanWhitespace(Params);
   size_t volPos = FindCharacter(params, ',');
 
-  Filename = Media.AssetDir + cutString(params, 0, volPos);
+  Filename = Media.AssetDir + CutString(params, 0, volPos);
 
   if (volPos != string::npos) {
-    const string& vol = cutString(params, volPos);
-    Volume = intoReal(vol);
+    const string& vol = CutString(params, volPos);
+    Volume = IntoReal(vol);
   }
 }
 
-/** @brief Play
-  *
-  * @todo: document this function
+/** @brief Load and play if not playing already, otherwise ignore
   */
 bool Sound::Play()
 {
@@ -34,9 +32,7 @@ bool Sound::Play()
   return false;
 }
 
-/** @brief Stop
-  *
-  * @todo: document this function
+/** @brief Stop sound if playing, otherwise ignore
   */
 bool Sound::Stop()
 {
@@ -48,9 +44,7 @@ bool Sound::Stop()
   return false;
 }
 
-/** @brief Stop
-  *
-  * @todo: document this function
+/** @brief Tick
   */
 bool Sound::Tick(real DeltaTime)
 {

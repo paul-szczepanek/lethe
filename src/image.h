@@ -8,7 +8,7 @@ class Image : public Asset
 {
 public:
   Image(MediaManager& Manager, const string& AssetName , const string& Params);
-  virtual ~Image();
+  virtual ~Image() { };
 
   virtual bool Play();
   virtual bool Stop();

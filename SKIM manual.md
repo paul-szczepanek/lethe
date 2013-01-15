@@ -17,8 +17,18 @@ Logic syntax is enclosed in square `[ ]` brackets. Keyword syntax is enclosed
 in angled `< >` brackets. Whitespace is ignored and may be used for
 indentation to aid readability.
 
-> Comments like this one may mention things that are explained fully in
-> subsequent sections.
+> Comments in the manual, indented like this one, may mention things that are
+> explained fully in subsequent sections.
+
+---
+
+This is the reference document, not a tutorial. For a primer in the language
+read the tutorial story that explains all the basic functionality.
+
+The language is fairly compact but still offers enough functionality to warrant
+a lengthy manual but keep in mind that this is showing all the functionality.
+When writing a story you will probably use a subset of it. Some features
+are useful only in particular story styles or within the menu system. 
 
 ---
 
@@ -245,6 +255,17 @@ you'll have to escape one if you want to use them in text.
 All other characters are legal and only treated as special characters
 if within `[ ]`.
 
+There is one more type of keyword, used mostly internally:
+
+`<keyword[noun=value:verb]>` - this sets the value of noun and then goes to
+                               noun:verb. This is called value selection.
+
+This is provided for convenience, you can get the same effect by moving the
+assignment into the verb.
+
+> `<keyword[noun=value]>` on its own is illegal as it would not visibly
+> advance the story, giving no indication of an action having happened.
+
 ### `Special Noun Names __________________________________________ [<QUEUE>]`
 
 These nouns are treated differently by the reader (not all are required):
@@ -261,7 +282,7 @@ execute:
                 so the value of QUEUE is available to you if you need it.
 - `[<QUICK>]` - like CALLS, executes every turn but is used to print the
                 quick menu. It should not contain logic as it will only
-                get executed if the quickmenu exists in the reader.
+                get executed if the quick menu exists in the reader.
                 Values here don't need to be in NOUNS to remain clickable.
 
 CALLS will not get executed on the turn it is added as it needs to happen
@@ -278,9 +299,9 @@ These nouns expect strings that match names of other valid nouns.
 
 - `[<PLACE>]` - where we are.
 - `[<EXITS>]` - where we can go.
-- `[<NOUNS>]` - a noun must be here to remain clickable in the main pane.
-                Text from the previous action will lose keywords unless they
-                are here.
+- `[<NOUNS>]` - a noun must be here to remain clickable in the main pane after
+                another action has taken place. Text from the previous action
+                by default loses the keywords unless they are found here.
 
 The absolute minimum is: `[<QUEUE> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
@@ -304,9 +325,20 @@ Currently available functions:
 
 - `Play(asset)` - activate asset (returns true if played).
 - `Stop(asset)` - deactivate asset (returns true if stopped).
+
 - `Size(noun)` - return number of values of a noun (not counting the integer).
-- `Print(noun)` - print the noun as a keyword. If there are multiple
-                  values print a comma separated list: `<v1>, <v2>`.
+
+- `Print(value)` - print the value as plain text. If there are multiple
+                   values print a comma separated list: `v1, v2`.
+- `Keyword(value)` - print the value as a keyword. If there are multiple
+                     values print a comma separated list: `<v1>, <v2>`.
+
+- `OpenBook(value)` - Try and open a book of given name.
+- `CloseBook()` - Close the book, save and return to the menu.
+- `OpenMenu()` - Open the game menu in the reader.
+- `CloseMenu()` - Close the game menu in the reader.
+- `Quit()` - this will call both CloseBook() and CloseMenu(),
+             thus exitingclosing the game.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 

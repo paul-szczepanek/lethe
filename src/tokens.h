@@ -289,5 +289,23 @@ string CleanWhitespace(const string& Text);
 void StripComments(string& Text);
 
 
+// handy text parsing function for escaping special chars
+inline bool IsEscaped(const string& Text, size_t Pos)
+{
+  if (Pos > 0) {
+    return (Text[Pos-1] == '\\');
+  } else {
+    return false;
+  }
+}
+
+inline bool IsSpecial(const string& Text, size_t Pos, char token)
+{
+  if ((Pos > 0) && (Text[Pos-1] == '\\')) {
+    return false;
+  } else {
+    return (Text[Pos] == token);
+  }
+}
 
 #endif // TOKEN_H

@@ -104,7 +104,7 @@ Page::Page(const string& SourceText)
 
             // put a new block into the current block's array of blocks
             // and set it as the new current block
-            Block newBlock(cutString(Text, tokenPos.X, tokenPos.Y+1));
+            Block newBlock(CutString(Text, tokenPos.X, tokenPos.Y+1));
             blocks.back()->Blocks.push_back(newBlock);
             blocks.push_back(&(blocks.back()->Blocks.back()));
 
@@ -120,16 +120,16 @@ Page::Page(const string& SourceText)
           }
         } else if (c == token::Start[token::instruction]) { // [!instruction]
           if (verb.Names.empty()) {
-            LOG(cutString(Text, tokenPos.X, tokenPos.Y+1) +
+            LOG(CutString(Text, tokenPos.X, tokenPos.Y+1) +
                 " - illegal instruction position, must be under a verb");
           } else {
             assert(!blocks.empty()); //Illegal definition, verb not started
 
-            Block newBlock(cutString(Text, tokenPos.X, tokenPos.Y+1));
+            Block newBlock(CutString(Text, tokenPos.X, tokenPos.Y+1));
             blocks.back()->Blocks.push_back(newBlock);
           }
         } else { // illegal
-          LOG(cutString(Text, tokenPos.X, tokenPos.Y+1) +
+          LOG(CutString(Text, tokenPos.X, tokenPos.Y+1) +
               " - illegal character: " + c +", use :, ? or ! after [");
         }
       } // end condition or instruction
@@ -198,7 +198,7 @@ void Page::NewPlainText(size_t_pair& TokenPos,
     char scopeEndChar = token::End[token::block];
     // can't use FindTokenEnd as it might not have a pair here
     while (pos < TokenPos.Y) {
-      if (Text[pos] == scopeEndChar && !isEscaped(Text, pos)) {
+      if (Text[pos] == scopeEndChar && !IsEscaped(Text, pos)) {
         popLocalScope = true;
         TokenPos.Y = pos; // skip } on next iteration
         break; // we'll copy the rest on the next call
@@ -206,7 +206,7 @@ void Page::NewPlainText(size_t_pair& TokenPos,
       ++pos;
     }
 
-    string plainText = cutString(Text, TokenPos.X, TokenPos.Y);
+    string plainText = CutString(Text, TokenPos.X, TokenPos.Y);
 
     if (!plainText.empty()) {
       Blocks.back()->Blocks.push_back(Block(plainText));
@@ -260,7 +260,7 @@ void Page::NewVerbCondition(size_t_pair& TokenPos,
                             vector<VerbCondition>& VerbConditions)
 {
   VerbCondition condition;
-  condition.Expression = cutString(Text, TokenPos.X, TokenPos.Y+1);
+  condition.Expression = CutString(Text, TokenPos.X, TokenPos.Y+1);
 
   // find the scope of this condition
   if (TokenPos.Y+1 < Text.size() &&
@@ -300,7 +300,7 @@ void Page::NewVerb(size_t_pair& TokenPos,
     AddVerb(VerbBlock);
   }
 
-  const string& name = cutString(Text, TokenPos.X+2, TokenPos.Y);
+  const string& name = CutString(Text, TokenPos.X+2, TokenPos.Y);
   VerbBlock.VisualName = name;
   VerbBlock.Names.push_back(name);
 
@@ -310,7 +310,7 @@ void Page::NewVerb(size_t_pair& TokenPos,
          Text[TokenPos.Y+2] == token::Start[token::scope]) {
     // get the next alias of the verb
     TokenPos = FindToken(Text, token::expression, TokenPos.Y+1);
-    VerbBlock.Names.push_back(cutString(Text, TokenPos.X+2, TokenPos.Y));
+    VerbBlock.Names.push_back(CutString(Text, TokenPos.X+2, TokenPos.Y));
   }
 
   // pop old conditions that no longer apply
@@ -330,4 +330,3 @@ void Page::NewVerb(size_t_pair& TokenPos,
 
   VerbBlock.BlockTree.Expression = verbExpression;
 }
-

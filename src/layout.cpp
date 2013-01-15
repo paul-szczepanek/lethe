@@ -12,30 +12,30 @@ bool Layout::Init(const string& Text)
   size_t offset = 0;
 
   for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
-    Order[i] = (boxType)intoInt(Text[offset+i]);
+    Order[i] = (boxType)IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
 
   for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
-    Side[i] = (side)intoInt(Text[offset+i]);
+    Side[i] = (side)IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
 
   for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
-    Active[i] = intoInt(Text[offset+i]);
+    Active[i] = IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
 
-  SizeSpan = intoInt(Text[offset]);
+  SizeSpan = IntoInt(Text[offset]);
   ++offset;
 
-  Split = intoInt(Text[offset]);
+  Split = IntoInt(Text[offset]);
   ++offset;
 
-  Split = intoInt(cutString(Text, offset+1, offset+3));
+  Split = IntoInt(CutString(Text, offset+1, offset+3));
 
   if (Text[offset] == '-') {
     Split = -Split;

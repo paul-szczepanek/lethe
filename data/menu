@@ -1,0 +1,40 @@
+[<QUEUE> = menu:main]
+
+[<menu>]
+ [:main]
+  Main Menu
+  [?IsInGame()] {
+    \n <save[session:save]>
+    \n<load[session:load]>
+  }
+  \nmain 
+    \n<browse[menu:browse]>
+    \n<exit[menu:exit]>
+ [:browse]
+   Open a book:\n
+    [!books = GetBooks()]
+    [!SelectValue(book:open)]
+    \nHardcoded book <test name[book=test:open]>
+    \nHardcoded book <test name2[book=test2:open]>
+ [:exit]
+   Goodbye
+   [?IsInGame()] {
+    [!CloseBook()]
+   }
+   [!Quit()]
+
+[<book>]
+ [:open]
+  book title:
+  [!Print(@book)]
+  [!OpenBook(@book)]
+  Book opened, <click to play[book:closemenu]>.
+ [:closemenu]
+  [!QUEUE+=menu:main]
+  [!CloseMenu()]
+
+[<session>]
+ [:save]
+  save
+ [:load]
+  load
