@@ -77,7 +77,7 @@ bool WindowBox::BuildFrame()
 
   Surface spritePage;
 
-  if (!spritePage.LoadImage(FRAMES_DIR+FrameName+".png")) {
+  if (!spritePage.LoadImage(FRAMES_DIR+SLASH+FrameName+".png")) {
     LOG(FrameName+" - frame image missing");
     FrameName.clear();
     return false;

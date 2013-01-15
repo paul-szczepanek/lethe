@@ -32,6 +32,31 @@ Properties::Properties(const string& Value) : IntValue(0)
 
 /** @brief return string with verbs as keywords
   */
+const string Properties::PrintValueSelectList(const string& Noun,
+                                              const string& VerbName,
+                                              const string& Separator) const
+{
+  string text;
+  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+    if (i && i < for_size + 1) {
+      text += Separator;
+    }
+    text += "<";
+    text += TextValues[i];
+    text += "[";
+    text += Noun;
+    text += "=";
+    text += TextValues[i];
+    text += ":";
+    text += VerbName;
+    text += "]>";
+  }
+
+  return text;
+}
+
+/** @brief return string with verbs as keywords
+  */
 const string Properties::PrintKeywordList(const string& Separator) const
 {
   string text;

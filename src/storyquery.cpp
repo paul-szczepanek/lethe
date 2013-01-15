@@ -656,6 +656,23 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       FunctionArgs.IntValue = 1;
       Text += FunctionArgs.PrintKeywordList();
       FunctionArgs.TextValues.clear();
+    } else if (func == "SelectValue") {
+      // print a list of <value[noun=value:verb]>
+      FunctionArgs.IntValue = 1;
+      for (const string& arg : FunctionArgs.TextValues) {
+        const size_t scopePos = FindTokenEnd(arg, token::scope);
+        if (scopePos != string::npos) {
+          // rearange the noun:verb into proper places
+          const string& noun = CutString(arg, 0, scopePos);
+          const string& verb = CutString(arg, scopePos + 1);
+          const Properties& values = BookSession.IsUserValues(noun)?
+                                     BookSession.UserValues[noun]
+                                     : StoryDef.FindPage(noun).PageValues;
+
+          Text += values.PrintValueSelectList(noun, verb, "\n ");
+        }
+      }
+      FunctionArgs.TextValues.clear();
     } else if (func == "Print") {
       // print a list of values as keywords
       FunctionArgs.IntValue = 1;
@@ -682,6 +699,10 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // Exit the reader
       StoryBook.CloseBook();
       StoryBook.HideMenu();
+    } else  if (func == "GetBooks") {
+      // Exit the reader
+      FunctionArgs.SetValues(StoryBook.GetBooks());
+      FunctionArgs.IntValue = 1;
     } else {
       LOG(func + " - function doesn't exist!");
       FunctionArgs.TextValues.clear();

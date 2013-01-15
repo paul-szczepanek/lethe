@@ -42,12 +42,12 @@ extern string GLog;
 #define LOG(t);
 #define RLOG(t);
 #endif
-
-const string STORY_DIR = "data/books/";
-const string MENU_STORY = "data/menu";
-const string FONTS_DIR = "data/fonts/";
-const string FRAMES_DIR = "data/frames/";
-const string KEYWORDS_DIR = "data/cache/keywords/";
+const string SLASH = "/";
+const string DATA_DIR = "data";
+const string STORY_DIR = DATA_DIR + SLASH + "books";
+const string MENU_DIR = DATA_DIR + SLASH + "menu";
+const string FONTS_DIR = DATA_DIR + SLASH + "fonts";
+const string FRAMES_DIR = DATA_DIR + SLASH + "frames";
 
 const size_t BLOCK_SIZE = 32;
 

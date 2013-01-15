@@ -18,12 +18,13 @@ public:
 
   bool OpenBook(const string& Title);
   bool OpenMenu();
-  bool OpenStory(const string& filename, Story& MyStory, Session& MySession);
+  bool OpenStory(const string& Path, Story& MyStory, Session& MySession);
 
   // these are exposed to the story
   bool ShowMenu();
   bool HideMenu();
   bool CloseBook();
+  Properties GetBooks();
 
   bool IsActionQueueEmpty() const;
 

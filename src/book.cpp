@@ -2,6 +2,7 @@
 #include "page.h"
 #include "tokens.h"
 #include "storyquery.h"
+#include "disk.h"
 
 /** @brief Open book of agiven title
   *
@@ -12,12 +13,12 @@ bool Book::OpenBook(const string& Title)
 {
   Assets.clear();
   BookTitle = Title;
-  string filename = STORY_DIR + BookTitle + "/story";
+  string path = STORY_DIR + SLASH + BookTitle;
 
   BookSession.Name = "FirstRead";
   BookSession.BookName = BookTitle;
 
-  BookOpen = OpenStory(filename, BookStory, BookSession);
+  BookOpen = OpenStory(path, BookStory, BookSession);
 
   Media.CreateAssets(Assets, BookTitle);
 
@@ -43,12 +44,21 @@ bool Book::CloseBook()
   return true;
 }
 
+Properties Book::GetBooks()
+{
+  Properties result;
+
+  Disk::ListFiles(STORY_DIR, result.TextValues);
+
+  return result;
+}
+
 bool Book::OpenMenu()
 {
   GameSession.Name = "game";
   GameSession.BookName = "menu";
 
-  return OpenStory(MENU_STORY, MenuStory, GameSession);
+  return OpenStory(MENU_DIR, MenuStory, GameSession);
 }
 
 bool Book::Tick(real DeltaTime)
@@ -56,25 +66,22 @@ bool Book::Tick(real DeltaTime)
   return Media.Tick(DeltaTime, *this);
 }
 
-bool Book::OpenStory(const string& Filename,
+bool Book::OpenStory(const string& Path,
                      Story& MyStory,
                      Session& MySession)
 {
   string storyText;
   string buffer;
-  ifstream story;
+  File story;
+  string filename = Path + "/story";
 
   MyStory.Purge();
 
-  story.open(Filename.c_str());
-
-  if (!story.is_open()) {
-    cout << Filename << " - missing file" << endl;
+  if (!story.Open(filename)) {
     return false;
   }
 
-  while (!story.eof()) {
-    getline(story, buffer);
+  while (story.GetLine(buffer)) {
     StripComments(buffer);
 
     if (buffer.empty()) {
@@ -107,7 +114,6 @@ bool Book::OpenStory(const string& Filename,
   }
 
   //finished reading the file
-  story.close();
   MyStory.Fixate();
 
   if (!MySession.Load("")) {

@@ -34,7 +34,7 @@ bool Font::Init(const string& Filename,
     TTF_CloseFont(SDLFont);
   }
 
-  const string path = FONTS_DIR + Filename;
+  const string path = FONTS_DIR + SLASH + Filename;
 
   SDLFont = TTF_OpenFont(path.c_str(), Size);
   if (SDLFont) {

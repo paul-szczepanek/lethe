@@ -32,6 +32,9 @@ public:
 
   const string PrintKeywordList(const string& Separator = ", ") const;
   const string PrintPlainList(const string& Separator = ", ") const;
+  const string PrintValueSelectList(const string& Noun,
+                                    const string& VerbName,
+                                    const string& Separator = ", ") const;
 
 public:
   lint IntValue;

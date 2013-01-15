@@ -1,0 +1,37 @@
+[<QUEUE> = menu:main]
+
+[<menu>]
+ [:main]
+  Game Menu
+  [?IsInGame()] {
+    \n<save[session:save]>
+    \n<load[session:load]>
+  }
+  \n
+  \n<browse books[menu:browse]>
+  \n<exit[menu:exit]>
+ [:browse]
+   Open a book:\n
+    [!book = GetBooks()]
+    Available books:\n
+    [!SelectValue(book:open)]
+ [:exit]
+   Goodbye
+   [!Quit()]
+
+[<book>]
+ [:open]
+  [!OpenBook(@book)]
+  Book\ [!Print(@book)]\ nopened.\n
+  \n<New Game[book:closemenu]>
+  \n<Continue Game[session:load]>
+ [:closemenu]
+  [!QUEUE+=menu:main]
+  [!CloseMenu()]
+
+[<session>]
+ [:save]
+  save
+ [:load]
+  loaded
+  [!book:closemenu]

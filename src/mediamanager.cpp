@@ -23,7 +23,7 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
                                 const string& BookTitle)
 {
   Reset();
-  AssetDir = STORY_DIR + BookTitle + "/";
+  AssetDir = STORY_DIR + SLASH + BookTitle + SLASH;
   for (string_pair assetDef : AssetDefs) {
     const size_t_pair& funcPos = FindToken(assetDef.Y, token::function); // ()
     const string& type = CutString(assetDef.Y, 0, funcPos.X);
