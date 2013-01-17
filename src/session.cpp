@@ -17,7 +17,7 @@ bool Session::LoadSnapshot(const size_t Index)
   // load the current queue
   if (queueI > 0) {
     const string& queueValue = QueueHistory[--queueI];
-    UserValues[QUEUE] = Properties(queueValue);
+    *QueueNoun = Properties(queueValue);
   } else {
     // this is at the start of the book, no loading needed
     return false;
@@ -314,7 +314,7 @@ bool Session::CreateSnapshot()
     ValuesChanged = false;
     bool valuedAdded = false;
     for (auto valuePair : UserValues) {
-      const Properties& newValue = valuePair.second;
+      Properties& newValue = valuePair.second;
       const string& valueName = valuePair.first;
       if (newValue.Dirty) {
         newValue.Dirty = false;

@@ -338,9 +338,9 @@ Currently available functions:
 - `Quit()` - this will call both CloseBook() and CloseMenu(),
              thus exitingclosing the game.
 
-- `SelectValue(noun:verb)` - print the all noun values as a value selections.
+- `SelectValue(noun:verb)` - print all noun values as value selections.
                              `<noun=v1:verb>, <noun=v2:verb>`.
-- `GetBooks()` - return book names as values.
+- `GetBooks()` - return books names of books in the book folder.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 

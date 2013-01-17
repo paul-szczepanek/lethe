@@ -7,7 +7,7 @@
 Book::Book()
 {
   OpenMenu();
-};
+}
 
 /** @brief Open book of agiven title
   *
@@ -16,18 +16,15 @@ Book::Book()
   */
 bool Book::OpenBook(const string& Title)
 {
-  Assets.clear();
   BookTitle = Title;
-  const string path = STORY_DIR + SLASH + BookTitle + SLASH;
+  CloseBook();
+  const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
+  BookOpen = OpenStory(path, BookStory, BookSession);
 
-  if (BookOpen) {
-    CloseBook();
-  }
-
-  BookSession.Reset();
   BookSession.Name = "play1";
   BookSession.BookName = BookTitle;
-  BookOpen = OpenStory(path, BookStory, BookSession);
+
+  Assets.clear();
   Media.CreateAssets(Assets, BookTitle);
 
   return BookOpen;
@@ -62,13 +59,14 @@ bool Book::HideMenu()
   return BookOpen;
 }
 
-bool Book::CloseBook()
+void Book::CloseBook()
 {
-  BookOpen = false;
-  const string Filename = STORY_DIR + SLASH + BookTitle + SLASH
-                          + BookSession.Name + ".session";
-  Disk::Write(Filename, BookSession.GetSessionText());
-  return !BookOpen;
+  if (BookOpen) {
+    BookOpen = false;
+    const string& Filename = STORY_DIR + SLASH + BookTitle + SLASH
+                             + BookSession.Name + ".session";
+    Disk::Write(Filename, BookSession.GetSessionText());
+  }
 }
 
 Properties Book::GetBooks()
@@ -163,23 +161,20 @@ void Book::InitSession(Story& MyStory,
 bool Book::AddAssetDefinition(const string& StoryText)
 {
   string text = CleanWhitespace(StoryText);
-
   const size_t_pair namePos = FindToken(text, token::expression); // []
   const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
                                      namePos.Y);
-  if (namePos.Y == string::npos || defPos == string::npos) {
-    return false;
+
+  if (namePos.Y != string::npos && defPos != string::npos) {
+    // get the strings [$name=def]
+    const string& assetName = CutString(text, namePos.X+2, defPos);
+    const string& assetDefinition = CutString(text, defPos+1, namePos.Y);
+    if (!assetName.empty() && !assetDefinition.empty()) {
+      Assets.push_back(string_pair(assetName, assetDefinition));
+      return true;
+    }
   }
-
-  // get the strings [$name=def]
-  string assetName = CutString(text, namePos.X+2, defPos);
-  string assetDefinition = CutString(text, defPos+1, namePos.Y);
-
-  if (!assetName.empty() && !assetDefinition.empty()) {
-    Assets.push_back(string_pair(assetName, assetDefinition));
-  }
-
-  return true;
+  return false;
 }
 
 /** @brief fill the result with nouns that should remain highlighted
@@ -294,7 +289,6 @@ string Book::ProcessQueue(Story& MyStory,
   Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
-
   const size_t safety = 1000; // to stop user generated infite loops
   size_t i = 0;
   // collect all the queue values here to look for system calls
@@ -328,9 +322,7 @@ string Book::ProcessQueue(Story& MyStory,
 string Book::GetQuickMenu()
 {
   string pageText;
-
   StoryQuery query(*this, BookStory, BookSession, pageText);
   query.ExecuteExpression(QUICK, QUICK_CONTENTS);
-
   return pageText + '\n';
 }

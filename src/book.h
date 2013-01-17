@@ -21,7 +21,7 @@ public:
   // these are exposed to the story
   Properties GetBooks();
   bool OpenBook(const string& Title);
-  bool CloseBook();
+  void CloseBook();
   bool ShowMenu();
   bool HideMenu();
 

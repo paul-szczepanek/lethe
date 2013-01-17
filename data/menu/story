@@ -7,7 +7,6 @@
     \n<save[session:save]>
     \n<load[session:load]>
   }
-  \n
   \n<browse books[menu:browse]>
   \n<exit[menu:exit]>
  [:browse]
@@ -22,7 +21,7 @@
 [<book>]
  [:open]
   [!OpenBook(@book)]
-  Book\ [!Print(@book)]\ nopened.\n
+  Book\ [!Print(@book)]\ opened.
   \n<New Game[session:new]>
   \n<Continue Game[session:load]>
  [:closemenu]

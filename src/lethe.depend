@@ -302,14 +302,14 @@
 	"properties.h"
 	"tokens.h"
 
-1358461505 source:/home/paul/lethe/lethe/src/book.cpp
+1358466370 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"page.h"
 	"tokens.h"
 	"storyquery.h"
 	"disk.h"
 
-1358458200 /home/paul/lethe/lethe/src/book.h
+1358464996 /home/paul/lethe/lethe/src/book.h
 	"main.h"
 	"story.h"
 	"session.h"
@@ -382,7 +382,7 @@
 	"audio.h"
 	"input.h"
 
-1358462649 source:/home/paul/lethe/lethe/src/session.cpp
+1358465838 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
 	"disk.h"
 
