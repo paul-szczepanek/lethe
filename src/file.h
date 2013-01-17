@@ -8,10 +8,12 @@ class File
 public:
   File() { };
   ~File();
-  bool Open(const string& Filename);
+
+  bool Read(const string& Filename);
   bool Empty();
   bool GetLine(string& Buffer);
-public:
+
+
 private:
   bool Opened = false;
   ifstream Stream;

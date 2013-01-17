@@ -13,50 +13,52 @@ class Properties;
 class Book
 {
 public:
-  Book() { };
+  Book();
   virtual ~Book() { };
 
-  bool OpenBook(const string& Title);
-  bool OpenMenu();
-  bool OpenStory(const string& Path, Story& MyStory, Session& MySession);
+  bool Tick(real DeltaTime);
 
   // these are exposed to the story
+  Properties GetBooks();
+  bool OpenBook(const string& Title);
+  bool CloseBook();
   bool ShowMenu();
   bool HideMenu();
-  bool CloseBook();
-  Properties GetBooks();
 
-  bool IsActionQueueEmpty() const;
+  bool LoadSnapshot(const size_t SnapshotIndex);
+  bool UndoSnapshot();
+  bool RedoSnapshot();
 
   void SetStoryAction(const string_pair& Choice);
   void SetMenuAction(const string_pair& Choice);
-  string ExecuteStoryAction();
-  string ExecuteMenuAction();
 
+  bool IsActionQueueEmpty();
+  string ProcessStoryQueue();
+  string ProcessMenuQueue();
   string GetQuickMenu();
 
-  bool Tick(real DeltaTime);
+  void GetStoryNouns(Properties& Result);
+  const string GetStoryVerbs(const string& Noun);
+  const string GetMenuVerbs(const string& Noun);
+  bool GetChoice(string_pair& Choice) const;
+
   inline void DrawImage();
   inline void ShowImage(const Rect& Size);
   inline void HideImage();
-
-  const string GetStoryVerbs(const string& Noun);
-  const string GetMenuVerbs(const string& Noun);
-
-  void GetStoryNouns(Properties& Result) const;
-
-  bool GetChoice(string_pair& Choice) const;
-
-  inline const vector<string_pair>& GetAssetDefinitions();
   inline bool GetAssetState(const string& AssetName);
   inline void SetAssetState(const string& AssetName, const bool Playing);
 
 private:
+  bool AddAssetDefinition(const string& StoryText);
+  bool OpenMenu();
+  bool OpenStory(const string& Path, Story& MyStory, Session& MySession);
+  void InitSession(Story& MyStory, Session& MySession);
+
   const vector<string>& GetVerbs(const string& Noun, Story& MyStory,
                                  Session& MySession);
   void SetAction(const string_pair& Choice, Session& MySession);
-  string ExecuteAction(Story& MyStory, Session& MySession);
-  bool AddAssetDefinition(const string& StoryText);
+  string ProcessQueue(Story& MyStory, Session& MySession);
+
 
 public:
   string BookTitle;
@@ -77,7 +79,7 @@ private:
 bool Book::GetAssetState(const string& AssetName)
 {
   return BookSession.AssetStates[AssetName].Playing;
-};
+}
 
 void Book::SetAssetState(const string& AssetName, const bool Playing)
 {
@@ -85,7 +87,7 @@ void Book::SetAssetState(const string& AssetName, const bool Playing)
     BookSession.AssetsChanged = true;
     BookSession.AssetStates[AssetName].Playing = Playing;
   }
-};
+}
 
 void Book::DrawImage()
 {

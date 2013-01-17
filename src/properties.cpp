@@ -1,11 +1,6 @@
 #include "properties.h"
 #include "tokens.h"
 
-Properties::Properties() : IntValue(0)
-{
-  //ctor
-}
-
 Properties::Properties(const string& Value) : IntValue(0)
 {
   size_t pos = 0;
@@ -24,17 +19,30 @@ Properties::Properties(const string& Value) : IntValue(0)
       }
       AddValue(CutString(Value, pos, endPos));
     }
-
     pos = ++endPos;
   }
 }
 
 
+/** @brief print the values creation string, text and integer like so v1,v2,0
+  */
+const string Properties::PrintValues() const
+{
+  string text;
+  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+    text += TextValues[i];
+    text += VALUE_SEPARATOR;
+  }
+  text += "#";
+  text += IntoString(IntValue);
+  return text;
+}
+
 /** @brief return string with verbs as keywords
   */
 const string Properties::PrintValueSelectList(const string& Noun,
-                                              const string& VerbName,
-                                              const string& Separator) const
+    const string& VerbName,
+    const string& Separator) const
 {
   string text;
   for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
@@ -45,13 +53,12 @@ const string Properties::PrintValueSelectList(const string& Noun,
     text += TextValues[i];
     text += "[";
     text += Noun;
-    text += "=";
+    text += '=';
     text += TextValues[i];
     text += ":";
     text += VerbName;
     text += "]>";
   }
-
   return text;
 }
 
@@ -68,7 +75,6 @@ const string Properties::PrintKeywordList(const string& Separator) const
     text += TextValues[i];
     text += ">";
   }
-
   return text;
 }
 
@@ -83,7 +89,6 @@ const string Properties::PrintPlainList(const string& Separator) const
     }
     text += TextValues[i];
   }
-
   return text;
 }
 
@@ -93,15 +98,11 @@ const string Properties::PrintPlainList(const string& Separator) const
   */
 bool Properties::AddValues(const Properties& Value)
 {
-  bool dirty = false;
-
+  bool changed = false;
   for (const string& text : Value.TextValues) {
-    if (AddValue(text)) {
-      dirty = true;
-    }
+    changed |= AddValue(text);
   }
-
-  return dirty;
+  return changed;
 }
 
 /** @brief Concatenate all text values with passed in text values
@@ -115,7 +116,6 @@ bool Properties::ConcatValues(const Properties& Value)
       text += textAdded;
     }
   }
-
   return !TextValues.empty() && !Value.TextValues.empty();
 }
 
@@ -125,20 +125,17 @@ bool Properties::ConcatValues(const Properties& Value)
   */
 bool Properties::CommonValues(const Properties& Value)
 {
-  bool dirty = false;
+  bool changed = false;
   Properties common;
-
   for (const string& text : TextValues) {
     if (Value.ContainsValue(text)) {
       common.AddValue(text);
     } else {
-      dirty = true;
+      changed = true;
     }
   }
-
   TextValues = common.TextValues;
-
-  return dirty;
+  return changed;
 }
 
 /** @brief Remove all TextValues from the pased in Values if needed
@@ -147,15 +144,11 @@ bool Properties::CommonValues(const Properties& Value)
   */
 bool Properties::RemoveValues(const Properties& Value)
 {
-  bool dirty = false;
-
+  bool changed = false;
   for (const string& text : Value.TextValues) {
-    if (RemoveValue(text)) {
-      dirty = true;
-    }
+    changed |= RemoveValue(text);
   }
-
-  return dirty;
+  return changed;
 }
 
 /** @brief Replace old values with new ones (except Int)
@@ -167,8 +160,8 @@ bool Properties::SetValues(const Properties& Value)
   if (IsEquivalent(Value)) {
     return false;
   }
-
   TextValues = Value.TextValues;
+  Dirty = true;
   return true;
 }
 

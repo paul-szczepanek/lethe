@@ -12,11 +12,11 @@ public:
   virtual ~ImageBox() { };
 
   bool SetImage(const string& Image);
-
   void Draw();
 
 private:
   void ResetImage();
+
 
 private:
   Rect Dst;

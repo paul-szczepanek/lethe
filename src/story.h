@@ -23,6 +23,7 @@ private:
   string PrependPattern(const string& Keyword, const string& PageText,
                         const string& PatternName, const string& PatternText);
 
+
 private:
   map<string, Page*> Pages;
   map<string, string> Patterns;

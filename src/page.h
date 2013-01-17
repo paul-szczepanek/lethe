@@ -45,6 +45,7 @@ private:
   void AddVerb(Verb& VerbBlock);
   void PrintBlock(string& Text, const Block& Block);
 
+
 public:
   Properties PageValues;
   vector<Verb> Verbs;

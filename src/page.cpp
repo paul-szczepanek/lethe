@@ -289,7 +289,6 @@ void Page::NewVerbCondition(size_t_pair& TokenPos,
  *  If a verb block already exists it will add the verb first and then start
  *  a new one. Old verb conditions that are now out of scope are discarded.
  *  Active conditions are gathered and written to the new verb definition.
- *
  */
 void Page::NewVerb(size_t_pair& TokenPos,
                    Verb& VerbBlock,

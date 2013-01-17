@@ -46,6 +46,7 @@ private:
   size_t FixLayout();
   Layout& GetCurrentLayout();
 
+
 public:
   string MenuSource;
   string PageSource;

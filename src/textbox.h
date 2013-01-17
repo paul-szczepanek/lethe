@@ -48,6 +48,7 @@ private:
   void RefreshPage();
   void RefreshHighlights();
 
+
 public:
   bool HighlightsDirty = true;
   bool PageDirty = true;

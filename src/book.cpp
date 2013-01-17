@@ -4,6 +4,11 @@
 #include "storyquery.h"
 #include "disk.h"
 
+Book::Book()
+{
+  OpenMenu();
+};
+
 /** @brief Open book of agiven title
   *
   * open the file containing the story and feed it to StoryDefinition to parse
@@ -13,16 +18,36 @@ bool Book::OpenBook(const string& Title)
 {
   Assets.clear();
   BookTitle = Title;
-  string path = STORY_DIR + SLASH + BookTitle;
+  const string path = STORY_DIR + SLASH + BookTitle + SLASH;
 
-  BookSession.Name = "FirstRead";
+  if (BookOpen) {
+    CloseBook();
+  }
+
+  BookSession.Reset();
+  BookSession.Name = "play1";
   BookSession.BookName = BookTitle;
-
   BookOpen = OpenStory(path, BookStory, BookSession);
-
   Media.CreateAssets(Assets, BookTitle);
 
   return BookOpen;
+}
+
+bool Book::RedoSnapshot()
+{
+  return LoadSnapshot(BookSession.CurrentSnapshot + 1);
+}
+
+bool Book::UndoSnapshot()
+{
+  return LoadSnapshot(BookSession.CurrentSnapshot - 1);
+}
+
+bool Book::LoadSnapshot(const size_t SnapshotIndex)
+{
+  // before loading, revert to book values
+  InitSession(BookStory, BookSession);
+  return BookSession.LoadSnapshot(SnapshotIndex);
 }
 
 bool Book::ShowMenu()
@@ -40,16 +65,16 @@ bool Book::HideMenu()
 bool Book::CloseBook()
 {
   BookOpen = false;
-  // do saving here
-  return true;
+  const string Filename = STORY_DIR + SLASH + BookTitle + SLASH
+                          + BookSession.Name + ".session";
+  Disk::Write(Filename, BookSession.GetSessionText());
+  return !BookOpen;
 }
 
 Properties Book::GetBooks()
 {
   Properties result;
-
   Disk::ListFiles(STORY_DIR, result.TextValues);
-
   return result;
 }
 
@@ -57,8 +82,7 @@ bool Book::OpenMenu()
 {
   GameSession.Name = "game";
   GameSession.BookName = "menu";
-
-  return OpenStory(MENU_DIR, MenuStory, GameSession);
+  return OpenStory(MENU_DIR + SLASH, MenuStory, GameSession);
 }
 
 bool Book::Tick(real DeltaTime)
@@ -73,17 +97,16 @@ bool Book::OpenStory(const string& Path,
   string storyText;
   string buffer;
   File story;
-  string filename = Path + "/story";
-
+  string filename = Path + "story";
   MyStory.Purge();
+  MySession.Reset();
 
-  if (!story.Open(filename)) {
+  if (!story.Read(filename)) {
     return false;
   }
 
   while (story.GetLine(buffer)) {
     StripComments(buffer);
-
     if (buffer.empty()) {
       continue;
     }
@@ -103,7 +126,7 @@ bool Book::OpenStory(const string& Path,
       AddAssetDefinition(buffer);
     } else if (!storyText.empty()) {
       // we didn't find a keyword, keep adding lines if we already hit one
-      storyText += "\n";
+      storyText += '\n';
       storyText += buffer;
     }
   }
@@ -112,22 +135,25 @@ bool Book::OpenStory(const string& Path,
   if (!storyText.empty()) {
     MyStory.ParseKeywordDefinition(storyText);
   }
-
   //finished reading the file
   MyStory.Fixate();
 
-  if (!MySession.Load("")) {
-    // initialise reserved keywords
-    for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
-      const string& name = SystemNounNames[i];
-      const Properties& systemValues = MyStory.FindPage(name).PageValues;
-      MySession.UserValues[SystemNounNames[i]].AddValues(systemValues);
-    }
-  }
-
-  MySession.Fixate();
+  InitSession(MyStory, MySession);
 
   return true;
+}
+
+void Book::InitSession(Story& MyStory,
+                       Session& MySession)
+{
+  MySession.UserValues.clear();
+  // initialise reserved keywords
+  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+    const string& name = SystemNounNames[i];
+    const Properties& systemValues = MyStory.FindPage(name).PageValues;
+    MySession.UserValues[SystemNounNames[i]].AddValues(systemValues);
+  }
+  MySession.Fixate();
 }
 
 /** @brief AddAssetDefinition
@@ -158,7 +184,7 @@ bool Book::AddAssetDefinition(const string& StoryText)
 
 /** @brief fill the result with nouns that should remain highlighted
   */
-void Book::GetStoryNouns(Properties& Result) const
+void Book::GetStoryNouns(Properties& Result)
 {
   Result += BookSession.GetSystemValues(systemPlace);
   Result += BookSession.GetSystemValues(systemExits);
@@ -167,7 +193,7 @@ void Book::GetStoryNouns(Properties& Result) const
 
 /** @brief return true if the queue has pending actions
   */
-bool Book::IsActionQueueEmpty() const
+bool Book::IsActionQueueEmpty()
 {
   if (MenuOpen) {
     return GameSession.GetSystemValues(systemQueue).IsEmpty();
@@ -217,23 +243,28 @@ void Book::SetStoryAction(const string_pair& Choice)
   SetAction(Choice, BookSession);
 }
 
+/** @brief Add the action to the queue for later execution
+  */
 void Book::SetAction(const string_pair& Choice, Session& MySession)
 {
-  // parse [noun=value:verb] which is in pair(noun=value, verb) form
+  //check for value assignment first
   const size_t assignPos = FindTokenEnd(Choice.X, token::assign);
   string action;
   if (assignPos != string::npos) {
+    // parse [noun=value:verb] which is in pair(noun=value, verb) form
     action += CutString(Choice.X, 0, assignPos);
     action += ":";
     action += Choice.Y;
-    MySession.GetSystemValues(systemQueue).AddValue(Choice.X);
-    MySession.GetSystemValues(systemQueue).AddValue(action);
+    // queue up the extra action of setting the value
+    MySession.AddQueueValue(Choice.X);
   } else {
+    // regular noun:verb only
     action += Choice.X;
     action += ":";
     action += Choice.Y;
   }
-  MySession.GetSystemValues(systemQueue).AddValue(action);
+  // queue up the noun:verb for execution
+  MySession.AddQueueValue(action);
 }
 
 void Book::SetMenuAction(const string_pair& Choice)
@@ -241,14 +272,15 @@ void Book::SetMenuAction(const string_pair& Choice)
   SetAction(Choice, GameSession);
 }
 
-string Book::ExecuteStoryAction()
+string Book::ProcessStoryQueue()
 {
-  return ExecuteAction(BookStory, BookSession);
+  BookSession.CreateSnapshot();
+  return ProcessQueue(BookStory, BookSession);
 }
 
-string Book::ExecuteMenuAction()
+string Book::ProcessMenuQueue()
 {
-  return ExecuteAction(MenuStory, GameSession);
+  return ProcessQueue(MenuStory, GameSession);
 }
 
 /** @brief Read the book by executing actions on the queue
@@ -256,11 +288,10 @@ string Book::ExecuteMenuAction()
   * and during execution is the only value on the queue
   * at the end of execution the whole queue is cleared
   */
-string Book::ExecuteAction(Story& MyStory,
-                           Session& MySession)
+string Book::ProcessQueue(Story& MyStory,
+                          Session& MySession)
 {
-  Properties& actions = MySession.GetSystemValues(systemQueue);
-
+  Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
 
@@ -275,26 +306,21 @@ string Book::ExecuteAction(Story& MyStory,
       LOG(pool.TextValues[i] + " - possible infinite loop, aborting");
       break;
     }
-
     // only the currently executed call is present during execution
     actions.Reset();
     const string& expression = pool.TextValues[i];
     actions.AddValue(expression);
-
     // call the actions scheduled for every turn
     query.ExecuteExpression(CALLS, CALLS_CONTENTS);
     // only one value present during this call, unless it has been removed
     query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);
-
     // if the execution added more actions, add the to the pool
     pool.AddValues(actions);
     ++i;
   }
 
   actions.Reset();
-  MySession.ValuesChanged = true;
-
-  return pageText + "\n";
+  return pageText + '\n';
 }
 
 /** @brief This returns the text for the quick menu
@@ -306,5 +332,5 @@ string Book::GetQuickMenu()
   StoryQuery query(*this, BookStory, BookSession, pageText);
   query.ExecuteExpression(QUICK, QUICK_CONTENTS);
 
-  return pageText + "\n";
+  return pageText + '\n';
 }

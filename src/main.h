@@ -42,6 +42,7 @@ extern string GLog;
 #define LOG(t);
 #define RLOG(t);
 #endif
+const char VALUE_SEPARATOR = ',';
 const string SLASH = "/";
 const string DATA_DIR = "data";
 const string STORY_DIR = DATA_DIR + SLASH + "books";
@@ -137,6 +138,15 @@ template <typename T> inline int IntoInt(const T& Thing)
 {
   stringstream stream;
   int integer;
+  stream << Thing;
+  stream >> integer;
+  return integer;
+}
+
+template <typename T> inline size_t IntoSizeT(const T& Thing)
+{
+  stringstream stream;
+  size_t integer;
   stream << Thing;
   stream >> integer;
   return integer;

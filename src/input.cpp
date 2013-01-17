@@ -61,6 +61,10 @@ bool Input::Tick(MouseState& Mouse,
           Keys.PgDown = true;
         } else if (event.key.keysym.sym == SDLK_PAGEUP) {
           Keys.PgUp = true;
+        } else if (event.key.keysym.sym == SDLK_u) {
+          Keys.Undo = true;
+        } else if (event.key.keysym.sym == SDLK_r) {
+          Keys.Redo = true;
         }
         break;
 

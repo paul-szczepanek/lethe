@@ -1,10 +1,9 @@
 #include "storyquery.h"
 #include "tokens.h"
-#include "properties.h"
-#include "page.h"
-#include "reader.h"
 #include "story.h"
 #include "session.h"
+#include "book.h"
+#include "page.h"
 
 /** \brief fills in the Text param with the story to display
  * Will recursively evalute the Expression and fill in Text resulting from the
@@ -71,7 +70,7 @@ Properties StoryQuery::GetVerbs(const string& Noun)
 {
   Properties Result;
 
-  const Page& page = StoryDef.FindPage(Noun);
+  const Page& page = QueryStory.FindPage(Noun);
 
   for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
     const Verb& verb = page.Verbs[i];
@@ -83,34 +82,6 @@ Properties StoryQuery::GetVerbs(const string& Noun)
   }
 
   return Result;
-}
-
-/** @brief add user values of the noun to the passed in Properites
-  * \return true if value was found in the user values
-  */
-bool StoryQuery::GetUserValues(const string& Noun,
-                               Properties& Result)
-{
-  if (BookSession.GetUserValues(Noun, Result)) {
-    return true;
-  }
-  // fall back to values as defined in the story
-  Result.AddValues(StoryDef.FindPage(Noun).PageValues);
-  return false;
-}
-
-/** @brief add user integer value of the noun to the passed in Properites
-  * \return true if value was found in the user values
-  */
-bool StoryQuery::GetUserInteger(const string& Noun,
-                                Properties& Result)
-{
-  if (BookSession.GetUserInteger(Noun, Result)) {
-    return true;
-  }
-  // fall back to values as defined in the story
-  Result.IntValue = StoryDef.FindPage(Noun).PageValues.IntValue;
-  return false;
 }
 
 /** @brief Execute Expression
@@ -176,11 +147,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
 
         // assign right values to all nouns whose name is in left values
         for (const string& text : leftValues.TextValues) {
-          // copy the story values if they haven't been created for the user yet
-          if (!BookSession.IsUserValues(text)) {
-            BookSession.UserValues[text] = StoryDef.FindPage(text).PageValues;
-          }
-          Properties& userValues = BookSession.UserValues[text];
+          Properties& userValues = GetUserValues(text);
 
           switch (op) {
             case token::assign:
@@ -254,20 +221,20 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       // bare conditions have different syntax because no comparison
       if (op != token::condition) {
         bool isNum = false, isText = false;
-        Properties leftValues;
+        Properties leftEvalValues;
         Properties rightValues;
 
         const string& left = CutString(Expression, tokenPos.X+2, opPos.X);
         const string& right = CutString(Expression, opPos.Y+1, tokenPos.Y);
 
         // default to current page noun
-        if (left.empty()) {
-          leftValues = BookSession.IsUserValues(Noun)?
-                       BookSession.UserValues[Noun]
-                       : StoryDef.FindPage(Noun).PageValues;
-        } else {
-          EvaluateExpression(leftValues, left, isNum, isText);
+        if (!left.empty()) {
+          EvaluateExpression(leftEvalValues, left, isNum, isText);
         }
+
+        const Properties& leftValues = left.empty()?
+                                       GetValues(Noun)
+                                       : leftEvalValues;
 
         EvaluateExpression(rightValues, right, isNum, isText);
 
@@ -341,7 +308,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
           if (noun.empty()) {
             noun = Noun;
           }
-          const Page& page = StoryDef.FindPage(noun);
+          const Page& page = QueryStory.FindPage(noun);
           const Block& block = page.GetVerb(verbName).BlockTree;
 
           result &= ExecuteBlock(noun, block);
@@ -576,7 +543,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
         // evaluate all text into noun values, add them up and reuse the value
         for (string text : operand.TextValues) {
           // try to find the Values of this noun, user values first
-          GetUserValues(text, target);
+          GetUserTextValues(text, target);
         }
         break;
       case token::integer:
@@ -625,18 +592,15 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // return number of values
       FunctionArgs.IntValue = 0;
       for (const string& arg : FunctionArgs.TextValues) {
-        const Properties& nounValues = BookSession.IsUserValues(arg)?
-                                       BookSession.UserValues[arg]
-                                       : StoryDef.FindPage(arg).PageValues;
+        const Properties nounValues = GetValues(arg);
         FunctionArgs.IntValue += nounValues.TextValues.size();
       }
       FunctionArgs.TextValues.clear();
     } else if (func == "Play") {
       // activate asset
       for (const string& arg : FunctionArgs.TextValues) {
-        if (!BookSession.AssetStates[arg].Playing) {
-          BookSession.AssetsChanged = true;
-          BookSession.AssetStates[arg].Playing = true;
+        if (!QueryBook.GetAssetState(arg)) {
+          QueryBook.SetAssetState(arg, true);
         }
         LOG(arg + " - play");
       }
@@ -644,9 +608,8 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
     } else if (func == "Stop") {
       // deactivate asset
       for (const string& arg : FunctionArgs.TextValues) {
-        if (BookSession.AssetStates[arg].Playing) {
-          BookSession.AssetsChanged = true;
-          BookSession.AssetStates[arg].Playing = true;
+        if (!QueryBook.GetAssetState(arg)) {
+          QueryBook.SetAssetState(arg, false);
         }
         LOG(arg + " - stop");
       }
@@ -665,10 +628,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           // rearange the noun:verb into proper places
           const string& noun = CutString(arg, 0, scopePos);
           const string& verb = CutString(arg, scopePos + 1);
-          const Properties& values = BookSession.IsUserValues(noun)?
-                                     BookSession.UserValues[noun]
-                                     : StoryDef.FindPage(noun).PageValues;
-
+          const Properties& values = GetValues(noun);
           Text += values.PrintValueSelectList(noun, verb, "\n ");
         }
       }
@@ -680,28 +640,28 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       FunctionArgs.TextValues.clear();
     } else if (func == "CloseMenu") {
       // close main menu, show book
-      FunctionArgs.IntValue = (lint)StoryBook.HideMenu();
+      FunctionArgs.IntValue = (lint)QueryBook.HideMenu();
       FunctionArgs.TextValues.clear();
     } else if (func == "OpenMenu") {
       // show main menu
-      FunctionArgs.IntValue = (lint)StoryBook.ShowMenu();
+      FunctionArgs.IntValue = (lint)QueryBook.ShowMenu();
       FunctionArgs.TextValues.clear();
     } else  if (func == "OpenBook") {
       // try values until you open a book
       FunctionArgs.IntValue = 0;
       for (const string& arg : FunctionArgs.TextValues) {
-        if (StoryBook.OpenBook(arg)) {
+        if (QueryBook.OpenBook(arg)) {
           FunctionArgs.IntValue = 1;
         }
       }
       FunctionArgs.TextValues.clear();
     } else  if (func == "Quit") {
       // Exit the reader
-      StoryBook.CloseBook();
-      StoryBook.HideMenu();
+      QueryBook.HideMenu();
+      QueryBook.CloseBook();
     } else  if (func == "GetBooks") {
       // Exit the reader
-      FunctionArgs.SetValues(StoryBook.GetBooks());
+      FunctionArgs.SetValues(QueryBook.GetBooks());
       FunctionArgs.IntValue = 1;
     } else {
       LOG(func + " - function doesn't exist!");
@@ -711,4 +671,54 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
     }
   }
   return true;
+}
+
+/** @brief return values for assigning too
+  */
+Properties& StoryQuery::GetUserValues(const string& Noun)
+{
+  if (!QuerySession.IsUserValues(Noun)) {
+    QuerySession.UserValues[Noun] = QueryStory.FindPage(Noun).PageValues;
+  }
+  QuerySession.ValuesChanged = true;
+  return QuerySession.UserValues[Noun];
+}
+
+/** @brief return values for quick access but only for reading
+  */
+const Properties& StoryQuery::GetValues(const string& Noun)
+{
+  if (QuerySession.IsUserValues(Noun)) {
+    return QuerySession.UserValues[Noun];
+  } else {
+    return QueryStory.FindPage(Noun).PageValues;
+  }
+}
+
+/** @brief add user values of the noun to the passed in Properites
+  * \return true if value was found in the user values
+  */
+bool StoryQuery::GetUserTextValues(const string& Noun,
+                                   Properties& Result)
+{
+  if (QuerySession.GetUserTextValues(Noun, Result)) {
+    return true;
+  }
+  // fall back to values as defined in the story
+  Result.AddValues(QueryStory.FindPage(Noun).PageValues);
+  return false;
+}
+
+/** @brief add user integer value of the noun to the passed in Properites
+  * \return true if value was found in the user values
+  */
+bool StoryQuery::GetUserInteger(const string& Noun,
+                                Properties& Result)
+{
+  if (QuerySession.GetUserInteger(Noun, Result)) {
+    return true;
+  }
+  // fall back to values as defined in the story
+  Result.IntValue = QueryStory.FindPage(Noun).PageValues.IntValue;
+  return false;
 }

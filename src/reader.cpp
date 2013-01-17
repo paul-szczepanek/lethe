@@ -33,7 +33,7 @@ bool Reader::Init()
     return false;
   }
 
-  //*
+  /*
   if (!Audio::SystemInit()) {
     return false;
   } //*/
@@ -92,7 +92,6 @@ bool Reader::Init()
   SetLayout();
 
   // Main Menu window
-  MyBook.OpenMenu();
   Rect mainWindow = { Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
                       BLOCK_SIZE, BLOCK_SIZE
                     };
@@ -153,7 +152,7 @@ bool Reader::ReadBook()
   // this is how far into the text the valid keywords get checked
   MainText.ValidateKeywords = PageSource.size();
 
-  PageSource += MyBook.ExecuteStoryAction();
+  PageSource += MyBook.ProcessStoryQueue();
   QuickMenuSource = MyBook.GetQuickMenu();
 
   // clear out old keywords
@@ -175,7 +174,7 @@ bool Reader::ReadMenu()
     return false;
   }
 
-  MenuSource = MyBook.ExecuteMenuAction();
+  MenuSource = MyBook.ProcessMenuQueue();
 
   MainMenu.SetText(MenuSource);
 
@@ -215,6 +214,10 @@ bool Reader::ProcessInput(real DeltaTime)
       }
     } else if (keys.ImageZoom) {
       //
+    } else if (keys.Undo) {
+      MyBook.UndoSnapshot();
+    } else if (keys.Redo) {
+      MyBook.RedoSnapshot();
     } else if (keys.Bookmark) {
       //
     }

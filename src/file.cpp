@@ -7,7 +7,7 @@ File::~File()
   }
 }
 
-bool File::Open(const string& Filename)
+bool File::Read(const string& Filename)
 {
   Stream.open(Filename.c_str());
   if (Stream.is_open()) {

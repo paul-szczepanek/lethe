@@ -42,6 +42,7 @@ public:
 private:
   bool OnInit();
 
+
 public:
   size_t W = 0;
   size_t H = 0;

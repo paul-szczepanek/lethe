@@ -13,10 +13,10 @@ struct Block;
 class StoryQuery
 {
 public:
-  StoryQuery(Book& _StoryBook, Story& _StoryDefinition,
-             Session& _Progress, string& _Text)
-    : Text(_Text), StoryBook(_StoryBook), StoryDef(_StoryDefinition),
-      BookSession(_Progress) { };
+  StoryQuery(Book& StoryBook, Story& StoryDefinition,
+             Session& Progress, string& Output)
+    : Text(Output), QueryBook(StoryBook), QueryStory(StoryDefinition),
+      QuerySession(Progress) { };
   virtual ~StoryQuery() { };
 
   bool ExecuteExpression(const string& Noun, const string& Expression);
@@ -24,7 +24,9 @@ public:
 
   Properties GetVerbs(const string& Noun);
 
-  bool GetUserValues(const string& Noun, Properties& Result);
+  Properties& GetUserValues(const string& Noun);
+  const Properties& GetValues(const string& Noun);
+  bool GetUserTextValues(const string& Noun, Properties& Result);
   bool GetUserInteger(const string& Noun, Properties& Result);
 
 private:
@@ -32,13 +34,14 @@ private:
                           bool& IsNum, bool& IsText);
   bool ExecuteFunction(const Properties& FunctionName, Properties& FunctionArgs);
 
+
 public:
   string& Text;
 
 private:
-  Book& StoryBook;
-  Story& StoryDef;
-  Session& BookSession;
+  Book& QueryBook;
+  Story& QueryStory;
+  Session& QuerySession;
 };
 
 #endif // STORYQUERY_H

@@ -25,6 +25,8 @@ struct KeysState {
   bool Escape = false;
   bool ImageZoom = false;
   bool Bookmark = false;
+  bool Undo = false;
+  bool Redo = false;
 };
 
 class Input

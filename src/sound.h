@@ -14,6 +14,7 @@ public:
   virtual bool Stop();
   virtual bool Tick(real DeltaTime);
 
+
 private:
   real Volume;
   Audio SoundAudio;

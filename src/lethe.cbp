@@ -93,6 +93,7 @@
 		<Extensions>
 			<code_completion>
 				<search_path add="src" />
+				<search_path add="/usr/include/c++/4.7/" />
 			</code_completion>
 			<envvars />
 			<debugger />

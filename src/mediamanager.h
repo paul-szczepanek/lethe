@@ -19,7 +19,9 @@ public:
   void Draw();
   void SetImageWindowSize(Rect Size);
 
-  bool CreateAssets(const vector<string_pair>& AssetDefs, const string& BookTitle);
+  bool CreateAssets(const vector<string_pair>& AssetDefs,
+                    const string& BookTitle);
+
 
 public:
   Rect ImageWindowSize;
@@ -32,7 +34,6 @@ public:
 private:
   vector<Image*> Images;
   vector<Sound*> Sounds;
-
 };
 
 #endif // MEDIAMANAGER_H

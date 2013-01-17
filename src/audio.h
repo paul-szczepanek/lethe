@@ -21,6 +21,7 @@ public:
   bool IsPlaying();
   static void SoundVolume(const real Volume = 1.0);
 
+
 private:
   Mix_Chunk* SDLAudio = NULL;
   int ChannelUsed = -1;

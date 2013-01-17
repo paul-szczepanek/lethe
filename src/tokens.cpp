@@ -101,7 +101,7 @@ string CleanWhitespace(const string& Text)
         ++pos;
         // check for a newline
         if (Text[pos] == 'n') {
-          clean += "\n";
+          clean += '\n';
         } else {
           // copy the escaped character ignoring any special meaning
           clean += "\\";

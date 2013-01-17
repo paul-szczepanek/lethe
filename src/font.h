@@ -20,6 +20,7 @@ public:
   size_t GetWidth(const string& Text);
   size_t_pair GetSize(const string& Text);
 
+
 public:
   TTF_Font* SDLFont = NULL;
 };

@@ -17,6 +17,8 @@ void MediaManager::Reset()
   for (auto asset : Sounds) {
     delete asset;
   }
+  Images.clear();
+  Sounds.clear();
 }
 
 bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
@@ -28,7 +30,6 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
     const size_t_pair& funcPos = FindToken(assetDef.Y, token::function); // ()
     const string& type = CutString(assetDef.Y, 0, funcPos.X);
     const string& arguments = CutString(assetDef.Y, funcPos.X + 1, funcPos.Y);
-
     if (type == "BG" || type == "Image") {
       Image* asset = new Image(*this, assetDef.X, arguments);
       if (asset) {
@@ -41,13 +42,11 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
         Images.insert(it, asset);
       }
     }
-
     if (type == "Sound" || type == "Voice") {
       Sound* asset = new Sound(*this, assetDef.X, arguments);
       Sounds.push_back(asset);
     }
   }
-
   return true;
 }
 

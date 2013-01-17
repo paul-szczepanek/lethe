@@ -3,37 +3,37 @@
 
 #include "main.h"
 
+const string QUEUE = "QUEUE";
 const string NOUNS = "NOUNS";
 const string PLACE = "PLACE";
 const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
-const string QUEUE = "QUEUE";
 
+const string QUEUE_CONTENTS = "[!@QUEUE]";
 const string NOUNS_CONTENTS = "[!@NOUNS]";
 const string PLACE_CONTENTS = "[!@PLACE]";
 const string EXITS_CONTENTS = "[!@EXITS]";
 const string CALLS_CONTENTS = "[!@CALLS]";
 const string QUICK_CONTENTS = "[!@QUICK]";
-const string QUEUE_CONTENTS = "[!@QUEUE]";
 
 enum systemNoun {
+  systemQueue,
   systemNouns,
   systemPlace,
   systemExits,
   systemCalls,
   systemQuick,
-  systemQueue,
   SYSTEM_NOUN_MAX
 };
 
 const string SystemNounNames[SYSTEM_NOUN_MAX] = {
+  QUEUE,
   NOUNS,
   PLACE,
   EXITS,
   CALLS,
-  QUICK,
-  QUEUE
+  QUICK
 };
 
 namespace token

@@ -23,15 +23,18 @@
  [:open]
   [!OpenBook(@book)]
   Book\ [!Print(@book)]\ nopened.\n
-  \n<New Game[book:closemenu]>
+  \n<New Game[session:new]>
   \n<Continue Game[session:load]>
  [:closemenu]
   [!QUEUE+=menu:main]
   [!CloseMenu()]
 
 [<session>]
+ [:new]
+  new game started
+  [!book:closemenu]
  [:save]
-  save
+  saved
  [:load]
   loaded
   [!book:closemenu]

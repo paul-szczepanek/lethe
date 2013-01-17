@@ -16,6 +16,7 @@ public:
 
   bool Draw();
 
+
 private:
   Surface ImageSurface;
   Rect Size;

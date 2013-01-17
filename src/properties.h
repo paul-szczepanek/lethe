@@ -6,7 +6,7 @@
 class Properties
 {
 public:
-  Properties();
+  Properties() { };
   explicit Properties(const string& Value);
   virtual ~Properties() { };
 
@@ -28,18 +28,21 @@ public:
 
   inline void Reset();
   inline Properties& operator+=(const Properties& Value);
-  inline bool IsEmpty();
+  inline bool IsEmpty() const;
 
+  const string PrintValues() const;
   const string PrintKeywordList(const string& Separator = ", ") const;
   const string PrintPlainList(const string& Separator = ", ") const;
   const string PrintValueSelectList(const string& Noun,
                                     const string& VerbName,
                                     const string& Separator = ", ") const;
 
+
 public:
-  lint IntValue;
+  lint IntValue = 0;
   // not using set as the number of values will usually be 1
   vector<string> TextValues;
+  bool Dirty = false;
 };
 
 Properties& Properties::operator+=(const Properties& Value)
@@ -48,7 +51,7 @@ Properties& Properties::operator+=(const Properties& Value)
   return *this;
 }
 
-bool Properties::IsEmpty()
+bool Properties::IsEmpty() const
 {
   return TextValues.empty();
 }
@@ -87,8 +90,8 @@ bool Properties::AddValue(const string& Value)
   if (ContainsValue(Value) || Value.empty()) {
     return false;
   }
-
   TextValues.push_back(Value);
+  Dirty = true;
   return true;
 }
 
@@ -106,6 +109,7 @@ bool Properties::RemoveValue(const string& Value)
   for (auto endIt = TextValues.end(); it != endIt; ++it) {
     if (*it == Value) {
       TextValues.erase(it);
+      Dirty = true;
       return true;
     }
   }
@@ -132,6 +136,7 @@ void Properties::Reset()
 {
   IntValue = 0;
   TextValues.clear();
+  Dirty = true;
 }
 
 #endif // PROPERTIES_H

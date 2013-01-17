@@ -27,6 +27,7 @@ public:
   bool Init(const string& Text);
   string GetDefinition();
 
+
 public:
   boxType Order[BOX_TYPE_MAX] = { boxMain, boxBG, boxMenu, boxQuick };
   side Side[BOX_TYPE_MAX] = { left, right, right, right };

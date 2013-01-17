@@ -22,3 +22,18 @@ bool Disk::ListFiles(const string& Path, vector<string>& Files)
   closedir(directory);
   return true;
 }
+
+/** @brief Write file to disk and close
+  */
+bool Disk::Write(const string& Filename, const string& Text)
+{
+  ofstream writeFile(Filename.c_str());
+  if (writeFile.is_open()) {
+    writeFile << Text << std::flush;
+    writeFile.close();
+    return true;
+  } else {
+    cout << Filename << " - can't write file" << endl;
+    return false;
+  }
+}

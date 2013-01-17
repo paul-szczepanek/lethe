@@ -19,6 +19,7 @@ public:
   bool DrawFrame();
   bool BuildFrame();
 
+
 public:
   int BPP;
   Rect Size;

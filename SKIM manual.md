@@ -325,9 +325,7 @@ Currently available functions:
 
 - `Play(asset)` - activate asset (returns true if played).
 - `Stop(asset)` - deactivate asset (returns true if stopped).
-
 - `Size(noun)` - return number of values of a noun (not counting the integer).
-
 - `Print(value)` - print the value as plain text. If there are multiple
                    values print a comma separated list: `v1, v2`.
 - `Keyword(value)` - print the value as a keyword. If there are multiple
@@ -339,6 +337,10 @@ Currently available functions:
 - `CloseMenu()` - Close the game menu in the reader.
 - `Quit()` - this will call both CloseBook() and CloseMenu(),
              thus exitingclosing the game.
+
+- `SelectValue(noun:verb)` - print the all noun values as a value selections.
+                             `<noun=v1:verb>, <noun=v2:verb>`.
+- `GetBooks()` - return book names as values.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 
