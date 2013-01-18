@@ -25,8 +25,6 @@ bool Book::OpenBook(const string& Title)
   const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
   BookOpen = OpenStory(path, BookStory, BookSession);
   BookSession.BookName = BookTitle;
-
-  Assets.clear();
   Media.CreateAssets(Assets, BookTitle);
 
   return BookOpen;
@@ -74,12 +72,12 @@ bool Book::LoadSession(const string& Filename)
 
 bool Book::RedoSnapshot()
 {
-  return LoadSnapshot(BookSession.CurrentSnapshot + 1);
+  return LoadSnapshot(BookSession.CurrentSnapshot);
 }
 
 bool Book::UndoSnapshot()
 {
-  return LoadSnapshot(BookSession.CurrentSnapshot - 1);
+  return LoadSnapshot(BookSession.CurrentSnapshot - 2);
 }
 
 bool Book::LoadSnapshot(const size_t SnapshotIndex)
@@ -117,7 +115,10 @@ void Book::CloseBook()
   if (BookOpen) {
     BookOpen = false;
     BookStory.Reset();
+    Assets.clear();
   }
+
+  ShowMenu();
 }
 
 Properties Book::GetBooks()

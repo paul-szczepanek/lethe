@@ -25,7 +25,7 @@ bool Reader::Init()
   if (!Font::SystemInit()) {
     return false;
   }
-  /*
+  //*
   if (!Audio::SystemInit()) {
     return false;
   } //*/
@@ -175,6 +175,7 @@ bool Reader::ProcessInput(real DeltaTime)
       if (MyBook.MenuOpen) {
         MyBook.MenuOpen  = false;
       } else {
+        // this kills the game without closing the book and saving
         MyBook.BookOpen = false;
       }
     } else if (keys.SplitShrink) {
