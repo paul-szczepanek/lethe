@@ -3,7 +3,7 @@
 [<menu>]
  [:main]
   Game Menu
-  [?IsInGame()] {
+  [?IsBookOpen()] {
     \n<save[session:save]>
     \n<load[session:load]>
   }
@@ -20,8 +20,7 @@
 
 [<book>]
  [:open]
-  [!OpenBook(@book)]
-  Book\ [!Print(@book)]\ opened.
+  Book\ [!Print(@book)]:
   \n<New Game[session:new]>
   \n<Continue Game[session:load]>
  [:closemenu]
@@ -30,10 +29,10 @@
 
 [<session>]
  [:new]
-  new game started
+  [!OpenBook(@book)]
   [!book:closemenu]
  [:save]
   saved
  [:load]
-  loaded
+  [!OpenBook(@book)]
   [!book:closemenu]

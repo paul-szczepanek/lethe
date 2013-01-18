@@ -605,6 +605,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
         LOG(arg + " - play");
       }
       FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
     } else if (func == "Stop") {
       // deactivate asset
       for (const string& arg : FunctionArgs.TextValues) {
@@ -614,14 +615,14 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
         LOG(arg + " - stop");
       }
       FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
     } else if (func == "Keyword") {
       // print a list of values
-      FunctionArgs.IntValue = 1;
       Text += FunctionArgs.PrintKeywordList();
       FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
     } else if (func == "SelectValue") {
       // print a list of <value[noun=value:verb]>
-      FunctionArgs.IntValue = 1;
       for (const string& arg : FunctionArgs.TextValues) {
         const size_t scopePos = FindTokenEnd(arg, token::scope);
         if (scopePos != string::npos) {
@@ -633,11 +634,12 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
         }
       }
       FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
     } else if (func == "Print") {
       // print a list of values as keywords
-      FunctionArgs.IntValue = 1;
       Text += FunctionArgs.PrintPlainList();
       FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
     } else if (func == "CloseMenu") {
       // close main menu, show book
       FunctionArgs.IntValue = (lint)QueryBook.HideMenu();
@@ -652,28 +654,35 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       for (const string& arg : FunctionArgs.TextValues) {
         if (QueryBook.OpenBook(arg)) {
           FunctionArgs.IntValue = 1;
+          break;
         }
       }
       FunctionArgs.TextValues.clear();
     } else  if (func == "Quit") {
       // Exit the reader
+      FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = 1;
       QueryBook.HideMenu();
       QueryBook.CloseBook();
     } else  if (func == "GetBooks") {
-      // Exit the reader
-      FunctionArgs.SetValues(QueryBook.GetBooks());
+      // return book names
+      FunctionArgs.TextValues.clear();
       FunctionArgs.IntValue = 1;
+      FunctionArgs.SetValues(QueryBook.GetBooks());
+    } else  if (func == "IsBookOpen") {
+      // return 1 if a book is open
+      FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = (lint)QueryBook.BookOpen;
     } else {
       LOG(func + " - function doesn't exist!");
       FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 0;
       return false;
     }
   }
   return true;
 }
 
-/** @brief return values for assigning too
+/** @brief return values for assignment
   */
 Properties& StoryQuery::GetUserValues(const string& Noun)
 {

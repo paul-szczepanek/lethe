@@ -330,17 +330,16 @@ Currently available functions:
                    values print a comma separated list: `v1, v2`.
 - `Keyword(value)` - print the value as a keyword. If there are multiple
                      values print a comma separated list: `<v1>, <v2>`.
-
+- `SelectValue(noun:verb)` - print all noun values as value selections.
+                             `<noun=v1:verb>, <noun=v2:verb>`.
+- `GetBooks()` - return book names of books in the book folder.
 - `OpenBook(value)` - Try and open a book of given name.
 - `CloseBook()` - Close the book, save and return to the menu.
+- `IsBookOpen()` - Return true if a book is opened.
 - `OpenMenu()` - Open the game menu in the reader.
 - `CloseMenu()` - Close the game menu in the reader.
 - `Quit()` - this will call both CloseBook() and CloseMenu(),
              thus exitingclosing the game.
-
-- `SelectValue(noun:verb)` - print all noun values as value selections.
-                             `<noun=v1:verb>, <noun=v2:verb>`.
-- `GetBooks()` - return books names of books in the book folder.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 
