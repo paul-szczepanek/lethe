@@ -8,11 +8,11 @@ class Mix_Chunk;
 class Audio
 {
 public:
-  static bool SystemInit();
-
-  Audio();
+  Audio() { };
   Audio(const string& Filename);
-  virtual ~Audio();
+  ~Audio() { };
+
+  static bool SystemInit();
 
   bool Load(const string& Filename);
   bool Unload();
@@ -25,7 +25,6 @@ public:
 private:
   Mix_Chunk* SDLAudio = NULL;
   int ChannelUsed = -1;
-  static int PlayingChannels;
 };
 
 #endif // AUDIO_H

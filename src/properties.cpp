@@ -59,7 +59,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
     text += VerbName;
     text += "]>";
   }
-  return text;
+  return CleanEscapeCharacters(text);
 }
 
 /** @brief return string with verbs as keywords
@@ -75,7 +75,7 @@ const string Properties::PrintKeywordList(const string& Separator) const
     text += TextValues[i];
     text += ">";
   }
-  return text;
+  return CleanEscapeCharacters(text);
 }
 
 /** @brief return string with verbs as keywords
@@ -89,7 +89,7 @@ const string Properties::PrintPlainList(const string& Separator) const
     }
     text += TextValues[i];
   }
-  return text;
+  return CleanEscapeCharacters(text);
 }
 
 /** @brief Add all TextValues from the pased in Values if needed

@@ -8,7 +8,7 @@ class Properties
 public:
   Properties() { };
   explicit Properties(const string& Value);
-  virtual ~Properties() { };
+  ~Properties() { };
 
   inline bool ContainsValue(const string& Value) const;
   inline bool ContainsValues(const Properties& Value) const;
@@ -40,9 +40,8 @@ public:
 
 public:
   lint IntValue = 0;
-  // not using set as the number of values will usually be 1
   vector<string> TextValues;
-  bool Dirty = false;
+  bool Dirty = true;
 };
 
 Properties& Properties::operator+=(const Properties& Value)

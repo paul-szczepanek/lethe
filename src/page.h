@@ -27,7 +27,7 @@ class Page
 {
 public:
   Page(const string& SourceText);
-  virtual ~Page();
+  ~Page() { };
 
   const Verb& GetVerb(const string& VerbName) const;
   void SetValues(const string& Values);

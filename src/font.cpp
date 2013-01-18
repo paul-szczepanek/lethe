@@ -11,9 +11,7 @@ bool Font::SystemInit()
     cout << "Unable to init TTF: " << SDL_GetError() << endl;
     return false;
   }
-
   atexit(TTF_Quit);
-
   return true;
 }
 
@@ -30,19 +28,16 @@ Font::~Font()
 bool Font::Init(const string& Filename,
                 const size_t Size)
 {
-  if (SDLFont) {
-    TTF_CloseFont(SDLFont);
-  }
-
-  const string path = FONTS_DIR + SLASH + Filename;
-
-  SDLFont = TTF_OpenFont(path.c_str(), Size);
-  if (SDLFont) {
+  const string& path = FONTS_DIR + SLASH + Filename;
+  TTF_Font* newFont = TTF_OpenFont(path.c_str(), Size);
+  if (newFont) {
+    if (SDLFont) {
+      TTF_CloseFont(SDLFont);
+    }
+    SDLFont = newFont;
     return true;
   }
-
-  cout << "Font: " << path << " failed to load." << endl;
-
+  LOG("Font " + path + " failed to load.");
   return false;
 }
 

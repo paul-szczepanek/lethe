@@ -24,6 +24,7 @@ class Layout
 public:
   Layout() { };
   ~Layout() { };
+
   bool Init(const string& Text);
   string GetDefinition();
 

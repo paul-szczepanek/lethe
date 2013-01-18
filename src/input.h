@@ -33,7 +33,7 @@ class Input
 {
 public:
   Input() { };
-  virtual ~Input() { };
+  ~Input() { };
 
   static bool Tick(MouseState& Mouse, KeysState& Keys);
   static real limitFPS(ulint& LastTime);

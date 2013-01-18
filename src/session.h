@@ -27,10 +27,9 @@ class Session
 {
 public:
   Session() { };
-  virtual ~Session() { };
+  ~Session() { };
 
-  bool Load(File& Save);
-  void Fixate();
+  bool Load();
   void Reset();
   const string GetSessionText() const;
 
@@ -51,6 +50,7 @@ private:
 
 
 public:
+  string Filename;
   string Name;
   string BookName;
 

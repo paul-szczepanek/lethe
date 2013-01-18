@@ -113,7 +113,6 @@ void MediaManager::SetImageWindowSize(Rect Size)
   Size.H -= BLOCK_SIZE;
   Size.X += BLOCK_SIZE / 2;
   Size.Y += BLOCK_SIZE / 2;
-
   if (ImageWindowSize != Size) {
     ImageWindowSize = Size;
     ImageWindow.Init();

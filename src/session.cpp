@@ -8,7 +8,6 @@ bool Session::LoadSnapshot(const size_t Index)
   if (Index >= Snapshots.size()) {
     return false;
   }
-
   CurrentSnapshot = Index;
   size_t queueI = Snapshots[Index].QueueIndex;
   size_t assetI = Snapshots[Index].AssetsIndex;
@@ -25,7 +24,7 @@ bool Session::LoadSnapshot(const size_t Index)
 
   // find the most up to date positions of value histories for each history
   vector<size_t> currentIndex;
-  currentIndex.resize(ValuesHistories.size());
+  currentIndex.resize(ValuesHistories.size(), 0);
   for (size_t i = 0; i < changeI; ++i) {
     const size_t_pair& change = ValuesChanges[i];
     currentIndex[change.X] = change.Y;
@@ -41,9 +40,10 @@ bool Session::LoadSnapshot(const size_t Index)
       UserValues[name] = Properties(oldValue);
     } else {
       // remove user values that are the same as in the book
+      // because we don't have a record of the initial state
       auto it = UserValues.find(name);
       if (it != UserValues.end()) {
-        // but don't remove system nouns
+        // but don't remove system nouns, they are initialised
         bool nonSystem = true;
         for (const Properties* systemNoun : SystemNouns) {
           if (&(it->second) == systemNoun) {
@@ -52,7 +52,6 @@ bool Session::LoadSnapshot(const size_t Index)
           }
         }
         if (nonSystem) {
-          assert(true); //we don't really need this?
           UserValues.erase(it);
         }
       }
@@ -72,6 +71,11 @@ bool Session::LoadSnapshot(const size_t Index)
       lastPos = ++pos;
       pos = FindCharacter(assets, '\n', lastPos);
     }
+    if (lastPos < assets.size()) {
+      // last value doesn't have a \n at the end
+      const string& assetName = CutString(assets, lastPos);
+      AssetStates[assetName] = true;
+    }
   }
 
   return true;
@@ -80,8 +84,16 @@ bool Session::LoadSnapshot(const size_t Index)
 /** @brief parse the save file and fill histories
   * Doesn't load the last snapshot.
   */
-bool Session::Load(File& Save)
+bool Session::Load()
 {
+  File Save;
+  const string& savePath = STORY_DIR + SLASH + BookName + SLASH
+                           + Filename + SESSION_EXT;
+  if (!Disk::Exists(savePath) || !Save.Read(savePath)) {
+    LOG(savePath + " - savefile missing");
+    return false;
+  }
+
   string buffer;
   Save.GetLine(buffer); // session name:
   Save.GetLine(Name);
@@ -91,34 +103,41 @@ bool Session::Load(File& Save)
   Save.GetLine(buffer); // steps taken:
   Save.GetLine(buffer); // #
   Save.GetLine(buffer);
+
   // queue
   while (Save.GetLine(buffer)) {
     QueueHistory.push_back(buffer);
   }
+
+  // assets
   Save.GetLine(buffer); // asset states:
   Save.GetLine(buffer); // #
-  // assets
+  Save.GetLine(buffer);
   while (Save.GetLine(buffer)) {
     string historyEntry = buffer;
     while (Save.GetLine(buffer)) {
+      historyEntry += "\n";
       historyEntry += buffer;
     }
     AssetsHistory.push_back(historyEntry);
   }
+
+  // values
   Save.GetLine(buffer); // tracked values:
   Save.GetLine(buffer); // #
+  // resize the array to fit all the values tracked
   ValuesHistories.resize(IntoSizeT(buffer));
-  // values
+  Save.GetLine(buffer);
   while (Save.GetLine(buffer)) {
     string indexBuffer;
     Save.GetLine(indexBuffer);
     const size_t index = IntoSizeT(indexBuffer);
     ValuesHistoryNames[buffer] = IntoSizeT(index);
-    string historyEntry = buffer;
     while (Save.GetLine(buffer)) {
       ValuesHistories[index].push_back(buffer);
     }
   }
+
   // changes
   while (Save.GetLine(buffer)) {
     const size_t pos = FindCharacter(buffer, VALUE_SEPARATOR);
@@ -127,6 +146,7 @@ bool Session::Load(File& Save)
     const size_t_pair change(IntoSizeT(valueIndex), IntoSizeT(changeIndex));
     ValuesChanges.push_back(change);
   }
+
   // snapshots
   while (Save.GetLine(buffer)) {
     const size_t pos = FindCharacter(buffer, VALUE_SEPARATOR);
@@ -134,11 +154,14 @@ bool Session::Load(File& Save)
     const string& queueIndex = CutString(buffer, 0, pos);
     const string& assetIndex = CutString(buffer, pos + 1, pos2);
     const string& changeIndex = CutString(buffer, pos2 + 1);
-    const Snapshot snap(IntoSizeT(queueIndex),
-                        IntoSizeT(assetIndex),
-                        IntoSizeT(changeIndex));
-    Snapshots.push_back(snap);
+    const Snapshot loadedSnapshot(IntoSizeT(queueIndex),
+                                  IntoSizeT(assetIndex),
+                                  IntoSizeT(changeIndex));
+    Snapshots.push_back(loadedSnapshot);
   }
+
+  // repeat last snapshot
+  LoadSnapshot(Snapshots.size() - 1);
 
   return true;
 }
@@ -168,10 +191,10 @@ const string Session::GetSessionText() const
   text += "\n\n";
   for (const string& value : AssetsHistory) {
     text += value;
-    text += '\n';
+    text += "\n\n";
   }
   // history of all values
-  text += "\nTracked Values:";
+  text += "\nTracked Values:\n";
   text += IntoString(ValuesHistoryNames.size());
   text += "\n\n";
   for (const auto valueMap : ValuesHistoryNames) {
@@ -194,8 +217,9 @@ const string Session::GetSessionText() const
     text += '\n';
   }
   text += '\n';
-  // snapshots
-  for (const Snapshot& value : Snapshots) {
+  // snapshots (don't save the first snapshot, it's part of initialisation)
+  for (size_t i = 1, for_size = Snapshots.size(); i < for_size; ++i) {
+    const Snapshot& value = Snapshots[i];
     text += IntoString(value.QueueIndex);
     text += VALUE_SEPARATOR;
     text += IntoString(value.AssetsIndex);
@@ -239,28 +263,18 @@ string Session::GetQueueValuesText() const
 string Session::GetAssetStatesText() const
 {
   string text;
+  bool addBreak = false;
   for (auto valuePair : AssetStates) {
     if (valuePair.second.Playing) {
+      if (addBreak) {
+        text += '\n';
+      } else {
+        addBreak = true;
+      }
       text += valuePair.first;
-      text += '\n';
     }
   }
   return text;
-}
-
-void Session::Fixate()
-{
-  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
-    auto it = UserValues.find(SystemNounNames[i]);
-    if (it != UserValues.end()) {
-      SystemNouns[i] = &(it->second);
-      if (i == systemQueue) {
-        QueueNoun = &(it->second);
-      }
-    } else {
-      LOG("System noun missing: " + SystemNounNames[i]);
-    }
-  }
 }
 
 void Session::Reset()
@@ -273,7 +287,7 @@ void Session::Reset()
   Snapshots.clear();
   // create the zeroth step so we can go back in history to the start
   Snapshots.push_back(Snapshot(0, 0, 0));
-  CurrentSnapshot = 0;
+  CurrentSnapshot = 1;
   ValuesChanged = true;
   AssetsChanged = true;
 }
@@ -282,8 +296,9 @@ void Session::Reset()
   */
 bool Session::CreateSnapshot()
 {
-  if (++CurrentSnapshot < Snapshots.size()) {
-    // we have loaded an old snapshot
+  if (CurrentSnapshot < Snapshots.size()) {
+    // we have loaded an old snapshot, so the future is already written
+    ++CurrentSnapshot;
     return false;
   }
   Snapshot newSnapshot = Snapshots.back();
@@ -313,6 +328,7 @@ bool Session::CreateSnapshot()
   if (ValuesChanged) {
     ValuesChanged = false;
     bool valuedAdded = false;
+
     for (auto valuePair : UserValues) {
       Properties& newValue = valuePair.second;
       const string& valueName = valuePair.first;
@@ -333,6 +349,7 @@ bool Session::CreateSnapshot()
         ValuesHistoryNames[valueName] = historyI;
         // create the first history value in the history
         history.push_back(newValue.PrintValues());
+        ValuesChanges.push_back(size_t_pair(historyI, history.size()));
         valuedAdded = true;
       } else {
         // add the value to the existing history
@@ -347,6 +364,7 @@ bool Session::CreateSnapshot()
         }
       }
     }
+
     // we've added a value, move up the index tracking the newest values
     if (valuedAdded) {
       newSnapshot.ChangesIndex = ValuesChanges.size();
@@ -354,8 +372,8 @@ bool Session::CreateSnapshot()
   }
 
   // each move creates a snapshot, because queue is always recorded
-  CurrentSnapshot = Snapshots.size();
   Snapshots.push_back(newSnapshot);
+  CurrentSnapshot = Snapshots.size();
   return true;
 }
 

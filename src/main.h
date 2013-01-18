@@ -49,6 +49,8 @@ const string STORY_DIR = DATA_DIR + SLASH + "books";
 const string MENU_DIR = DATA_DIR + SLASH + "menu";
 const string FONTS_DIR = DATA_DIR + SLASH + "fonts";
 const string FRAMES_DIR = DATA_DIR + SLASH + "frames";
+const string SESSION_EXT = ".session";
+const string SESSION_CONTINUE = "session";
 
 const size_t BLOCK_SIZE = 32;
 

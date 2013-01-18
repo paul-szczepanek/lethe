@@ -9,9 +9,7 @@ Image::Image(MediaManager& Manager,
 {
   const string& params = CleanWhitespace(Params);
   size_t xPos = FindCharacter(params, ',');
-
   Filename = Media.AssetDir + CutString(params, 0, xPos);
-
   if (xPos != string::npos) {
     Priority = 1;
     size_t yPos = FindCharacter(params, ',', ++xPos);
@@ -43,7 +41,6 @@ bool Image::Play()
   if (!Playing && Media.Visible) {
     Playing = true;
     Size = WindowSize = Media.ImageWindowSize;
-
     if (ImageSurface.LoadImage(Filename)) {
       Size.W = ImageSurface.W;
       Size.H = ImageSurface.H;

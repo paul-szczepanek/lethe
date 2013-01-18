@@ -12,7 +12,8 @@ class MediaManager
 {
 public:
   MediaManager() {};
-  virtual ~MediaManager();
+  ~MediaManager();
+
   void Reset();
 
   bool Tick(real DeltaTime, Book& MyBook);

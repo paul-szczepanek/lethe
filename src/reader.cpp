@@ -7,13 +7,6 @@ const string FRAME_TEXT = "text";
 const string FRAME_MENU = "menu";
 const string FRAME_IMAGE = "image";
 
-Reader::Reader(int ReaderWidth,
-               int ReaderHeight,
-               int ReaderBPP)
-  : BPP(ReaderBPP), Width(ReaderWidth), Height(ReaderHeight)
-{
-}
-
 Reader::~Reader()
 {
 #ifdef LOGGER
@@ -25,32 +18,28 @@ Reader::~Reader()
 
 bool Reader::Init()
 {
+  // init all the critical systems and assets
   if (!Surface::SystemInit()) {
     return false;
   }
-
   if (!Font::SystemInit()) {
     return false;
   }
-
   /*
   if (!Audio::SystemInit()) {
     return false;
   } //*/
-
   if (!Screen.InitScreen(Width, Height, BPP)) {
     return false;
   }
-
-  Screen.SetAlpha(255);
-
   if (!FontSys.Init("mono.ttf", 12)
       || !FontMain.Init("sans.ttf", 20)
       || !FontSmall.Init("serif.ttf", 12)
       || !FontTitle.Init("king.ttf", 24)) {
-
     return false;
   }
+
+  Screen.SetAlpha(255);
 
   if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
@@ -68,7 +57,6 @@ bool Reader::Init()
       "0132 3111 1111 0 -002"
     }
   };
-
   for (size_t i = 0, for_size = ORIENTATION_MAX; i < for_size; ++i) {
     for (size_t j = 0, for_size = NUM_LAYOUTS; j < for_size; ++j) {
       Layouts[i][j].Init(layoutStrings[i][j]);
@@ -81,7 +69,6 @@ bool Reader::Init()
   ReaderButtons.Init(FontMain, FRAME_MENU, BPP);
   MainMenu.Init(FontMain, FRAME_SOLID, BPP);
   VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
-
   MainText.AspectW = 4;
   QuickMenu.AspectW = 4;
   MainImage.AspectW = 4;
@@ -116,15 +103,16 @@ bool Reader::Tick(real DeltaTime)
     TimeoutTimer -= DeltaTime;
   } else {
     ProcessInput(DeltaTime);
-
+    // process the action queue
     if (MyBook.MenuOpen) {
       RedrawPending |= ReadMenu();
     } else if (MyBook.BookOpen) {
       RedrawPending |= ReadBook();
     } else {
+      // both menu and book are closed, quit
       return false;
     }
-
+    // game logic migh have hidden the menu
     MainMenu.Visible = MyBook.MenuOpen;
   }
 
@@ -137,7 +125,6 @@ bool Reader::Tick(real DeltaTime)
   } else {
     RedrawCountdown -= DeltaTime;
   }
-
   return true;
 }
 
@@ -148,21 +135,19 @@ bool Reader::ReadBook()
   if (MyBook.IsActionQueueEmpty()) {
     return false;
   }
+  TimeoutTimer = Timeout;
 
   // this is how far into the text the valid keywords get checked
   MainText.ValidateKeywords = PageSource.size();
-
+  // fill the text from the book
   PageSource += MyBook.ProcessStoryQueue();
   QuickMenuSource = MyBook.GetQuickMenu();
-
   // clear out old keywords
   MainText.ValidKeywords.Reset();
   MyBook.GetStoryNouns(MainText.ValidKeywords);
-
+  // actually set the received text to be shown
   MainText.SetText(PageSource);
   QuickMenu.SetText(QuickMenuSource);
-
-  TimeoutTimer = Timeout;
   return true;
 }
 
@@ -173,12 +158,10 @@ bool Reader::ReadMenu()
   if (MyBook.IsActionQueueEmpty()) {
     return false;
   }
+  TimeoutTimer = Timeout;
 
   MenuSource = MyBook.ProcessMenuQueue();
-
   MainMenu.SetText(MenuSource);
-
-  TimeoutTimer = Timeout;
   return true;
 }
 
@@ -271,8 +254,7 @@ bool Reader::ProcessInput(real DeltaTime)
         KeywordAction.clear();
       } else {
         // we clicked on a keyword, create a menu full of verbs
-        const string VerbsText = MyBook.GetStoryVerbs(KeywordAction.X);
-
+        const string& VerbsText = MyBook.GetStoryVerbs(KeywordAction.X);
         if (!VerbsText.empty()) {
           VerbMenu.Visible = true;
           VerbMenu.SetText(VerbsText);
@@ -283,20 +265,15 @@ bool Reader::ProcessInput(real DeltaTime)
       }
     }
   }
-
   return true;
 }
 
 void Reader::RedrawScreen(real DeltaTime)
 {
   DrawBackdrop();
-
   MyBook.DrawImage();
-
   DrawWindows();
-
   PrintFPS(DeltaTime);
-
 #ifdef LOGGER
   const size_t maxlog = 1024;
   if (GLog.size() > maxlog) {
@@ -306,7 +283,6 @@ void Reader::RedrawScreen(real DeltaTime)
   Logger->Pane.PaneScroll = 10000;
   Logger->Draw();
 #endif
-
   Surface::SystemDraw();
 }
 
@@ -315,13 +291,11 @@ void Reader::RedrawScreen(real DeltaTime)
 void Reader::DrawBackdrop()
 {
   double zoom;
-
   if (Screen.W > Screen.H) {
     zoom = (Screen.W) / double(Backdrop.W);
   } else {
     zoom = (Screen.H) / double(Backdrop.W);
   }
-
   if (zoom > 1.01d || zoom < 0.99d) {
     Backdrop.Zoom(zoom, zoom);
     Backdrop.SetAlpha(32);
@@ -329,7 +303,6 @@ void Reader::DrawBackdrop()
 
   Rect dst(Backdrop.W, Backdrop.H,
            (Screen.W - Backdrop.W) / 2, (Screen.H - Backdrop.H) / 2);
-
   Screen.Blank();
   Backdrop.Draw(dst);
 }
@@ -380,13 +353,10 @@ size_t Reader::FixLayout()
 size_t Reader::SetLayout(size_t LayoutIndex)
 {
   CurrentOrientation = Width > Height? landscape : portrait;
-
   if (LayoutIndex < NUM_LAYOUTS) {
     CurrentLayout = LayoutIndex;
   }
-
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
-
   WindowBox* boxes[BOX_TYPE_MAX];
 
   for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
@@ -412,7 +382,6 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
   size_t splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
-
   for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
@@ -504,14 +473,12 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     }
 
     boxes[i]->SetSize(boxSize);
-
     // resizing is allowed only vertically
     if (boxSize.W < boxes[i]->Size.W) {
       return FixLayout();
     }
 
     boxSize = boxes[i]->Size;
-
     splitH = boxSize.X + boxSize.W;
     splitV = boxSize.Y + boxSize.H;
   }

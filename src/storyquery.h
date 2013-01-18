@@ -17,7 +17,7 @@ public:
              Session& Progress, string& Output)
     : Text(Output), QueryBook(StoryBook), QueryStory(StoryDefinition),
       QuerySession(Progress) { };
-  virtual ~StoryQuery() { };
+  ~StoryQuery() { };
 
   bool ExecuteExpression(const string& Noun, const string& Expression);
   size_t ExecuteBlock(const string& Noun, const Block& CurBlock);

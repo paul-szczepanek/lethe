@@ -7,17 +7,12 @@
 
 Page Story::MissingPage = Page("");
 
-Story::Story()
-{
-  //ctor
-}
-
 Story::~Story()
 {
-  Purge();
+  Reset();
 }
 
-void Story::Purge()
+void Story::Reset()
 {
   auto it = Pages.begin();
   while (it != Pages.end()) {
@@ -40,15 +35,14 @@ void Story::Fixate()
 bool Story::ParseKeywordDefinition(const string& StoryText)
 {
   string text = CleanWhitespace(StoryText);
-
-  size_t_pair defPos = FindToken(text, token::expression); // []
+  // break up the expected [<noun[pattern]>=value]
+  size_t_pair defPos = FindToken(text, token::expression); // [] outer
   size_t_pair keyPos = FindToken(text, token::keyword, defPos.X+1, // <>
                                  defPos.Y);
   size_t_pair patPos = FindToken(text, token::expression, defPos.X+1, // []
                                  defPos.Y);
   size_t_pair valuesPos = FindToken(text, token::assign, defPos.X+1, // =
                                     defPos.Y);
-
   // cut the text inside <>
   string keyword = CutString(text, keyPos.X+1, keyPos.Y);
   // and the definition that follows
@@ -56,7 +50,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
 
   // check if the keyword contains a pattern name
   if (patPos.X != string::npos) {
-    const string pattern = CutString(text, patPos.X+1, patPos.Y);
+    const string& pattern = CutString(text, patPos.X+1, patPos.Y);
     // try find the pattern in the defined patterns
     map<string, string>::iterator it = Patterns.find(pattern);
 
@@ -92,12 +86,11 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
 
   // parsing happens in the constructor
   Page* page = new Page(pageText);
-
   if (valuesPos.X != string::npos) {
     page->PageValues = Properties(CutString(text, valuesPos.X+1, defPos.Y));
   }
-
-  Pages[keyword] = page; // parsing done in the constructor
+  // parsing done in the constructor
+  Pages[keyword] = page;
 
   return true;
 }
@@ -113,7 +106,6 @@ string Story::PrependPattern(const string& Keyword,
 {
   string text = PatternText;
   size_t pos = 0;
-
   // replace the pattern name with the keyword
   while (pos < text.size()) { // size changes along the way
     size_t patternPos = text.find(PatternName, pos);

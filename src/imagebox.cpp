@@ -21,12 +21,10 @@ bool ImageBox::SetImage(const string& Image)
     Dst.H = Size.H - BLOCK_SIZE;
     Dst.X = Size.X + BLOCK_SIZE / (size_t)2;
     Dst.Y = Size.Y + BLOCK_SIZE / (size_t)2;
-
     if (!ImageSurface.LoadImage(Image)) {
       ImageSurface.Init(Dst.W, Dst.H);
       return false;
     }
   }
-
   return true;
 }

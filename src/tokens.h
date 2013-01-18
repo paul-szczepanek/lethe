@@ -286,6 +286,7 @@ size_t FindTokenEnd(const string& Text, token::tokenName TokenName,
 size_t FindCharacter(const string& Text, char Char,
                      size_t Start = 0, size_t End = 0);
 string CleanWhitespace(const string& Text);
+string CleanEscapeCharacters(const string& Text);
 void StripComments(string& Text);
 
 

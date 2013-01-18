@@ -161,11 +161,6 @@ Page::Page(const string& SourceText)
   Text.reserve(0);
 }
 
-Page::~Page()
-{
-  //
-}
-
 void Page::PrintBlock(string& Text,
                       const Block& Block)
 {
@@ -207,7 +202,6 @@ void Page::NewPlainText(size_t_pair& TokenPos,
     }
 
     string plainText = CutString(Text, TokenPos.X, TokenPos.Y);
-
     if (!plainText.empty()) {
       Blocks.back()->Blocks.push_back(Block(plainText));
     }
@@ -233,9 +227,7 @@ const Verb& Page::GetVerb(const string& VerbName) const
       }
     }
   }
-
   MissingVerb.BlockTree.Expression = "You can't " + VerbName + " that.";
-
   return MissingVerb;
 }
 
@@ -246,7 +238,6 @@ const Verb& Page::GetVerb(const string& VerbName) const
 void Page::AddVerb(Verb& VerbBlock)
 {
   Verbs.push_back(VerbBlock);
-
   VerbBlock.BlockTree.Blocks.clear();
   VerbBlock.VisualName.clear();
   VerbBlock.Names.clear();
@@ -298,7 +289,6 @@ void Page::NewVerb(size_t_pair& TokenPos,
   if (!VerbBlock.Names.empty()) {
     AddVerb(VerbBlock);
   }
-
   const string& name = CutString(Text, TokenPos.X+2, TokenPos.Y);
   VerbBlock.VisualName = name;
   VerbBlock.Names.push_back(name);
@@ -318,7 +308,6 @@ void Page::NewVerb(size_t_pair& TokenPos,
   }
 
   string verbExpression;
-
   // and append all conditions that still apply
   for (size_t i = 0, for_s = VerbConditions.size(); i < for_s; ++i) {
     if (i) { // after the first one keep prepending &
@@ -326,6 +315,5 @@ void Page::NewVerb(size_t_pair& TokenPos,
     }
     verbExpression += VerbConditions[i].Expression;
   }
-
   VerbBlock.BlockTree.Expression = verbExpression;
 }

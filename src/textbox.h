@@ -30,7 +30,7 @@ class TextBox : public WindowBox
 {
 public:
   TextBox() { };
-  virtual ~TextBox() { };
+  ~TextBox() { };
 
   size_t_pair GetMaxSize();
   void SetText(const string NewText);

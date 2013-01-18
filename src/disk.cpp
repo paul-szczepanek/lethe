@@ -1,4 +1,5 @@
 #include "disk.h"
+#include <sys/stat.h>
 #include <dirent.h>
 
 /** @brief Return false if path doesn't exist, add files to vector
@@ -7,7 +8,7 @@ bool Disk::ListFiles(const string& Path, vector<string>& Files)
 {
   DIR* directory = opendir(Path.c_str());
   if (directory == NULL) {
-    cout << errno << " error trying to access " << Path << endl;
+    LOG("Error " + IntoString(errno) + " trying to access: " + Path);
     return false;
   }
 
@@ -33,7 +34,18 @@ bool Disk::Write(const string& Filename, const string& Text)
     writeFile.close();
     return true;
   } else {
-    cout << Filename << " - can't write file" << endl;
+    LOG(Filename + " - can't write file");
     return false;
   }
+}
+
+bool Disk::Delete(const string& Filename)
+{
+  return (remove(Filename.c_str()) == 0);
+}
+
+bool Disk::Exists(const string& Filename)
+{
+  struct stat fileStat;
+  return (stat(Filename.c_str(), &fileStat) != -1);
 }

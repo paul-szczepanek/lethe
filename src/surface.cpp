@@ -31,14 +31,11 @@ bool Surface::SystemInit()
     cout << "Unable to init SDL: " << SDL_GetError() << endl;
     return false;
   }
-
   if (IMG_Init(IMG_INIT_PNG) < 0) {
     cout << "Unable to init IMG: " << SDL_GetError() << endl;
     return false;
   }
-
   atexit(SDL_Quit);
-
   return true;
 }
 
@@ -75,18 +72,16 @@ bool Surface::InitScreen(size_t ScreenWidth,
                          size_t ScreenHeight,
                          int ScreenBPP)
 {
+  Unload();
   ScreenW = W = ScreenWidth;
   ScreenH = H = ScreenHeight;
-
-  Unload();
-
   BPP = ScreenBPP;
   SDLSurface = SDL_SetVideoMode(ScreenWidth, ScreenHeight, BPP,
                                 SDL_HWSURFACE|SDL_DOUBLEBUF);
 
-  Screen = SDLSurface;
-
-  if (!SDLSurface) {
+  if (SDLSurface) {
+    Screen = SDLSurface;
+  } else {
     cout << "Unable to set video: " << SDL_GetError() << endl;
   }
 
@@ -98,7 +93,6 @@ bool Surface::InitScreen(size_t ScreenWidth,
 bool Surface::LoadImage(const string& Filename)
 {
   Unload();
-
   SDLSurface = IMG_Load(Filename.c_str());
   if (!SDLSurface) {
     LOG(Filename + " - image missing");
@@ -120,7 +114,6 @@ bool Surface::Init(size_t Width,
                    size_t Height)
 {
   Unload();
-
   SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height,
                                     BPP, MASK_R, MASK_G, MASK_B, MASK_A);
   return OnInit();
@@ -166,7 +159,6 @@ bool Surface::OnInit()
   W = 0;
   H = 0;
   Clip = { 0, 0, 0, 0 };
-
   return false;
 }
 
@@ -209,7 +201,6 @@ bool Surface::Draw(const Rect& Position)
     (Uint16)Position.W,
     (Uint16)Position.H
   };
-
   if (SDLSurface && Screen) {
     Blit(SDLSurface, Clip, Screen, &dst);
     // return true only if the image got blitted
@@ -280,9 +271,7 @@ bool Surface::DrawRectangle(const Rect& Rectangle,
       (Uint16)Rectangle.W,
       (Uint16)Rectangle.H
     };
-
     SDL_FillRect(SDLSurface, &dst, SDL_MapRGB(SDLSurface->format, R, B, G));
-
     return true;
   }
   return false;
@@ -299,7 +288,6 @@ bool Surface::PrintText(const Rect& Position,
 {
   if (SDLSurface) {
     SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
-
     SDL_Surface* textSurface = TTF_RenderText_Blended(TextFont.SDLFont,
                                Text.c_str(), colour);
     if (textSurface) {
@@ -309,15 +297,12 @@ bool Surface::PrintText(const Rect& Position,
         (Uint16)0,
         (Uint16)0
       };
-
       SDL_SetAlpha(textSurface, 0,  SDL_ALPHA_OPAQUE);
       SDL_BlitSurface(textSurface, 0, SDLSurface, &dst);
       SDL_FreeSurface(textSurface);
-
       return true;
     }
   }
-
   return false;
 }
 
@@ -330,9 +315,7 @@ bool Surface::CreateText(const Font& TextFont,
                          usint B)
 {
   Unload();
-
   SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
-
   SDLSurface = TTF_RenderText_Blended(TextFont.SDLFont, Text.c_str(), colour);
 
   return OnInit();

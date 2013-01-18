@@ -1,19 +1,13 @@
 #include "windowbox.h"
 
-/** @brief Create all the assets required by the text box
-  *
-  * builds the image slice array for the frame building
-  */
 void WindowBox::Init(Font& NewFont,
                      const string& Frame,
                      int Bpp)
 {
   FontMain = &NewFont;
-
   if (!Frame.empty()) {
     FrameName = Frame;
   }
-
   BPP = Bpp;
 }
 
@@ -26,9 +20,7 @@ void WindowBox::Draw()
   }
 }
 
-/** @brief Set Size of the textbox
-  *
-  * resets the page as well
+/** @brief Set Size of the textbox (resets the page as well)
   */
 void WindowBox::SetSize(Rect NewSize)
 {
@@ -49,7 +41,6 @@ void WindowBox::SetSize(Rect NewSize)
   }
 
   NewSize.Blockify();
-
   if (Size != NewSize) {
     Size = NewSize;
     BuildFrame();
@@ -57,11 +48,10 @@ void WindowBox::SetSize(Rect NewSize)
   }
 }
 
-/** @brief Reset
+/** @brief Does nothing
   */
 void WindowBox::Reset()
 {
-
 }
 
 /** @brief Open the frame file and construct the image of the frame
@@ -72,11 +62,9 @@ bool WindowBox::BuildFrame()
   if (FrameName.empty()) {
     return false;
   }
-
   FrameSurface.Init(Size.W, Size.H);
 
   Surface spritePage;
-
   if (!spritePage.LoadImage(FRAMES_DIR+SLASH+FrameName+".png")) {
     LOG(FrameName+" - frame image missing");
     FrameName.clear();
@@ -137,7 +125,6 @@ bool WindowBox::BuildFrame()
           index = 15;
         }
       }
-
       src.X = BLOCK_SIZE * (index % 4);
       src.Y = BLOCK_SIZE * (index / 4);
       dst.X = BLOCK_SIZE * i;
@@ -182,11 +169,9 @@ bool WindowBox::DrawFrame()
   if (ShowUp) {
     FrameUp.Draw(UpDst);
   }
-
   if (ShowDown) {
     FrameDown.Draw(DownDst);
   }
-
   if (ShowIcon) {
     FrameIcon.Draw(IconDst);
   }

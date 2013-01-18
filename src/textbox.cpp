@@ -31,7 +31,6 @@ void TextBox::Draw()
   if (Visible) {
     RefreshPage();
     RefreshHighlights();
-
     DrawFrame();
     Highlights.Draw(PageSize);
     PageSurface.Draw(PageSize);
@@ -46,7 +45,6 @@ bool TextBox::GetSelectedKeyword(string& Keyword)
     Keyword = Keywords[SelectedKeyword].Keyword;
     return true;
   }
-
   return false;
 }
 
@@ -75,16 +73,13 @@ bool TextBox::Select(MouseState& Mouse,
     return false;
   }
 
-  // keyword selection
-  size_t oldSelectedKeyword = SelectedKeyword;
-  size_t keywordsNum = Keywords.size();
-
-  SelectedKeyword = keywordsNum;
-
   // translate coords to text surface coords
   const Uint16 X = Mouse.X - PageSize.X;
   const Uint16 Y = Mouse.Y - (PageSize.Y - PageClip.Y );
-
+  // find selected keyword
+  size_t oldSelectedKeyword = SelectedKeyword;
+  size_t keywordsNum = Keywords.size();
+  SelectedKeyword = keywordsNum;
   for (size_t i = 0, forSize = keywordsNum; i < forSize; ++i) {
     if ((Keywords[i].Size.X < X)
         && (Keywords[i].Size.Y < Y)
@@ -94,12 +89,13 @@ bool TextBox::Select(MouseState& Mouse,
       break;
     }
   }
-
   if (oldSelectedKeyword != SelectedKeyword) {
+    // selected keyword has changed
     HighlightsDirty = true;
     oldSelectedKeyword = SelectedKeyword;
   }
 
+  // nothing selected, try and drag the page instead
   if (SelectedKeyword < keywordsNum) {
     Pane.DragTimeout = DRAG_TIMEOUT;
   } else if (Pane.DragTimeout <= 0.f) {
@@ -122,24 +118,20 @@ void TextBox::Scroll()
     // only scroll if the page is bigger than box
     if ((Pane.PaneScroll != 0) && (PageHeight > PageClip.H)) {
       int pagePosition = Pane.PaneScroll + PageClip.Y;
-
       if (pagePosition < 0) {
         PageClip.Y = 0;
       } else {
         if ((usint)pagePosition > PageHeight - PageClip.H) {
           pagePosition = PageHeight - PageClip.H;
         }
-
         PageClip.Y = pagePosition;
       }
     }
-
+    // adjust the surfaces to the new scroll position
     ShowUp = (PageClip.Y > 1);
     ShowDown = ((usint)PageClip.Y + 1u + PageClip.H < PageHeight);
-
     PageSurface.SetClip(PageClip);
     Highlights.SetClip(PageClip);
-
     Pane.PaneScroll = 0;
   }
 }
@@ -151,10 +143,10 @@ size_t_pair TextBox::GetMaxSize()
   string text;
   size_t newline = 0;
   size_t pos = 0;
-
   maxSize.Y += lineSkip;
   LineHeight = FontMain->GetHeight() + lineSkip;
 
+  // check sizes for all ines of text to make sure we can fit them unwrapped
   while (newline != string::npos) {
     newline = FindCharacter(Text, '\n', pos);
     text = CutString(Text, pos, newline);
@@ -166,7 +158,6 @@ size_t_pair TextBox::GetMaxSize()
 
   maxSize.X += BLOCK_SIZE;
   maxSize.Y += BLOCK_SIZE;
-
   return maxSize;
 }
 
@@ -177,20 +168,17 @@ bool TextBox::BreakText()
 {
   vector<size_t_pair> keywordPos;
   vector<string> keywordNames;
-
+  string cleaned;
+  string realName;
+  size_t pos = 0;
+  size_t length = Text.size();
+  size_t skip = 0; // characters skipped
   PageClip.W = Size.W - BLOCK_SIZE;
   PageClip.H = Size.H - BLOCK_SIZE;
   PageSize.X = Size.X + BLOCK_SIZE / (size_t)2;
   PageSize.Y = Size.Y + BLOCK_SIZE / (size_t)2;
   PageSize.W = PageClip.W;
   PageSize.H = PageClip.H;
-
-  size_t pos = 0;
-  size_t length = Text.size();
-  size_t skip = 0; // characters skipped
-
-  string cleaned;
-  string realName;
 
   // record keywords and their positions and remove syntax symbols
   while(pos < length) {
@@ -200,14 +188,11 @@ bool TextBox::BreakText()
     if (namePos.X == string::npos) {
       break;
     }
-
     const size_t_pair realNamePos = FindToken(Text, token::expression,
                                     pos, namePos.Y);
-
     // copy up to the keyword
     cleaned += CutString(Text, pos, namePos.X);
     pos = namePos.Y + 1;
-
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
       realName = CutString(Text, realNamePos.X+1, realNamePos.Y);
@@ -221,7 +206,6 @@ bool TextBox::BreakText()
     const bool validKeyword = (pos < ValidateKeywords) ?
                               ValidKeywords.ContainsValue(realName)
                               : true;
-
     if (validKeyword) {
       keywordNames.push_back(realName);
     }
@@ -231,12 +215,10 @@ bool TextBox::BreakText()
     // fix up the position for after removing the tokens and real name
     namePos.X -= skip;
     namePos.Y -= ++skip; // +1 for opening <
-
     if (realNamePos.X != string::npos) {
       skip += realNamePos.Y - realNamePos.X + 1;
     }
     ++skip; // +1 for closing >
-
     if (validKeyword) {
       keywordPos.push_back(namePos);
     }
@@ -292,7 +274,6 @@ bool TextBox::BreakText()
   // break the text into lines that fit within the textbox width
   while(pos < length) {
     bool flush = false;
-
     //find space
     size_t space = cleaned.find(' ', pos);
     // if end of text
@@ -300,13 +281,11 @@ bool TextBox::BreakText()
       space = length;
       flush = true;
     }
-
     // find newline
     size_t newline = cleaned.find('\n', pos);
     if (newline == string::npos) {
       newline = length;
     }
-
     // what's first, newline or space?
     if (newline < space) {
       pos = newline;
@@ -319,7 +298,6 @@ bool TextBox::BreakText()
 
     // test print the line
     string line = CutString(cleaned, lastLineEnd, pos);
-
     // did we fit in?
     if (FontMain->GetWidth(line) < PageClip.W || firstWord) {
       lastPos = pos;
@@ -331,9 +309,7 @@ bool TextBox::BreakText()
     }
 
     ++pos;
-
     firstWord = false;
-
     if (flush || !(pos < length)) { // || in case there's a space at the end
       lastLineEnd = pos;
       Lines.push_back(line);
@@ -343,7 +319,6 @@ bool TextBox::BreakText()
 
   PageHeight = 0;
   lastLineEnd = 0;
-
   // record visual keyword positions
   for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
     const string& line = Lines[i];
@@ -390,9 +365,7 @@ bool TextBox::BreakText()
   if (PageHeight) {
     PageHeight -= lineSkip;
   }
-
   SelectedKeyword = Keywords.size();
-
   // scroll to end
   PageClip.Y = PageHeight > PageClip.H? (PageHeight - PageClip.H) : 0;
 
@@ -406,28 +379,22 @@ void TextBox::RefreshPage()
 {
   if (PageDirty) {
     PageDirty = false;
-
     if (!PageHeight) {
       BreakText();
     }
-
     if (PageHeight == 0) {
+      // don't bother if there is no text
       return;
     }
-
     PageSurface.Init(PageClip.W, max(PageHeight, PageClip.H));
-
+    PageSurface.SetClip(PageClip);
     Rect dst;
     dst.X = 0;
     dst.Y = 0;
-
     for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
-
       PageSurface.PrintText(dst, *FontMain, Lines[i], 255, 255, 255);
       dst.Y += LineHeight;
     }
-
-    PageSurface.SetClip(PageClip);
   }
 }
 
@@ -438,18 +405,16 @@ void TextBox::RefreshHighlights()
 {
   if (HighlightsDirty) {
     HighlightsDirty = false;
-
     if (!PageHeight) {
       BreakText();
     }
-
     Highlights.Init(PageSize.W, max(PageHeight, PageSize.H));
-
+    Highlights.SetClip(PageClip);
+    // paint a rectangle behind each keyword
     for (size_t i = 0, forSize = Keywords.size(); i < forSize; ++i) {
+      // change colour for the selected keyword
       uint highlightColour = (i == SelectedKeyword) ? 150 : 50;
       Highlights.DrawRectangle(Keywords[i].Size, highlightColour, 150, 150);
     }
-
-    Highlights.SetClip(PageClip);
   }
 }

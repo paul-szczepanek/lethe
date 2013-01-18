@@ -333,13 +333,22 @@ Currently available functions:
 - `SelectValue(noun:verb)` - print all noun values as value selections.
                              `<noun=v1:verb>, <noun=v2:verb>`.
 - `GetBooks()` - return book names of books in the book folder.
-- `OpenBook(value)` - Try and open a book of given name.
-- `CloseBook()` - Close the book, save and return to the menu.
-- `IsBookOpen()` - Return true if a book is opened.
-- `OpenMenu()` - Open the game menu in the reader.
-- `CloseMenu()` - Close the game menu in the reader.
-- `Quit()` - this will call both CloseBook() and CloseMenu(),
-             thus exitingclosing the game.
+- `OpenBook(value)` - try and open a book of given name, return true if
+                      successfull.
+- `CloseBook()` - close the book, save and return to the menu.
+- `IsInGame()` - return true if a book is opened and a session started.
+- `GetSessions(value)` - return filenames of sessions (sans extension) for
+                         the given book title or if no value given for the
+                         currently book. If no value given and no is book
+                         open it will return no values.
+- `NewSession()` - start a new session.
+- `LoadSession(value)` - load a session with the given filename, if no value
+                         given continue the last played session. Will start
+                         a new session if no session is present.
+- `OpenMenu()` - open the game menu in the reader.
+- `CloseMenu()` - close the game menu in the reader.
+- `Quit()` - this will call both CloseBook() and CloseMenu(), which will
+             save the session and quit the game.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 

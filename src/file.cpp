@@ -14,7 +14,7 @@ bool File::Read(const string& Filename)
     Opened = true;
     return true;
   } else {
-    cout << Filename << " - missing file" << endl;
+    LOG(Filename + " - missing file");
     return false;
   }
 }
@@ -24,12 +24,14 @@ bool File::Empty()
   return Stream.eof();
 }
 
+/** @brief Return true only if a non-empty line is returned
+  */
 bool File::GetLine(string& Buffer)
 {
   if (!Opened || Stream.eof()) {
     return false;
   } else {
     getline(Stream, Buffer);
-    return true;
+    return !Buffer.empty();
   }
 }

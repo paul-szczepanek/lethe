@@ -25,8 +25,9 @@ enum orientation {
 class Reader
 {
 public:
-  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP);
-  virtual ~Reader();
+  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP)
+    : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP) { };
+  ~Reader();
 
   bool Init();
   bool Tick(real DeltaTime);
@@ -53,9 +54,9 @@ public:
   string QuickMenuSource;
 
 private:
-  int BPP;
   size_t Width;
   size_t Height;
+  int BPP;
   float RedrawCountdown = REDRAW_TIMEOUT;
   bool RedrawPending = true;
   // screen

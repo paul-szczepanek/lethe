@@ -9,9 +9,7 @@ Sound::Sound(MediaManager& Manager,
 {
   const string& params = CleanWhitespace(Params);
   size_t volPos = FindCharacter(params, ',');
-
   Filename = Media.AssetDir + CutString(params, 0, volPos);
-
   if (volPos != string::npos) {
     const string& vol = CutString(params, volPos);
     Volume = IntoReal(vol);

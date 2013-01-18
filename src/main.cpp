@@ -14,7 +14,6 @@ int main (int argc,
   if (reader.Init()) {
     ulint lastTime = 0;
     real deltaTime = 0.1;
-
     while (reader.Tick(deltaTime)) {
       deltaTime = Input::limitFPS(lastTime);
     }

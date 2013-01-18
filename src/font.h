@@ -9,10 +9,10 @@ typedef struct _TTF_Font TTF_Font;
 class Font
 {
 public:
-  static bool SystemInit();
-
   Font() { };
-  virtual ~Font();
+  ~Font();
+
+  static bool SystemInit();
 
   bool Init(const string& Filename, const size_t Size);
   size_t GetHeight();

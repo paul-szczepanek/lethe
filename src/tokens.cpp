@@ -7,14 +7,11 @@
 string CleanWhitespace(const string& Text)
 {
   string clean;
-
   clean.reserve(Text.size());
-
   size_t pos = 0;
   size_t expCount = 0;
   size_t whiteCount = 0;
   const size_t length = Text.size();
-
   char expStart = token::Start[token::expression];
   char expEnd = token::End[token::expression];
   bool ignoreWhite = false;
@@ -118,6 +115,24 @@ string CleanWhitespace(const string& Text)
   return clean;
 }
 
+/** @brief Return string with no escape characters in it
+  */
+string CleanEscapeCharacters(const string& Text)
+{
+  string clean;
+  clean.reserve(Text.size());
+  size_t pos = 0;
+  const size_t length = Text.size();
+  while (pos < length) {
+    char c = Text[pos];
+    if (c != '\\') {
+      clean += c;
+    }
+    ++pos;
+  }
+  return clean;
+}
+
 /** @brief FindToken
   *
   * \return a pair of begin and end positions of the token
@@ -130,7 +145,6 @@ size_t_pair FindToken(const string& Text,
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
@@ -162,7 +176,6 @@ size_t_pair FindToken(const string& Text,
         return size_t_pair(pos, pos);
       }
     }
-
     ++pos;
   }
 
@@ -182,7 +195,6 @@ size_t FindTokenStart(const string& Text,
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
@@ -214,7 +226,6 @@ size_t FindTokenStart(const string& Text,
         return pos;
       }
     }
-
     ++pos;
   }
 
@@ -234,7 +245,6 @@ size_t FindTokenEnd(const string& Text,
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-
   size_t pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
@@ -282,7 +292,6 @@ size_t FindCharacter(const string& Text,
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-
   size_t pos = Start;
 
   while (pos < End) {

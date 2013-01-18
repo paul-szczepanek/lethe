@@ -7,7 +7,6 @@ real Input::limitFPS(ulint& LastTime)
   const Uint32 newTime = SDL_GetTicks();
   const real deltaTime = ((real)newTime - (real)LastTime) * 0.001f;
   const Uint32 fpsInterval = 30;
-
 #ifdef PLATFORM_WIN32
   if (newTime - LastTime < fpsInterval) {
     DWORD sleep_time = (fpsInterval - (newTime - LastTime));
@@ -21,9 +20,7 @@ real Input::limitFPS(ulint& LastTime)
     nanosleep(&sleep_time, &sleep_time);
   }
 #endif
-
   LastTime = newTime;
-
   return deltaTime;
 }
 
@@ -99,6 +96,5 @@ bool Input::Tick(MouseState& Mouse,
   }
 
   changed |= Mouse.Left;
-
   return changed;
 }

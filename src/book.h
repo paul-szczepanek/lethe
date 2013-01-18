@@ -14,16 +14,19 @@ class Book
 {
 public:
   Book();
-  virtual ~Book() { };
+  ~Book() { };
 
   bool Tick(real DeltaTime);
 
   // these are exposed to the story
   Properties GetBooks();
+  Properties GetSessions(const string& Title = "");
   bool OpenBook(const string& Title);
   void CloseBook();
   bool ShowMenu();
   bool HideMenu();
+  bool NewSession();
+  bool LoadSession(const string& Filename = "");
 
   bool LoadSnapshot(const size_t SnapshotIndex);
   bool UndoSnapshot();
@@ -64,6 +67,7 @@ public:
   string BookTitle;
   bool MenuOpen = true;
   bool BookOpen = false;
+  bool SessionOpen = false;
 
 private:
   Story MenuStory;

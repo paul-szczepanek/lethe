@@ -10,13 +10,13 @@ class Font;
 class Surface
 {
 public:
-  static bool SystemInit();
-  static bool SystemDraw();
-
   Surface() { };
   Surface(size_t Width, size_t Height);
   Surface(const string& Filename);
-  virtual ~Surface();
+  ~Surface();
+
+  static bool SystemInit();
+  static bool SystemDraw();
 
   bool InitScreen(size_t ScreenWidth, size_t ScreenHeight, int ScreenBPP);
   bool Init();

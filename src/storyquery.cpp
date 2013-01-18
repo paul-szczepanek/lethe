@@ -71,7 +71,6 @@ Properties StoryQuery::GetVerbs(const string& Noun)
   Properties Result;
 
   const Page& page = QueryStory.FindPage(Noun);
-
   for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
     const Verb& verb = page.Verbs[i];
     if (!verb.VisualName.empty()) {
@@ -102,7 +101,6 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
   while (pos < length) {
     result = true;
     const size_t_pair tokenPos = FindToken(Expression, token::expression, pos);
-
     if (tokenPos.Y == string::npos) {
       LOG(Expression + " - expression ended unexpectedly");
       return false;
@@ -221,22 +219,19 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       // bare conditions have different syntax because no comparison
       if (op != token::condition) {
         bool isNum = false, isText = false;
-        Properties leftEvalValues;
-        Properties rightValues;
-
         const string& left = CutString(Expression, tokenPos.X+2, opPos.X);
         const string& right = CutString(Expression, opPos.Y+1, tokenPos.Y);
 
+        Properties rightValues;
+        Properties leftEvalValues;
+        EvaluateExpression(rightValues, right, isNum, isText);
         // default to current page noun
         if (!left.empty()) {
           EvaluateExpression(leftEvalValues, left, isNum, isText);
         }
-
         const Properties& leftValues = left.empty()?
                                        GetValues(Noun)
                                        : leftEvalValues;
-
-        EvaluateExpression(rightValues, right, isNum, isText);
 
         switch (op) {
           case token::contains:
@@ -292,7 +287,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
     }
 
     if (op == token::condition || op == token::instruction) {
-      const string evaluate = CutString(Expression, tokenPos.X+2, tokenPos.Y);
+      const string& evaluate = CutString(Expression, tokenPos.X+2, tokenPos.Y);
       bool isNum, isText;
       Properties values;
       EvaluateExpression(values, evaluate, isNum, isText);
@@ -302,15 +297,13 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
         const size_t scopePos = FindTokenStart(text, token::scope);
         if (scopePos != string::npos) { // recurse with the new block
           string noun = CutString(text, 0, scopePos);
-          const string verbName = CutString(text, scopePos+1);
-
+          const string& verbName = CutString(text, scopePos+1);
           // if no noun, use the current page noun by default
           if (noun.empty()) {
             noun = Noun;
           }
           const Page& page = QueryStory.FindPage(noun);
           const Block& block = page.GetVerb(verbName).BlockTree;
-
           result &= ExecuteBlock(noun, block);
         }
 
@@ -375,7 +368,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   // important hints to determine type of assignment
   IsNum = false;
   IsText = false;
-
   size_t length = Expression.size();
   size_t pos = 0;
   size_t valuePos = 0;
@@ -422,7 +414,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
               opStack.resize(1);
             }
           }
-
           opStack.resize(opStack.size()+1);
 
           // grouping and function calls recurse with the (contents)
@@ -442,7 +433,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
               EvaluateExpression(opStack.back().Operand, funcArgs,
                                  IsNum, IsText);
             }
-
             pos = funcEnd;
           }
 
@@ -456,7 +446,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
       // if an op was found this iteration, assign value to the previous op
       OperationNode& lastOp = opFound? *(opStack.rbegin()+1) : opStack.back();
       const string& valueText = CutString(Expression, valuePos, valueEnd);
-
       // a value terminates a series of nested operators
       lastOp.Nested = funcFound; // unless it was a function
       lastOp.Operand.AddValue(valueText);
@@ -577,7 +566,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   if (opStack.empty()) {
     return false;
   }
-
   return true;
 }
 
@@ -648,7 +636,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // show main menu
       FunctionArgs.IntValue = (lint)QueryBook.ShowMenu();
       FunctionArgs.TextValues.clear();
-    } else  if (func == "OpenBook") {
+    } else if (func == "OpenBook") {
       // try values until you open a book
       FunctionArgs.IntValue = 0;
       for (const string& arg : FunctionArgs.TextValues) {
@@ -658,21 +646,37 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
         }
       }
       FunctionArgs.TextValues.clear();
-    } else  if (func == "Quit") {
+    } else if (func == "Quit") {
       // Exit the reader
       FunctionArgs.TextValues.clear();
       FunctionArgs.IntValue = 1;
       QueryBook.HideMenu();
       QueryBook.CloseBook();
-    } else  if (func == "GetBooks") {
+    } else if (func == "GetBooks") {
       // return book names
-      FunctionArgs.TextValues.clear();
+      FunctionArgs = QueryBook.GetBooks();
       FunctionArgs.IntValue = 1;
-      FunctionArgs.SetValues(QueryBook.GetBooks());
-    } else  if (func == "IsBookOpen") {
+    } else if (func == "IsBookOpen") {
       // return 1 if a book is open
       FunctionArgs.TextValues.clear();
       FunctionArgs.IntValue = (lint)QueryBook.BookOpen;
+    } else if (func == "GetSessions") {
+      // return session filename
+      FunctionArgs = QueryBook.GetSessions();
+      FunctionArgs.IntValue = 1;
+    } else if (func == "LoadSession") {
+      // load session or continue last played session if no filename given
+      if (FunctionArgs.TextValues.empty()) {
+        FunctionArgs.IntValue = (lint)QueryBook.LoadSession();
+      } else {
+        const string& name = FunctionArgs.TextValues[0];
+        FunctionArgs.IntValue = (lint)QueryBook.LoadSession(name);
+        FunctionArgs.TextValues.clear();
+      }
+    } else if (func == "NewSession") {
+      // start new session
+      FunctionArgs.TextValues.clear();
+      FunctionArgs.IntValue = (lint)QueryBook.NewSession();
     } else {
       LOG(func + " - function doesn't exist!");
       FunctionArgs.TextValues.clear();

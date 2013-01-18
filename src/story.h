@@ -9,10 +9,10 @@ class Session;
 class Story
 {
 public:
-  Story();
-  virtual ~Story();
+  Story() { };
+  ~Story();
 
-  void Purge();
+  void Reset();
   void Fixate();
 
   bool ParseKeywordDefinition(const string& StoryText);

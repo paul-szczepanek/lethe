@@ -8,11 +8,11 @@ class Sound : public Asset
 {
 public:
   Sound(MediaManager& Manager, const string& AssetName, const string& Params);
-  virtual ~Sound() { };
+  ~Sound() { };
 
-  virtual bool Play();
-  virtual bool Stop();
-  virtual bool Tick(real DeltaTime);
+  bool Play();
+  bool Stop();
+  bool Tick(real DeltaTime);
 
 
 private:
