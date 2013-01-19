@@ -637,6 +637,11 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // show main menu
       intArg = (lint)QueryBook.ShowMenu();
       textArgs.clear();
+    } else if (func == "CloseBook") {
+      // saves the sessions and closes the book
+      QueryBook.CloseBook();
+      intArg = 1;
+      textArgs.clear();
     } else if (func == "OpenBook") {
       // try values until you open a book
       intArg = 0;
@@ -657,14 +662,22 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // return book names
       FunctionArgs = QueryBook.GetBooks();
       intArg = 1;
-    } else if (func == "IsBookOpen") {
+    } else if (func == "IsInGame") {
       // return 1 if a book is open
       textArgs.clear();
-      intArg = (lint)QueryBook.BookOpen;
+      intArg = (lint)QueryBook.SessionOpen;
     } else if (func == "GetSessions") {
       // return session filename
       FunctionArgs = QueryBook.GetSessions();
       intArg = 1;
+    } else if (func == "SaveSession") {
+      // saves the session, doesn't close it
+      intArg = (lint)QueryBook.SaveSession();
+      textArgs.clear();
+    } else if (func == "BranchSession") {
+      // saves the session and creates a new one from current place in time
+      intArg = (lint)QueryBook.BranchSession();
+      textArgs.clear();
     } else if (func == "LoadSession") {
       // load session or continue last played session if no filename given
       if (textArgs.empty()) {

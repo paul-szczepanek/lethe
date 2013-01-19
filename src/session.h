@@ -49,6 +49,7 @@ public:
   Bookmark& CreateBookmark();
   bool CreateSnapshot();
   bool LoadSnapshot(const size_t Index);
+  void Trim();
 
 private:
   string GetUserValuesText() const;

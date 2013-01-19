@@ -224,7 +224,7 @@ bool Reader::ProcessInput(real DeltaTime)
     // touch released, see if we cliked on something interactive
     // verb menu -> main menu -> quick menu -> main text
     if (VerbMenu.Visible) {
-      if (MyBook.ActiveBranch && VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
+      if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
         if (MainMenu.Visible) {
           MyBook.SetMenuAction(KeywordAction);
         } else {
@@ -237,9 +237,11 @@ bool Reader::ProcessInput(real DeltaTime)
       VerbMenu.Deselect();
     } else if (MainMenu.Visible) {
       MainMenu.GetSelectedKeyword(KeywordAction.X);
-    } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
+    } else if (MyBook.ActiveBranch
+               && QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
 
-    } else if (MainText.GetSelectedKeyword(KeywordAction.X)) {
+    } else if (MyBook.ActiveBranch
+               && MainText.GetSelectedKeyword(KeywordAction.X)) {
 
     }
 
@@ -248,13 +250,13 @@ bool Reader::ProcessInput(real DeltaTime)
     MainText.Deselect();
 
     if (!KeywordAction.X.empty()) {
-      if (!MyBook.ActiveBranch) {
-        // show a popup to ask to branch the story
-      } else if (MyBook.GetChoice(KeywordAction)) {
+      if (MyBook.GetChoice(KeywordAction)) {
         if (MainMenu.Visible) {
           MyBook.SetMenuAction(KeywordAction);
-        } else {
+        } else if (MyBook.ActiveBranch) {
           MyBook.SetStoryAction(KeywordAction);
+        } else {
+          // show a popup to ask to branch the story
         }
         KeywordAction.clear();
       } else {

@@ -299,6 +299,51 @@ string Session::GetAssetStatesText() const
   return text;
 }
 
+void Session::Trim()
+{
+  // don't trim at the end
+  if (CurrentSnapshot < Snapshots.size()) {
+    Snapshots.resize(CurrentSnapshot);
+    Snapshot& trimSnapshot = Snapshots.back();
+    // keep in mind that indices below are 1-based
+    QueueHistory.resize(trimSnapshot.QueueIndex);
+
+    // find the highest indices of values histories used until the trim
+    vector<size_t> biggestIndex;
+    biggestIndex.resize(ValuesHistories.size(), 0);
+    for (size_t i = 0; i < trimSnapshot.ChangesIndex; ++i) {
+      const size_t_pair& change = ValuesChanges[i];
+      if (change.Y > biggestIndex[change.X]) {
+        biggestIndex[change.X] = change.Y;
+      }
+    }
+    // trim all values histories beyond that index
+    for (size_t i = 0; i < ValuesHistories.size(); ++i) {
+      ValuesHistories[i].resize(biggestIndex[i]);
+    }
+    ValuesChanges.resize(trimSnapshot.ChangesIndex);
+
+    // find the biggest index of asset changes and trim the rest
+    size_t maxAssetStateIndex = 0;
+    for (const Snapshot& snap : Snapshots) {
+      if (snap.AssetsIndex > maxAssetStateIndex) {
+        maxAssetStateIndex = snap.AssetsIndex;
+      }
+    }
+    AssetsHistory.resize(maxAssetStateIndex);
+
+    // remove unused bookmarks
+    auto it = Bookmarks.begin();
+    while (it != Bookmarks.end()) {
+      if (it->first >= trimSnapshot.QueueIndex) {
+        Bookmarks.erase(it++);
+      } else {
+        it++;
+      }
+    }
+  }
+}
+
 void Session::Reset()
 {
   Name.clear();

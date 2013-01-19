@@ -95,11 +95,8 @@ bool Book::LoadSession(const string& Filename)
         return BookSession.Load();
       } else {
         // first playthrough or a new game - find first available filename
-        size_t i = 1;
-        while (Disk::Exists(path + IntoString(i) + SESSION_EXT)) {
-          ++i;
-        }
-        BookSession.Filename = IntoString(i);
+        BookSession.Filename = GetFreeSessionFilename();
+        BookSession.Name = "Playthrough" + BookSession.Filename;
         // session already initialised, no loading needed, add start bookmark
         Bookmark& mark = BookSession.CreateBookmark();
         mark.Description = "Story beginning";
@@ -111,6 +108,16 @@ bool Book::LoadSession(const string& Filename)
     }
   }
   return false;
+}
+
+string Book::GetFreeSessionFilename()
+{
+  const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
+  size_t i = 1;
+  while (Disk::Exists(path + IntoString(i) + SESSION_EXT)) {
+    ++i;
+  }
+  return IntoString(i);
 }
 
 bool Book::RedoSnapshot()
@@ -163,16 +170,38 @@ bool Book::HideMenu()
   return SessionOpen;
 }
 
-void Book::CloseBook()
+bool Book::BranchSession()
 {
   if (SessionOpen) {
-    SessionOpen = false;
+    SaveSession();
+    BookSession.Filename = GetFreeSessionFilename();
+    BookSession.Name = BookSession.Name + " branch";
+    BookSession.Trim();
+    ActiveBranch = true;
+    return true;
+  }
+  return false;
+}
+
+bool Book::SaveSession()
+{
+  if (SessionOpen) {
     const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
     const string& filename = path + BookSession.Filename + ".session";
     Disk::Write(filename, BookSession.GetSessionText());
     // save this filename as the last used session
     const string& continueFilename = path + SESSION_CONTINUE;
     Disk::Write(continueFilename, BookSession.Filename);
+    return true;
+  }
+  return false;
+}
+
+void Book::CloseBook()
+{
+  if (SessionOpen) {
+    SaveSession();
+    SessionOpen = false;
     BookSession.Reset();
   }
 
@@ -213,9 +242,9 @@ Properties Book::GetSessions(const string& Title)
     // find .session files
     const size_t length = file.size();
     if (length > SESSION_EXT.size()) {
-      const string& ext = CutString(file, 0, length - SESSION_EXT.size());
+      const string& ext = CutString(file, length - SESSION_EXT.size());
       if (ext == SESSION_EXT) {
-        const string& name = CutString(file, length - SESSION_EXT.size());
+        const string& name = CutString(file, 0, length - SESSION_EXT.size());
         result.AddValue(name);
       }
     }

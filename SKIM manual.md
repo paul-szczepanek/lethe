@@ -337,12 +337,15 @@ Currently available functions:
                       successfull.
 - `CloseBook()` - close the book, save and return to the menu.
 - `IsInGame()` - return true if a book is opened and a session started.
-- `GetSessions(value)` - return filenames of sessions (sans extension) for
-                         the given book title or if no value given for the
-                         currently book. If no value given and no is book
-                         open it will return no values.
+- `GetSessions(value)` - return user set names of sessions  for the given
+                         book title or if no value given for the currently
+                         book. If no value given and no is book open it will
+                         return no values.
+- `SaveSession()` - save the session.
+- `BranchSession()` - save the session and create a new one that starts
+                      at the current point in time.
 - `NewSession()` - start a new session.
-- `LoadSession(value)` - load a session with the given filename, if no value
+- `LoadSession(value)` - load a session with the given name, if no value is
                          given continue the last played session. Will start
                          a new session if no session is present.
 - `Bookmark(value)` - silently create a bookmark at current place. The value

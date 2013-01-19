@@ -28,6 +28,8 @@ public:
 
   Properties GetSessions(const string& Title = "");
   bool NewSession();
+  bool SaveSession();
+  bool BranchSession();
   bool LoadSession(const string& Filename = "");
 
   void SetBookmark(const Properties& Description);
@@ -68,6 +70,7 @@ private:
                                  Session& MySession);
   void SetAction(const string_pair& Choice, Session& MySession);
   string ProcessQueue(Story& MyStory, Session& MySession);
+  string GetFreeSessionFilename();
 
 
 public:
