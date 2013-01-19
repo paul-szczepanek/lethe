@@ -7,7 +7,7 @@ Image::Image(MediaManager& Manager,
              const string& Params)
   : Asset(Manager, AssetName)
 {
-  const string& params = CleanWhitespace(Params);
+  string params = GetCleanWhitespace(Params);
   size_t xPos = FindCharacter(params, ',');
   Filename = Media.AssetDir + CutString(params, 0, xPos);
   if (xPos != string::npos) {

@@ -1,12 +1,12 @@
 #include "page.h"
 #include "tokens.h"
 
-Verb Page::MissingVerb = { "", Block("You can't do that."), { } };
+VerbBlock Page::MissingVerb = { "", Block("You can't do that."), { } };
 
 Page::Page(const string& SourceText)
   : Text(SourceText)
 {
-  Verb verb; // gathers the verb definition before being copied to Verbs
+  VerbBlock verb; // gathers the verb definition before being copied to Verbs
   vector<Block*> blocks; // keeps track of local conditions stack
   vector<VerbCondition> verbConditions; // top level conditions
 
@@ -181,11 +181,11 @@ void Page::PrintBlock(string& Text,
  */
 void Page::NewPlainText(size_t_pair& TokenPos,
                         vector<Block*>& Blocks,
-                        Verb& VerbBlock)
+                        VerbBlock& Verb)
 {
   bool popLocalScope = false;
 
-  if (VerbBlock.Names.empty()) {
+  if (Verb.Names.empty()) {
     LOG("illegal text outside of a verb");
   } else {
     // look for block ending }
@@ -218,16 +218,16 @@ void Page::NewPlainText(size_t_pair& TokenPos,
   *
   * \return the block belonging to a verb by the name passed in
   */
-const Verb& Page::GetVerb(const string& VerbName) const
+const VerbBlock& Page::GetVerb(const string& Verb) const
 {
   for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
     for (size_t j = 0, for_size = Verbs[i].Names.size(); j < for_size; ++j) {
-      if (Verbs[i].Names[j] == VerbName) {
+      if (Verbs[i].Names[j] == Verb) {
         return Verbs[i];
       }
     }
   }
-  MissingVerb.BlockTree.Expression = "You can't " + VerbName + " that.";
+  MissingVerb.BlockTree.Expression = "You can't " + Verb + " that.";
   return MissingVerb;
 }
 
@@ -235,7 +235,7 @@ const Verb& Page::GetVerb(const string& VerbName) const
  *
  *  The key and block get claered
  */
-void Page::AddVerb(Verb& VerbBlock)
+void Page::AddVerb(VerbBlock& VerbBlock)
 {
   Verbs.push_back(VerbBlock);
   VerbBlock.BlockTree.Blocks.clear();
@@ -282,7 +282,7 @@ void Page::NewVerbCondition(size_t_pair& TokenPos,
  *  Active conditions are gathered and written to the new verb definition.
  */
 void Page::NewVerb(size_t_pair& TokenPos,
-                   Verb& VerbBlock,
+                   VerbBlock& VerbBlock,
                    vector<VerbCondition>& VerbConditions)
 {
   // flush the existing verb definition

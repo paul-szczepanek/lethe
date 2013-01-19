@@ -285,10 +285,33 @@ size_t FindTokenEnd(const string& Text, token::tokenName TokenName,
                     size_t Start = 0, size_t End = 0);
 size_t FindCharacter(const string& Text, char Char,
                      size_t Start = 0, size_t End = 0);
-string CleanWhitespace(const string& Text);
+void CleanWhitespace(string& Text);
 string CleanEscapeCharacters(const string& Text);
 void StripComments(string& Text);
 
+inline string GetCleanWhitespace(const string& Text)
+{
+  string clean = Text;
+  CleanWhitespace(clean);
+  return clean;
+}
+
+inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
+{
+  if (!Text.empty()) {
+    const size_t scopePos = FindTokenStart(Text, token::scope);
+    if (scopePos != string::npos) { // recurse with the new block
+      if (scopePos) {
+        Noun = CutString(Text, 0, scopePos);
+      } else {
+        Noun.clear();
+      }
+      Verb = CutString(Text, scopePos+1);
+      return true;
+    }
+  }
+  return false;
+}
 
 // handy text parsing function for escaping special chars
 inline bool IsEscaped(const string& Text, size_t Pos)

@@ -72,7 +72,7 @@ Properties StoryQuery::GetVerbs(const string& Noun)
 
   const Page& page = QueryStory.FindPage(Noun);
   for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
-    const Verb& verb = page.Verbs[i];
+    const VerbBlock& verb = page.Verbs[i];
     if (!verb.VisualName.empty()) {
       if (ExecuteExpression(Noun, verb.BlockTree.Expression)) {
         Result.AddValue(verb.VisualName);
@@ -294,16 +294,14 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
 
       // executy [!noun:verb] commands and [!noun=value] assignments
       for (const string& text : values.TextValues) {
-        const size_t scopePos = FindTokenStart(text, token::scope);
-        if (scopePos != string::npos) { // recurse with the new block
-          string noun = CutString(text, 0, scopePos);
-          const string& verbName = CutString(text, scopePos+1);
+        string noun, verb;
+        if (ExtractNounVerb(text, noun, verb)) {
           // if no noun, use the current page noun by default
           if (noun.empty()) {
             noun = Noun;
           }
           const Page& page = QueryStory.FindPage(noun);
-          const Block& block = page.GetVerb(verbName).BlockTree;
+          const Block& block = page.GetVerb(verb).BlockTree;
           result &= ExecuteBlock(noun, block);
         }
 
@@ -576,42 +574,45 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
 {
   for (const string& func : FunctionName.TextValues) {
     // execute function
+    // TODO: hash the function names
+    lint& intArg = FunctionArgs.IntValue;
+    vector<string>& textArgs = FunctionArgs.TextValues;
     if (func == "Size") {
       // return number of values
-      FunctionArgs.IntValue = 0;
-      for (const string& arg : FunctionArgs.TextValues) {
+      intArg = 0;
+      for (const string& arg : textArgs) {
         const Properties nounValues = GetValues(arg);
-        FunctionArgs.IntValue += nounValues.TextValues.size();
+        intArg += nounValues.TextValues.size();
       }
-      FunctionArgs.TextValues.clear();
+      textArgs.clear();
     } else if (func == "Play") {
       // activate asset
-      for (const string& arg : FunctionArgs.TextValues) {
+      for (const string& arg : textArgs) {
         if (!QueryBook.GetAssetState(arg)) {
           QueryBook.SetAssetState(arg, true);
         }
         LOG(arg + " - play");
       }
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
+      textArgs.clear();
+      intArg = 1;
     } else if (func == "Stop") {
       // deactivate asset
-      for (const string& arg : FunctionArgs.TextValues) {
+      for (const string& arg : textArgs) {
         if (!QueryBook.GetAssetState(arg)) {
           QueryBook.SetAssetState(arg, false);
         }
         LOG(arg + " - stop");
       }
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
+      textArgs.clear();
+      intArg = 1;
     } else if (func == "Keyword") {
       // print a list of values
       Text += FunctionArgs.PrintKeywordList();
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
+      textArgs.clear();
+      intArg = 1;
     } else if (func == "SelectValue") {
       // print a list of <value[noun=value:verb]>
-      for (const string& arg : FunctionArgs.TextValues) {
+      for (const string& arg : textArgs) {
         const size_t scopePos = FindTokenEnd(arg, token::scope);
         if (scopePos != string::npos) {
           // rearange the noun:verb into proper places
@@ -621,65 +622,90 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           Text += values.PrintValueSelectList(noun, verb, "\n ");
         }
       }
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
+      textArgs.clear();
+      intArg = 1;
     } else if (func == "Print") {
       // print a list of values as keywords
       Text += FunctionArgs.PrintPlainList();
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
+      textArgs.clear();
+      intArg = 1;
     } else if (func == "CloseMenu") {
       // close main menu, show book
-      FunctionArgs.IntValue = (lint)QueryBook.HideMenu();
-      FunctionArgs.TextValues.clear();
+      intArg = (lint)QueryBook.HideMenu();
+      textArgs.clear();
     } else if (func == "OpenMenu") {
       // show main menu
-      FunctionArgs.IntValue = (lint)QueryBook.ShowMenu();
-      FunctionArgs.TextValues.clear();
+      intArg = (lint)QueryBook.ShowMenu();
+      textArgs.clear();
     } else if (func == "OpenBook") {
       // try values until you open a book
-      FunctionArgs.IntValue = 0;
-      for (const string& arg : FunctionArgs.TextValues) {
+      intArg = 0;
+      for (const string& arg : textArgs) {
         if (QueryBook.OpenBook(arg)) {
-          FunctionArgs.IntValue = 1;
+          intArg = 1;
           break;
         }
       }
-      FunctionArgs.TextValues.clear();
+      textArgs.clear();
     } else if (func == "Quit") {
       // Exit the reader
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = 1;
-      QueryBook.HideMenu();
+      textArgs.clear();
+      intArg = 1;
       QueryBook.CloseBook();
+      QueryBook.Quit();
     } else if (func == "GetBooks") {
       // return book names
       FunctionArgs = QueryBook.GetBooks();
-      FunctionArgs.IntValue = 1;
+      intArg = 1;
     } else if (func == "IsBookOpen") {
       // return 1 if a book is open
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = (lint)QueryBook.BookOpen;
+      textArgs.clear();
+      intArg = (lint)QueryBook.BookOpen;
     } else if (func == "GetSessions") {
       // return session filename
       FunctionArgs = QueryBook.GetSessions();
-      FunctionArgs.IntValue = 1;
+      intArg = 1;
     } else if (func == "LoadSession") {
       // load session or continue last played session if no filename given
-      if (FunctionArgs.TextValues.empty()) {
-        FunctionArgs.IntValue = (lint)QueryBook.LoadSession();
+      if (textArgs.empty()) {
+        intArg = (lint)QueryBook.LoadSession();
       } else {
-        const string& name = FunctionArgs.TextValues[0];
-        FunctionArgs.IntValue = (lint)QueryBook.LoadSession(name);
-        FunctionArgs.TextValues.clear();
+        const string& name = textArgs[0];
+        intArg = (lint)QueryBook.LoadSession(name);
+        textArgs.clear();
       }
     } else if (func == "NewSession") {
       // start new session
-      FunctionArgs.TextValues.clear();
-      FunctionArgs.IntValue = (lint)QueryBook.NewSession();
+      textArgs.clear();
+      intArg = (lint)QueryBook.NewSession();
+    } else if (func == "Bookmark") {
+      // create a bookmark using the argument to produce the text
+      QueryBook.SetBookmark(FunctionArgs);
+      intArg = 1;
+      textArgs.clear();
+    } else if (func == "Dialog") {
+      // create a dialog
+      intArg = 0;
+      for (const string& arg : textArgs) {
+        if (QueryBook.AddDialog(arg)) {
+          intArg = 1;
+          break;
+        }
+      }
+      textArgs.clear();
+    } else if (func == "Input") {
+      // create an input dialog that saves user response in the noun
+      intArg = 0;
+      for (const string& arg : textArgs) {
+        if (QueryBook.AddInputDialog(arg)) {
+          intArg = 1;
+          break;
+        }
+      }
+      textArgs.clear();
     } else {
       LOG(func + " - function doesn't exist!");
-      FunctionArgs.TextValues.clear();
+      textArgs.clear();
       return false;
     }
   }

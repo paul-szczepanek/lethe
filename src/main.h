@@ -51,6 +51,8 @@ const string FONTS_DIR = DATA_DIR + SLASH + "fonts";
 const string FRAMES_DIR = DATA_DIR + SLASH + "frames";
 const string SESSION_EXT = ".session";
 const string SESSION_CONTINUE = "session";
+const string QUICK_BOOKMARK = "Quick bookmark";
+const char BACKSPACE_CHAR = (char)8;
 
 const size_t BLOCK_SIZE = 32;
 

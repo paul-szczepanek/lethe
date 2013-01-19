@@ -12,7 +12,7 @@ struct Block {
   vector<Block> Blocks;
 };
 
-struct Verb {
+struct VerbBlock {
   string VisualName;
   Block BlockTree;
   vector<string> Names;
@@ -29,33 +29,33 @@ public:
   Page(const string& SourceText);
   ~Page() { };
 
-  const Verb& GetVerb(const string& VerbName) const;
+  const VerbBlock& GetVerb(const string& Verb) const;
   void SetValues(const string& Values);
   void AddValues(const string& Values);
   void RemoveValues(const string& Values);
 
 private:
   void NewPlainText(size_t_pair& TokenPos, vector<Block*>& Blocks,
-                    Verb& VerbBlock);
-  void NewVerb(size_t_pair& TokenPos, Verb& VerbBlock,
+                    VerbBlock& VerbBlock);
+  void NewVerb(size_t_pair& TokenPos, VerbBlock& VerbBlock,
                vector<VerbCondition>& VerbConditions);
   void NewVerbCondition(size_t_pair& TokenPos,
                         vector<VerbCondition>& VerbConditions);
 
-  void AddVerb(Verb& VerbBlock);
+  void AddVerb(VerbBlock& VerbBlock);
   void PrintBlock(string& Text, const Block& Block);
 
 
 public:
   Properties PageValues;
-  vector<Verb> Verbs;
+  vector<VerbBlock> Verbs;
 
 private:
   // this is the normalised Text of the page
   // TODO: don't duplicate strings, use indices to Text
   string Text;
 
-  static Verb MissingVerb;
+  static VerbBlock MissingVerb;
 };
 
 #endif // PAGE_H

@@ -15,6 +15,8 @@ struct MouseState {
 };
 
 struct KeysState {
+  char Letter = '?';
+  bool InputMode = false;
   bool KeyPressed = false;
   bool PgUp = false;
   bool PgDown = false;
@@ -27,6 +29,7 @@ struct KeysState {
   bool Bookmark = false;
   bool Undo = false;
   bool Redo = false;
+  bool Quit = false;
 };
 
 class Input

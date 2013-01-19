@@ -9,6 +9,47 @@ Book::Book()
   OpenMenu();
 }
 
+/** @brief SetBookmark
+  *
+  * @todo: document this function
+  */
+void Book::SetBookmark(const Properties& Description)
+{
+  Bookmark& mark = BookSession.CreateBookmark();
+  if (mark.Description.empty()) {
+    StoryQuery query(*this, BookStory, BookSession, mark.Description);
+    for (const string& text : Description.TextValues) {
+      query.ExecuteExpression(QUEUE, text);
+    }
+    CleanWhitespace(mark.Description);
+  }
+}
+
+void Book::SetBookmark(const string& Description)
+{
+  Bookmark& mark = BookSession.CreateBookmark();
+  mark.Description = Description;
+  CleanWhitespace(mark.Description);
+}
+
+/** @brief AddDialog
+  *
+  * @todo: document this function
+  */
+bool Book::AddDialog(const string& Noun)
+{
+  return true;
+}
+
+/** @brief AddInputDialog
+  *
+  * @todo: document this function
+  */
+bool Book::AddInputDialog(const string& Noun)
+{
+  return true;
+}
+
 /** @brief Open book of agiven title
   *
   * open the file containing the story and feed it to StoryDefinition to parse
@@ -59,7 +100,9 @@ bool Book::LoadSession(const string& Filename)
           ++i;
         }
         BookSession.Filename = IntoString(i);
-        // session already initialised, no loading needed
+        // session already initialised, no loading needed, add start bookmark
+        Bookmark& mark = BookSession.CreateBookmark();
+        mark.Description = "Story beginning";
         return true;
       }
     } else {
@@ -72,18 +115,34 @@ bool Book::LoadSession(const string& Filename)
 
 bool Book::RedoSnapshot()
 {
-  return LoadSnapshot(BookSession.CurrentSnapshot);
+  // by loading the current move we can move forward if the current move
+  // already exists in the snapshots
+  const size_t next = BookSession.CurrentSnapshot;
+  // be careful not to overshoot because that will reset the story
+  if (next < BookSession.Snapshots.size()) {
+    return LoadSnapshot(next);
+  }
+  return false;
 }
 
 bool Book::UndoSnapshot()
 {
-  return LoadSnapshot(BookSession.CurrentSnapshot - 2);
+  // the current snapshot is the future one, so we need to go back 2 snapshots
+  const size_t prev = BookSession.CurrentSnapshot - 2;
+  // only load the snapshot if it's not the 0th step, which is the start
+  // of the book before values existed to be loaded
+  if (prev > 0) {
+    return LoadSnapshot(prev);
+  }
+  return false;
 }
 
 bool Book::LoadSnapshot(const size_t SnapshotIndex)
 {
   // before loading, revert to book values
   InitSession(BookStory, BookSession);
+  // if not the last snapshot then we're moving on the timeline and can't act
+  ActiveBranch = (SnapshotIndex == BookSession.Snapshots.size() - 1);
   return BookSession.LoadSnapshot(SnapshotIndex);
 }
 
@@ -91,6 +150,11 @@ bool Book::ShowMenu()
 {
   MenuOpen = true;
   return MenuOpen;
+}
+
+void Book::Quit()
+{
+  MenuOpen = SessionOpen = BookOpen = false;
 }
 
 bool Book::HideMenu()
@@ -254,7 +318,7 @@ void Book::InitSession(Story& MyStory,
   */
 bool Book::AddAssetDefinition(const string& StoryText)
 {
-  string text = CleanWhitespace(StoryText);
+  string text = GetCleanWhitespace(StoryText);
   const size_t_pair namePos = FindToken(text, token::expression); // []
   const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
                                      namePos.Y);

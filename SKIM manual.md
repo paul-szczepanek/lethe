@@ -345,10 +345,17 @@ Currently available functions:
 - `LoadSession(value)` - load a session with the given filename, if no value
                          given continue the last played session. Will start
                          a new session if no session is present.
+- `Bookmark(value)` - silently create a bookmark at current place. The value
+                      will be evaluated to provide the description. If a
+                      bookmark is already present it will not be overwritten.
+- `Input(noun)` - will show an input box that will set the value of the noun.
+                  The buttons on the input box will be the verbs of the noun.
+                  If a number is entered, the integer value will be set in
+                  addition to the text value.
 - `OpenMenu()` - open the game menu in the reader.
 - `CloseMenu()` - close the game menu in the reader.
-- `Quit()` - this will call both CloseBook() and CloseMenu(), which will
-             save the session and quit the game.
+- `Quit()` - this will call CloseBook() to save the session and then quit
+             the game.
 
 ### `Media Assets _____________________________________________ [$ = type()]`
 

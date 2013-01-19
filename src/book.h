@@ -18,19 +18,26 @@ public:
 
   bool Tick(real DeltaTime);
 
-  // these are exposed to the story
   Properties GetBooks();
-  Properties GetSessions(const string& Title = "");
   bool OpenBook(const string& Title);
   void CloseBook();
+
   bool ShowMenu();
   bool HideMenu();
+  void Quit();
+
+  Properties GetSessions(const string& Title = "");
   bool NewSession();
   bool LoadSession(const string& Filename = "");
 
+  void SetBookmark(const Properties& Description);
+  void SetBookmark(const string& Description);
   bool LoadSnapshot(const size_t SnapshotIndex);
   bool UndoSnapshot();
   bool RedoSnapshot();
+
+  bool AddDialog(const string& Noun);
+  bool AddInputDialog(const string& Noun);
 
   void SetStoryAction(const string_pair& Choice);
   void SetMenuAction(const string_pair& Choice);
@@ -68,6 +75,7 @@ public:
   bool MenuOpen = true;
   bool BookOpen = false;
   bool SessionOpen = false;
+  bool ActiveBranch = true;
 
 private:
   Story MenuStory;

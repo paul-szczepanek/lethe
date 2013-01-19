@@ -31,6 +31,8 @@ bool Input::Tick(MouseState& Mouse,
 {
   bool changed = false;
   SDL_Event event;
+  const SDLKey& key = event.key.keysym.sym;
+  const SDL_MouseButtonEvent& mouse = event.button;
 
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
@@ -40,59 +42,83 @@ bool Input::Tick(MouseState& Mouse,
 
       case SDL_KEYDOWN:
         Keys.KeyPressed = changed = true;
-        if (event.key.keysym.sym == SDLK_ESCAPE) {
-          Keys.Escape = true;
-        } else if (event.key.keysym.sym == SDLK_LEFTBRACKET) {
-          Keys.SplitShrink = true;
-        } else if (event.key.keysym.sym == SDLK_RIGHTBRACKET) {
-          Keys.SplitGrow = true;
-        } else if (event.key.keysym.sym == SDLK_l) {
-          Keys.LayoutToggle = true;
-        } else if (event.key.keysym.sym == SDLK_b) {
-          Keys.Bookmark = true;
-        } else if (event.key.keysym.sym == SDLK_m) {
-          Keys.Menu = true;
-        } else if (event.key.keysym.sym == SDLK_SPACE) {
-          Keys.ImageZoom = true;
-        } else if (event.key.keysym.sym == SDLK_PAGEDOWN) {
-          Keys.PgDown = true;
-        } else if (event.key.keysym.sym == SDLK_PAGEUP) {
-          Keys.PgUp = true;
-        } else if (event.key.keysym.sym == SDLK_u) {
-          Keys.Undo = true;
-        } else if (event.key.keysym.sym == SDLK_r) {
-          Keys.Redo = true;
+        if (Keys.InputMode) {
+          // input mode where we just grab the letter and leave
+          if (key == SDLK_RETURN) {
+            Keys.InputMode = false;
+          } else if (key == SDLK_ESCAPE) {
+            Keys.InputMode = false;
+            Keys.Letter = BACKSPACE_CHAR;
+          } else if (key == SDLK_BACKSPACE || key == SDLK_DELETE) {
+            Keys.Letter = BACKSPACE_CHAR;
+          } else if ((SDLK_a <= key && key <= SDLK_z)
+                     || (SDLK_0 <= key && key <= SDLK_9)
+                     || (SDLK_ASTERISK <= key && key <= SDLK_PERIOD)
+                     || SDLK_QUESTION == key || SDLK_EXCLAIM == key
+                     || SDLK_SPACE == key || SDLK_QUOTE == key
+                     || SDLK_UNDERSCORE == key || SDLK_SEMICOLON == key) {
+            Keys.Letter = (char)key; // ASCII mapped
+          }
+        } else {
+          // normal, keys as shortcuts mode
+          if (key == SDLK_ESCAPE) {
+            Keys.Escape = true;
+          } else if (key == SDLK_LEFTBRACKET) {
+            Keys.SplitShrink = true;
+          } else if (key == SDLK_RIGHTBRACKET) {
+            Keys.SplitGrow = true;
+          } else if (key == SDLK_l) {
+            Keys.LayoutToggle = true;
+          } else if (key == SDLK_b) {
+            Keys.Bookmark = true;
+          } else if (key == SDLK_m) {
+            Keys.Menu = true;
+          } else if (key == SDLK_SPACE) {
+            Keys.ImageZoom = true;
+          } else if (key == SDLK_PAGEDOWN) {
+            Keys.PgDown = true;
+          } else if (key == SDLK_PAGEUP) {
+            Keys.PgUp = true;
+          } else if (key == SDLK_u) {
+            Keys.Undo = true;
+          } else if (key == SDLK_r) {
+            Keys.Redo = true;
+          } else if (key == SDLK_q || key == SDLK_c) {
+            if (event.key.keysym.mod & (KMOD_LALT | KMOD_LCTRL)) {
+              Keys.Quit = true;
+            }
+          }
         }
         break;
 
       case SDL_MOUSEBUTTONDOWN:
         changed = true;
-        if (event.button.button == SDL_BUTTON_LEFT) {
+        if (mouse.button == SDL_BUTTON_LEFT) {
           Mouse.Left = true;
-        } else if (event.button.button == SDL_BUTTON_RIGHT) {
+        } else if (mouse.button == SDL_BUTTON_RIGHT) {
           Mouse.Right = true;
-        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
+        } else if (mouse.button == SDL_BUTTON_MIDDLE) {
           Mouse.Middle = true;
         }
         break;
 
       case SDL_MOUSEBUTTONUP:
         changed = true;
-        if (event.button.button == SDL_BUTTON_LEFT) {
+        if (mouse.button == SDL_BUTTON_LEFT) {
           Mouse.Left = false;
           Mouse.LeftUp = true;
-        } else if (event.button.button == SDL_BUTTON_RIGHT) {
+        } else if (mouse.button == SDL_BUTTON_RIGHT) {
           Mouse.Right = false;
           Mouse.RightUp = true;
-        } else if (event.button.button == SDL_BUTTON_MIDDLE) {
+        } else if (mouse.button == SDL_BUTTON_MIDDLE) {
           Mouse.Middle = false;
           Mouse.MiddleUp = true;
         }
         break;
     }
 
-    Mouse.X = event.button.x;
-    Mouse.Y = event.button.y;
+    Mouse.X = mouse.x;
+    Mouse.Y = mouse.y;
   }
 
   changed |= Mouse.Left;

@@ -6,8 +6,7 @@
 string GLog = "";
 #endif
 
-int main (int argc,
-          char** argv)
+int main ()
 {
   Reader reader(1000, 800, 32);
 

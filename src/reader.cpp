@@ -25,7 +25,7 @@ bool Reader::Init()
   if (!Font::SystemInit()) {
     return false;
   }
-  //*
+  /*
   if (!Audio::SystemInit()) {
     return false;
   } //*/
@@ -172,11 +172,11 @@ bool Reader::ProcessInput(real DeltaTime)
 
   if (keys.KeyPressed) {
     if (keys.Escape) {
+      // todo: handle dismissing dialog
       if (MyBook.MenuOpen) {
-        MyBook.MenuOpen  = false;
+        MyBook.HideMenu();
       } else {
-        // this kills the game without closing the book and saving
-        MyBook.BookOpen = false;
+        MyBook.ShowMenu();
       }
     } else if (keys.SplitShrink) {
       --(GetCurrentLayout().Split);
@@ -203,7 +203,9 @@ bool Reader::ProcessInput(real DeltaTime)
     } else if (keys.Redo) {
       MyBook.RedoSnapshot();
     } else if (keys.Bookmark) {
-      //
+      MyBook.SetBookmark(QUICK_BOOKMARK);
+    } else if (keys.Quit) {
+      MyBook.Quit();
     }
   }
 
@@ -222,7 +224,7 @@ bool Reader::ProcessInput(real DeltaTime)
     // touch released, see if we cliked on something interactive
     // verb menu -> main menu -> quick menu -> main text
     if (VerbMenu.Visible) {
-      if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
+      if (MyBook.ActiveBranch && VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
         if (MainMenu.Visible) {
           MyBook.SetMenuAction(KeywordAction);
         } else {
@@ -246,7 +248,9 @@ bool Reader::ProcessInput(real DeltaTime)
     MainText.Deselect();
 
     if (!KeywordAction.X.empty()) {
-      if (MyBook.GetChoice(KeywordAction)) {
+      if (!MyBook.ActiveBranch) {
+        // show a popup to ask to branch the story
+      } else if (MyBook.GetChoice(KeywordAction)) {
         if (MainMenu.Visible) {
           MyBook.SetMenuAction(KeywordAction);
         } else {

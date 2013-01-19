@@ -34,7 +34,7 @@ void Story::Fixate()
   */
 bool Story::ParseKeywordDefinition(const string& StoryText)
 {
-  string text = CleanWhitespace(StoryText);
+  string text = GetCleanWhitespace(StoryText);
   // break up the expected [<noun[pattern]>=value]
   size_t_pair defPos = FindToken(text, token::expression); // [] outer
   size_t_pair keyPos = FindToken(text, token::keyword, defPos.X+1, // <>
@@ -78,7 +78,7 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   }
 
   // check if it's already defined
-  auto it = Pages.find(keyword);
+  const auto it = Pages.find(keyword);
   if (it != Pages.end()) {
     LOG(keyword + " - already defined");
     return false;

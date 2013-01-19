@@ -31,10 +31,11 @@ public:
   inline bool IsEmpty() const;
 
   const string PrintValues() const;
+  const string PrintTextValues() const;
   const string PrintKeywordList(const string& Separator = ", ") const;
   const string PrintPlainList(const string& Separator = ", ") const;
   const string PrintValueSelectList(const string& Noun,
-                                    const string& VerbName,
+                                    const string& Verb,
                                     const string& Separator = ", ") const;
 
 

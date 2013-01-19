@@ -5,7 +5,9 @@
   */
 bool Session::LoadSnapshot(const size_t Index)
 {
-  if (Index >= Snapshots.size()) {
+  if (Index >= Snapshots.size() || !Index) {
+    // if it's not within the history or is the start of the story
+    // there's nothing to load and the story is ready to go from the init
     return false;
   }
   CurrentSnapshot = Index;
@@ -30,7 +32,7 @@ bool Session::LoadSnapshot(const size_t Index)
     currentIndex[change.X] = change.Y;
   }
 
-  for (const auto value : ValuesHistoryNames) {
+  for (const auto& value : ValuesHistoryNames) {
     const string& name = value.first;
     const size_t i = value.second;
     // all indeces here are 1-based, 0 meaning book values should be used
@@ -160,9 +162,19 @@ bool Session::Load()
     Snapshots.push_back(loadedSnapshot);
   }
 
+  // bookmarks
+  while (Save.GetLine(buffer)) {
+    const size_t index = IntoSizeT(buffer);
+    Save.GetLine(Bookmarks[index].Action);
+    string bookmarkDescription;
+    while (Save.GetLine(buffer)) {
+      bookmarkDescription += buffer;
+    }
+    Bookmarks[index].Description = bookmarkDescription;
+  }
+
   // repeat last snapshot
   LoadSnapshot(Snapshots.size() - 1);
-
   return true;
 }
 
@@ -197,7 +209,7 @@ const string Session::GetSessionText() const
   text += "\nTracked Values:\n";
   text += IntoString(ValuesHistoryNames.size());
   text += "\n\n";
-  for (const auto valueMap : ValuesHistoryNames) {
+  for (const auto& valueMap : ValuesHistoryNames) {
     text += valueMap.first;
     text += '\n';
     text += IntoString(valueMap.second);
@@ -227,6 +239,16 @@ const string Session::GetSessionText() const
     text += IntoString(value.ChangesIndex);
     text += '\n';
   }
+  text += '\n';
+  // bookmarks, queueindex and description
+  for (const auto& value : Bookmarks) {
+    text += IntoString(value.first);
+    text += '\n';
+    text += value.second.Action;
+    text += '\n';
+    text += value.second.Description;
+    text += "\n\n";
+  }
   text += "\nEnd of session file";
 
   return text;
@@ -237,7 +259,7 @@ const string Session::GetSessionText() const
 string Session::GetUserValuesText() const
 {
   string text;
-  for (auto valuePair : UserValues) {
+  for (const auto& valuePair : UserValues) {
     // skip queue noun
     if (&valuePair.second == SystemNouns[systemQueue]) {
       break;
@@ -255,7 +277,7 @@ string Session::GetUserValuesText() const
 string Session::GetQueueValuesText() const
 {
   const Properties& queueValues = *(SystemNouns[systemQueue]);
-  return queueValues.PrintValues();
+  return queueValues.PrintTextValues();
 }
 
 /** @brief Return the asset states ready for writing to a file
@@ -264,7 +286,7 @@ string Session::GetAssetStatesText() const
 {
   string text;
   bool addBreak = false;
-  for (auto valuePair : AssetStates) {
+  for (const auto& valuePair : AssetStates) {
     if (valuePair.second.Playing) {
       if (addBreak) {
         text += '\n';
@@ -329,7 +351,7 @@ bool Session::CreateSnapshot()
     ValuesChanged = false;
     bool valuedAdded = false;
 
-    for (auto valuePair : UserValues) {
+    for (auto& valuePair : UserValues) {
       Properties& newValue = valuePair.second;
       const string& valueName = valuePair.first;
       if (newValue.Dirty) {
@@ -339,7 +361,7 @@ bool Session::CreateSnapshot()
         continue;
       }
       // if it's not already in the map add the history and the map entry
-      auto it = ValuesHistoryNames.find(valueName);
+      const auto it = ValuesHistoryNames.find(valueName);
       if (it == ValuesHistoryNames.end()) {
         // create a new history to hold the values
         const size_t historyI = ValuesHistories.size();
@@ -375,6 +397,29 @@ bool Session::CreateSnapshot()
   Snapshots.push_back(newSnapshot);
   CurrentSnapshot = Snapshots.size();
   return true;
+}
+
+/** @brief return a bookmark for current time
+  * will also fill in the action from the queue
+  */
+Bookmark& Session::CreateBookmark()
+{
+  const size_t queueI = CurrentSnapshot > 1? CurrentSnapshot - 2 : 0;
+  Bookmark& mark = Bookmarks[queueI];
+  if (mark.Action.empty()) {
+    if (queueI < QueueHistory.size()) {
+      const string& queueString = QueueHistory[queueI];
+      string noun, verb;
+      if (ExtractNounVerb(queueString, noun, verb)) {
+        mark.Action += verb;
+        mark.Action += ' ';
+        mark.Action += noun;
+      }
+    } else {
+      mark.Action = "open book";
+    }
+  }
+  return mark;
 }
 
 /** @brief Checks if this page has a user value

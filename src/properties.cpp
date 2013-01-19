@@ -23,8 +23,21 @@ Properties::Properties(const string& Value) : IntValue(0)
   }
 }
 
+/** @brief omit the integer value
+  */
+const string Properties::PrintTextValues() const
+{
+  string text;
+  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+    if (i) {
+      text += VALUE_SEPARATOR;
+    }
+    text += TextValues[i];
+  }
+  return text;
+}
 
-/** @brief print the values creation string, text and integer like so v1,v2,0
+/** @brief print the values creation string, text and integer like so v1,v2,#0
   */
 const string Properties::PrintValues() const
 {
@@ -41,12 +54,12 @@ const string Properties::PrintValues() const
 /** @brief return string with verbs as keywords
   */
 const string Properties::PrintValueSelectList(const string& Noun,
-    const string& VerbName,
+    const string& Verb,
     const string& Separator) const
 {
   string text;
   for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
-    if (i && i < for_size + 1) {
+    if (i) {
       text += Separator;
     }
     text += "<";
@@ -56,7 +69,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
     text += '=';
     text += TextValues[i];
     text += ":";
-    text += VerbName;
+    text += Verb;
     text += "]>";
   }
   return CleanEscapeCharacters(text);
@@ -68,7 +81,7 @@ const string Properties::PrintKeywordList(const string& Separator) const
 {
   string text;
   for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
-    if (i && i < for_size + 1) {
+    if (i) {
       text += Separator;
     }
     text += "<";
@@ -84,7 +97,7 @@ const string Properties::PrintPlainList(const string& Separator) const
 {
   string text;
   for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
-    if (i && i < for_size + 1) {
+    if (i) {
       text += Separator;
     }
     text += TextValues[i];

@@ -35,7 +35,7 @@ private:
   */
 Page& Story::FindPage(const string& Noun)
 {
-  auto it = Pages.find(Noun);
+  const auto it = Pages.find(Noun);
 
   if (it != Pages.end()) {
     return *(it->second);

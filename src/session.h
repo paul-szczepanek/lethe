@@ -17,6 +17,12 @@ struct Snapshot {
   size_t ChangesIndex = 0;
 };
 
+struct Bookmark {
+  Bookmark() { };
+  string Action;
+  string Description;
+};
+
 struct AssetState {
   AssetState() { };
   AssetState(bool _Playing) : Playing(_Playing) { };
@@ -40,6 +46,7 @@ public:
   inline const Properties& GetSystemValues(systemNoun Noun);
   inline void AddQueueValue(const string& Value);
 
+  Bookmark& CreateBookmark();
   bool CreateSnapshot();
   bool LoadSnapshot(const size_t Index);
 
@@ -73,6 +80,7 @@ private:
   vector<vector<string>> ValuesHistories;
   map<string, size_t> ValuesHistoryNames;
   vector<size_t_pair> ValuesChanges;
+  map<size_t, Bookmark> Bookmarks;
 
   friend class Book;
   friend class StoryQuery;

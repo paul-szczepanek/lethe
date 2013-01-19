@@ -4,7 +4,7 @@
   *
   * removes all whitespace around tokens and collapses multiple newlines
   */
-string CleanWhitespace(const string& Text)
+void CleanWhitespace(string& Text)
 {
   string clean;
   clean.reserve(Text.size());
@@ -112,7 +112,7 @@ string CleanWhitespace(const string& Text)
     ++pos;
   }
 
-  return clean;
+  Text.swap(clean);
 }
 
 /** @brief Return string with no escape characters in it
