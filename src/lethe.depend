@@ -302,20 +302,20 @@
 	"properties.h"
 	"tokens.h"
 
-1358639054 source:/home/paul/lethe/lethe/src/book.cpp
+1358807796 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"page.h"
 	"tokens.h"
 	"storyquery.h"
 	"disk.h"
 
-1358631193 /home/paul/lethe/lethe/src/book.h
+1358807679 /home/paul/lethe/lethe/src/book.h
 	"main.h"
 	"story.h"
 	"session.h"
 	"mediamanager.h"
 
-1358781672 /home/paul/lethe/lethe/src/main.h
+1358801868 /home/paul/lethe/lethe/src/main.h
 	<iostream>
 	<fstream>
 	<sstream>
@@ -384,7 +384,7 @@
 	"input.h"
 	"disk.h"
 
-1358783151 source:/home/paul/lethe/lethe/src/session.cpp
+1358806840 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
 	"disk.h"
 
@@ -408,7 +408,7 @@
 	"main.h"
 	"properties.h"
 
-1358788862 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1358804628 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"story.h"

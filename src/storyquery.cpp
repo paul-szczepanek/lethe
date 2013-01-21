@@ -667,7 +667,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       textArgs.clear();
       intArg = (lint)QueryBook.SessionOpen;
     } else if (func == "GetSessions") {
-      // return session filename
+      // return session names
       FunctionArgs = QueryBook.GetSessions();
       intArg = 1;
     } else if (func == "SaveSession") {
@@ -679,7 +679,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       intArg = (lint)QueryBook.BranchSession();
       textArgs.clear();
     } else if (func == "LoadSession") {
-      // load session or continue last played session if no filename given
+      // load session or continue last played session if no name given
       if (textArgs.empty()) {
         intArg = (lint)QueryBook.LoadSession();
       } else {

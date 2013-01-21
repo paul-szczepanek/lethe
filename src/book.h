@@ -30,7 +30,7 @@ public:
   bool NewSession();
   bool SaveSession();
   bool BranchSession();
-  bool LoadSession(const string& Filename = "");
+  bool LoadSession(const string& SessionName = "");
 
   void SetBookmark(const Properties& Description);
   void SetBookmark(const string& Description);
@@ -63,15 +63,18 @@ public:
 private:
   bool AddAssetDefinition(const string& StoryText);
   bool OpenMenu();
-  bool OpenStory(const string& Path, Story& MyStory, Session& MySession);
-  void InitSession(Story& MyStory, Session& MySession);
+  bool OpenStory(const string& Path, Story& MyStory);
 
   const vector<string>& GetVerbs(const string& Noun, Story& MyStory,
                                  Session& MySession);
   void SetAction(const string_pair& Choice, Session& MySession);
-  string ProcessQueue(Story& MyStory, Session& MySession);
-  string GetFreeSessionFilename();
+  const string ProcessQueue(Story& MyStory, Session& MySession);
 
+  void InitSession(Story& MyStory, Session& MySession);
+  const string GetFreeSessionFilename(const string& Path);
+  const vector<string> GetSessionFilenames(const string& Path);
+  const vector<string_pair> GetSessionNamemap(const string& Path);
+  bool MakeSessionNameUnique(string& Name, const vector<string_pair>& Namemap);
 
 public:
   string BookTitle;

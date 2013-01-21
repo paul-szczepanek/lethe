@@ -30,7 +30,7 @@ Reader::~Reader()
 #ifdef LOGGER
   if (Logger) {
     delete Logger;
-    Disk::Write(GLog, "log");
+    Disk::Write("log", GLog);
   }
 #endif
 }

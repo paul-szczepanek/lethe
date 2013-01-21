@@ -341,7 +341,10 @@ Currently available functions:
                          book title or if no value given for the currently
                          book. If no value given and no is book open it will
                          return no values.
-- `SaveSession()` - save the session.
+- `SaveSession()` - save the session to disk now. This gets called for you
+                    automatically when you close the book, try to branch,
+                    load or exit the game altogether (except when force
+                    quitting).
 - `BranchSession()` - save the session and create a new one that starts
                       at the current point in time.
 - `NewSession()` - start a new session.

@@ -4,6 +4,8 @@
 #include "storyquery.h"
 #include "disk.h"
 
+const string FIRST_PLAY = "First Playthrough";
+
 Book::Book()
 {
   OpenMenu();
@@ -30,19 +32,11 @@ void Book::SetBookmark(const string& Description)
   CleanWhitespace(mark.Description);
 }
 
-/** @brief AddDialog
-  *
-  * @todo: document this function
-  */
 bool Book::AddDialog(const string& Noun)
 {
   return true;
 }
 
-/** @brief AddInputDialog
-  *
-  * @todo: document this function
-  */
 bool Book::AddInputDialog(const string& Noun)
 {
   return true;
@@ -61,61 +55,13 @@ bool Book::OpenBook(const string& Title)
   CloseBook();
 
   BookTitle = Title;
-  const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
-  BookOpen = OpenStory(path, BookStory, BookSession);
+  const string& path = STORY_DIR + SLASH + BookTitle;
+  BookOpen = OpenStory(path, BookStory);
+  BookSession.Reset();
   BookSession.BookName = BookTitle;
   Media.CreateAssets(Assets, BookTitle);
 
   return BookOpen;
-}
-
-bool Book::NewSession()
-{
-  const string& path = STORY_DIR + SLASH + BookTitle + SLASH + SESSION_CONTINUE;
-  Disk::Delete(path);
-  return LoadSession();
-}
-
-bool Book::LoadSession(const string& Filename)
-{
-  if (BookOpen) {
-    SessionOpen = true;
-    InitSession(BookStory, BookSession);
-    const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
-    // if no filename use the continue file to find the filename
-    if (Filename.empty()) {
-      const string& continueFilename = path + SESSION_CONTINUE;
-      if (Disk::Exists(continueFilename)) {
-        // filename in the continue file
-        File continueFile;
-        continueFile.Read(continueFilename);
-        continueFile.GetLine(BookSession.Filename);
-        return BookSession.Load();
-      } else {
-        // first playthrough or a new game - find first available filename
-        BookSession.Filename = GetFreeSessionFilename();
-        BookSession.Name = "Playthrough" + BookSession.Filename;
-        // session already initialised, no loading needed, add start bookmark
-        Bookmark& mark = BookSession.CreateBookmark();
-        mark.Description = "Story beginning";
-        return true;
-      }
-    } else {
-      BookSession.Filename = Filename;
-      return BookSession.Load();
-    }
-  }
-  return false;
-}
-
-string Book::GetFreeSessionFilename()
-{
-  const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
-  size_t i = 1;
-  while (Disk::Exists(path + IntoString(i) + SESSION_EXT)) {
-    ++i;
-  }
-  return IntoString(i);
 }
 
 bool Book::RedoSnapshot()
@@ -168,33 +114,6 @@ bool Book::HideMenu()
   return SessionOpen;
 }
 
-bool Book::BranchSession()
-{
-  if (SessionOpen) {
-    SaveSession();
-    BookSession.Filename = GetFreeSessionFilename();
-    BookSession.Name = BookSession.Name + " branch";
-    BookSession.Trim();
-    ActiveBranch = true;
-    return true;
-  }
-  return false;
-}
-
-bool Book::SaveSession()
-{
-  if (SessionOpen) {
-    const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
-    const string& filename = path + BookSession.Filename + ".session";
-    Disk::Write(filename, BookSession.GetSessionText());
-    // save this filename as the last used session
-    const string& continueFilename = path + SESSION_CONTINUE;
-    Disk::Write(continueFilename, BookSession.Filename);
-    return true;
-  }
-  return false;
-}
-
 void Book::CloseBook()
 {
   if (SessionOpen) {
@@ -202,13 +121,11 @@ void Book::CloseBook()
     SessionOpen = false;
     BookSession.Reset();
   }
-
   if (BookOpen) {
     BookOpen = false;
     BookStory.Reset();
     Assets.clear();
   }
-
   ShowMenu();
 }
 
@@ -219,43 +136,13 @@ Properties Book::GetBooks()
   return result;
 }
 
-Properties Book::GetSessions(const string& Title)
-{
-  Properties result;
-  string path = STORY_DIR + SLASH;
-  if (Title.empty()) {
-    if (BookOpen) {
-      path += BookTitle;
-    } else {
-      // no book open, don't know where to look for sessions
-      return result;
-    }
-  } else {
-    path += Title;
-  }
-
-  vector<string> files;
-  Disk::ListFiles(path, files);
-  for (const string& file : files) {
-    // find .session files
-    const size_t length = file.size();
-    if (length > SESSION_EXT.size()) {
-      const string& ext = CutString(file, length - SESSION_EXT.size());
-      if (ext == SESSION_EXT) {
-        const string& name = CutString(file, 0, length - SESSION_EXT.size());
-        result.AddValue(name);
-      }
-    }
-  }
-
-  return result;
-}
-
 bool Book::OpenMenu()
 {
   GameSession.Name = "game";
   GameSession.BookName = "menu";
-  return OpenStory(MENU_DIR + SLASH, MenuStory, GameSession);
+  MenuOpen = OpenStory(MENU_DIR + SLASH, MenuStory);
+  InitSession(MenuStory, GameSession);
+  return MenuOpen;
 }
 
 bool Book::Tick(real DeltaTime)
@@ -264,16 +151,13 @@ bool Book::Tick(real DeltaTime)
 }
 
 bool Book::OpenStory(const string& Path,
-                     Story& MyStory,
-                     Session& MySession)
+                     Story& MyStory)
 {
   string storyText;
   string buffer;
   File story;
-  string filename = Path + "story";
+  string filename = Path + SLASH + "story";
   MyStory.Reset();
-  MySession.Reset();
-
   if (!story.Read(filename)) {
     return false;
   }
@@ -312,8 +196,6 @@ bool Book::OpenStory(const string& Path,
   //finished reading the file
   MyStory.Fixate();
 
-  InitSession(MyStory, MySession);
-
   return true;
 }
 
@@ -322,6 +204,7 @@ void Book::InitSession(Story& MyStory,
 {
   MySession.BookName = BookTitle;
   MySession.UserValues.clear();
+  MySession.AssetStates.clear();
   // initialise reserved keywords
   for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
     const string& name = SystemNounNames[i];
@@ -468,8 +351,8 @@ string Book::ProcessMenuQueue()
   * and during execution is the only value on the queue
   * at the end of execution the whole queue is cleared
   */
-string Book::ProcessQueue(Story& MyStory,
-                          Session& MySession)
+const string Book::ProcessQueue(Story& MyStory,
+                                Session& MySession)
 {
   Properties& actions = *MySession.QueueNoun;
   string pageText;
@@ -510,4 +393,222 @@ string Book::GetQuickMenu()
   StoryQuery query(*this, BookStory, BookSession, pageText);
   query.ExecuteExpression(QUICK, QUICK_CONTENTS);
   return pageText + '\n';
+}
+
+/** @brief This find a unique name and filename and tries to load it
+  */
+bool Book::NewSession()
+{
+  if (BookOpen) {
+    const string& path = STORY_DIR + SLASH + BookTitle;
+    // get unique filename and session name
+    BookSession.Filename = GetFreeSessionFilename(path);
+    const vector<string_pair>& namemap = GetSessionNamemap(path);
+    BookSession.Name = FIRST_PLAY;
+    MakeSessionNameUnique(BookSession.Name, namemap);
+    return LoadSession(BookSession.Name);
+  }
+  return false;
+}
+
+/** @brief Loading a non-existent file will start a new game, trying to load
+  * an empty session name will continue the last available session
+  * It will start a new session if no old ones are avaiable
+  */
+bool Book::LoadSession(const string& SessionName)
+{
+  if (BookOpen) {
+    if (SessionOpen) {
+      SaveSession();
+      BookSession.Reset();
+    }
+    SessionOpen = true;
+    InitSession(BookStory, BookSession);
+    const string& path = STORY_DIR + SLASH + BookTitle;
+    // if no filename use the continue file to find the filename
+    if (SessionName.empty()) {
+      const string& sessionMap = path + SLASH + SESSION_MAP;
+      if (Disk::Exists(sessionMap)) {
+        // continue from the first file in the map file
+        File continueFile;
+        continueFile.Read(sessionMap);
+        continueFile.GetLine(BookSession.Filename);
+        return BookSession.Load();
+      } else {
+        NewSession();
+      }
+    } else {
+      // try and load the session if it already exists
+      const vector<string_pair>& namemap = GetSessionNamemap(path);
+      for (const string_pair& existingName : namemap) {
+        if (SessionName == existingName.Y) {
+          BookSession.Filename = existingName.X;
+          return BookSession.Load();
+        }
+      }
+      // session name not found so it's the first playthrough or a new game
+      // session already initialised, no loading needed, add start bookmark
+      Bookmark& mark = BookSession.CreateBookmark();
+      mark.Description = "Story beginning";
+      return true;
+    }
+  }
+  return false;
+}
+
+/** @brief Return the session names that are stored in the session name map
+  */
+Properties Book::GetSessions(const string& Title)
+{
+  Properties result;
+  string path = STORY_DIR + SLASH;
+  if (Title.empty()) {
+    if (BookOpen) {
+      path += BookTitle;
+    } else {
+      // no book open, don't know where to look for sessions
+      return result;
+    }
+  } else {
+    path += Title;
+  }
+  // load the names of sessions from the meta file
+  const vector<string_pair>& namemap = GetSessionNamemap(path);
+  for (const string_pair& name : namemap) {
+    result.AddValue(name.Y);
+  }
+  return result;
+}
+
+/** @brief Return existing session filename
+  */
+const vector<string> Book::GetSessionFilenames(const string& Path)
+{
+  vector<string> result;
+  vector<string> files;
+  Disk::ListFiles(Path, files);
+  for (const string& file : files) {
+    // find .session files
+    const size_t length = file.size();
+    if (length > SESSION_EXT.size()) {
+      const string& ext = CutString(file, length - SESSION_EXT.size());
+      if (ext == SESSION_EXT) {
+        const string& name = CutString(file, 0, length - SESSION_EXT.size());
+        result.push_back(name);
+      }
+    }
+  }
+  return result;
+}
+
+/** @brief get a list of pairs of filename and session name from the map file
+  */
+const vector<string_pair> Book::GetSessionNamemap(const string& Path)
+{
+  vector<string_pair> namemap;
+  const vector<string>& files = GetSessionFilenames(Path);
+  if (files.empty()) {
+    return namemap;
+  }
+  const string mapFilename = Path + SLASH + SESSION_MAP;
+  if (Disk::Exists(mapFilename)) {
+    File filemap;
+    filemap.Read(mapFilename);
+    // read the file and name pairs from the session file but only add
+    // the ones that also exist as filename in the folder
+    string existingFilename, sessionName;
+    while(filemap.GetLine(existingFilename)) {
+      filemap.GetLine(sessionName);
+      for (const string& filename : files) {
+        if (existingFilename == filename) {
+          namemap.push_back(string_pair(existingFilename, sessionName));
+          break;
+        }
+      }
+    }
+  }
+  return namemap;
+}
+
+/** @brief Mangle the name so it's unique based on the namemap
+  * \return false if the name was alrady unique
+  */
+bool Book::MakeSessionNameUnique(string& Name,
+                                 const vector<string_pair>& Namemap)
+{
+  bool dupeName = true;
+  const string originalName = Name;
+  size_t i = 0;
+  // get a unique session name
+  while (dupeName) {
+    if (i) {
+      Name = originalName + IntoString(++i);
+    } else {
+      ++i;
+    }
+    dupeName = false;
+    for (const string_pair& existingName : Namemap) {
+      if (Name == existingName.Y) {
+        dupeName = true;
+      }
+    }
+  }
+  return i;
+}
+
+/** @brief Save current session, trim the excess and rename
+  */
+bool Book::BranchSession()
+{
+  if (SessionOpen) {
+    SaveSession();
+    BookSession.Trim();
+    ActiveBranch = true;
+    // create unique names
+    const string& path = STORY_DIR + SLASH + BookTitle;
+    BookSession.Filename = GetFreeSessionFilename(path);
+    const vector<string_pair>& namemap = GetSessionNamemap(path);
+    const string& turn = IntoString(BookSession.CurrentSnapshot - 1);
+    BookSession.Name = BookSession.Name + " T" + turn + " branch";
+    MakeSessionNameUnique(BookSession.Name, namemap);
+    return true;
+  }
+  return false;
+}
+
+bool Book::SaveSession()
+{
+  if (SessionOpen) {
+    const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
+    const string& filename = path + BookSession.Filename + ".session";
+    Disk::Write(filename, BookSession.GetSessionText());
+    // write the meta information for all the session files
+    string meta = BookSession.Filename;
+    meta += '\n';
+    meta += BookSession.Name;
+    meta += '\n';
+    const vector<string_pair>& namemap = GetSessionNamemap(path);
+    for (const string_pair& name : namemap) {
+      if (name.X != BookSession.Filename) {
+        meta += name.X;
+        meta += '\n';
+        meta += name.Y;
+        meta += '\n';
+      }
+    }
+    // save this filename as the last used session
+    const string& continueFilename = path + SESSION_MAP;
+    Disk::Write(continueFilename, meta);
+    return true;
+  }
+  return false;
+}
+
+const string Book::GetFreeSessionFilename(const string& Path)
+{
+  size_t i = 1;
+  while (Disk::Exists(Path + SLASH + IntoString(i) + SESSION_EXT)) {
+    ++i;
+  }
+  return IntoString(i);
 }
