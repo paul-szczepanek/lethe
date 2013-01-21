@@ -302,7 +302,7 @@
 	"properties.h"
 	"tokens.h"
 
-1358637566 source:/home/paul/lethe/lethe/src/book.cpp
+1358639054 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"page.h"
 	"tokens.h"
@@ -315,7 +315,7 @@
 	"session.h"
 	"mediamanager.h"
 
-1358620785 /home/paul/lethe/lethe/src/main.h
+1358781672 /home/paul/lethe/lethe/src/main.h
 	<iostream>
 	<fstream>
 	<sstream>
@@ -351,7 +351,7 @@
 	"reader.h"
 	"input.h"
 
-1358520808 /home/paul/lethe/lethe/src/reader.h
+1358779835 /home/paul/lethe/lethe/src/reader.h
 	"main.h"
 	"book.h"
 	"textbox.h"
@@ -360,12 +360,13 @@
 	"surface.h"
 	"font.h"
 	"input.h"
+	"valuestore.h"
 
 1358517177 /home/paul/lethe/lethe/src/textbox.h
 	"windowbox.h"
 	"properties.h"
 
-1358602417 source:/home/paul/lethe/lethe/src/page.cpp
+1358780417 source:/home/paul/lethe/lethe/src/page.cpp
 	"page.h"
 	"tokens.h"
 
@@ -373,16 +374,17 @@
 	"main.h"
 	"properties.h"
 
-1358620300 source:/home/paul/lethe/lethe/src/properties.cpp
+1358780417 source:/home/paul/lethe/lethe/src/properties.cpp
 	"properties.h"
 	"tokens.h"
 
-1358637971 source:/home/paul/lethe/lethe/src/reader.cpp
+1358781765 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"audio.h"
 	"input.h"
+	"disk.h"
 
-1358638487 source:/home/paul/lethe/lethe/src/session.cpp
+1358783151 source:/home/paul/lethe/lethe/src/session.cpp
 	"session.h"
 	"disk.h"
 
@@ -394,7 +396,7 @@
 	"storyquery.h"
 	"properties.h"
 
-1358518772 source:/home/paul/lethe/lethe/src/textbox.cpp
+1358780417 source:/home/paul/lethe/lethe/src/textbox.cpp
 	"textbox.h"
 	"reader.h"
 	"tokens.h"
@@ -406,7 +408,7 @@
 	"main.h"
 	"properties.h"
 
-1358630930 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1358788862 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"story.h"
@@ -414,7 +416,7 @@
 	"book.h"
 	"page.h"
 
-1358517177 /home/paul/lethe/lethe/src/layout.h
+1358778821 /home/paul/lethe/lethe/src/layout.h
 	"main.h"
 
 1358458200 /home/paul/lethe/lethe/src/windowbox.h
@@ -430,7 +432,7 @@
 	"windowbox.h"
 	"surface.h"
 
-1358520247 source:/home/paul/lethe/lethe/src/layout.cpp
+1358780417 source:/home/paul/lethe/lethe/src/layout.cpp
 	"layout.h"
 
 1358517351 source:/home/paul/lethe/lethe/src/windowbox.cpp
@@ -514,7 +516,7 @@
 1358617314 /home/paul/lethe/lethe/src/input.h
 	"main.h"
 
-1358619023 source:/home/paul/lethe/lethe/src/input.cpp
+1358642053 source:/home/paul/lethe/lethe/src/input.cpp
 	"input.h"
 	<SDL.h>
 
@@ -536,6 +538,14 @@
 1358556065 source:/home/paul/lethe/lethe/src/dialogbox.cpp
 	"dialogbox.h"
 
-1358556100 /home/paul/lethe/lethe/src/dialogbox.h
+1358780438 /home/paul/lethe/lethe/src/dialogbox.h
 	"windowbox.h"
+
+1358788792 /home/paul/lethe/lethe/src/valuestore.h
+	"main.h"
+	"tokens.h"
+
+1358781482 source:/home/paul/lethe/lethe/src/valuestore.cpp
+	"valuestore.h"
+	"disk.h"
 

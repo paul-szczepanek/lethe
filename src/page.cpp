@@ -146,15 +146,15 @@ Page::Page(const string& SourceText)
   string oldText = Text;
   Text.clear();
 
-  for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = Verbs.size(); i < fSz; ++i) {
     Block& topBlock = Verbs[i].BlockTree;
     Text += topBlock.Expression;
-    for (size_t j = 0, for_size = Verbs[i].Names.size(); j < for_size; ++j) {
+    for (size_t j = 0, fSz = Verbs[i].Names.size(); j < fSz; ++j) {
       Text = Text + token::Start[token::expression]
              + token::Start[token::scope]
              + Verbs[i].Names[j] + token::End[token::expression];
     }
-    for (size_t j = 0, for_size = topBlock.Blocks.size(); j < for_size; ++j) {
+    for (size_t j = 0, fSz = topBlock.Blocks.size(); j < fSz; ++j) {
       PrintBlock(Text, topBlock.Blocks[j]);
     }
   }
@@ -167,7 +167,7 @@ void Page::PrintBlock(string& Text,
   Text += Block.Expression;
   if (Block.Blocks.size()) {
     Text += token::Start[token::block];
-    for (size_t j = 0, for_size = Block.Blocks.size(); j < for_size; ++j) {
+    for (size_t j = 0, fSz = Block.Blocks.size(); j < fSz; ++j) {
       PrintBlock(Text, Block.Blocks[j]);
     }
     Text += token::End[token::block];
@@ -220,8 +220,8 @@ void Page::NewPlainText(size_t_pair& TokenPos,
   */
 const VerbBlock& Page::GetVerb(const string& Verb) const
 {
-  for (size_t i = 0, for_size = Verbs.size(); i < for_size; ++i) {
-    for (size_t j = 0, for_size = Verbs[i].Names.size(); j < for_size; ++j) {
+  for (size_t i = 0, fSz = Verbs.size(); i < fSz; ++i) {
+    for (size_t j = 0, fSz = Verbs[i].Names.size(); j < fSz; ++j) {
       if (Verbs[i].Names[j] == Verb) {
         return Verbs[i];
       }

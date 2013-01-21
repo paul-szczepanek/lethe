@@ -53,8 +53,6 @@ bool Input::Tick(MouseState& Mouse,
             Keys.Letter = BACKSPACE_CHAR;
           } else if ((SDLK_a <= key && key <= SDLK_z)
                      || (SDLK_0 <= key && key <= SDLK_9)
-                     || (SDLK_ASTERISK <= key && key <= SDLK_PERIOD)
-                     || SDLK_QUESTION == key || SDLK_EXCLAIM == key
                      || SDLK_SPACE == key || SDLK_QUOTE == key
                      || SDLK_UNDERSCORE == key || SDLK_SEMICOLON == key) {
             Keys.Letter = (char)key; // ASCII mapped

@@ -37,11 +37,10 @@ using std::find;
 extern string GLog;
 #define LOG(t) { string log = (t); \
   if (log.size() > 0) { GLog = GLog + "\n" + log; } };
-#define RLOG(t) { GLog = (t); };
 #else
 #define LOG(t);
-#define RLOG(t);
 #endif
+
 const char VALUE_SEPARATOR = ',';
 const string SLASH = "/";
 const string DATA_DIR = "data";
@@ -52,6 +51,7 @@ const string FRAMES_DIR = DATA_DIR + SLASH + "frames";
 const string SESSION_EXT = ".session";
 const string SESSION_CONTINUE = "session";
 const string QUICK_BOOKMARK = "Quick bookmark";
+const string SETTINGS_FILE = DATA_DIR + SLASH + "settings";
 const char BACKSPACE_CHAR = (char)8;
 
 const size_t BLOCK_SIZE = 32;

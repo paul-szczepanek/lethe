@@ -90,6 +90,8 @@
 		<Unit filename="textbox.h" />
 		<Unit filename="tokens.cpp" />
 		<Unit filename="tokens.h" />
+		<Unit filename="valuestore.cpp" />
+		<Unit filename="valuestore.h" />
 		<Unit filename="windowbox.cpp" />
 		<Unit filename="windowbox.h" />
 		<Extensions>

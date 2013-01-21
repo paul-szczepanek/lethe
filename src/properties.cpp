@@ -28,7 +28,7 @@ Properties::Properties(const string& Value) : IntValue(0)
 const string Properties::PrintTextValues() const
 {
   string text;
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += VALUE_SEPARATOR;
     }
@@ -42,7 +42,7 @@ const string Properties::PrintTextValues() const
 const string Properties::PrintValues() const
 {
   string text;
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     text += TextValues[i];
     text += VALUE_SEPARATOR;
   }
@@ -58,7 +58,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
     const string& Separator) const
 {
   string text;
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }
@@ -80,7 +80,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
 const string Properties::PrintKeywordList(const string& Separator) const
 {
   string text;
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }
@@ -96,7 +96,7 @@ const string Properties::PrintKeywordList(const string& Separator) const
 const string Properties::PrintPlainList(const string& Separator) const
 {
   string text;
-  for (size_t i = 0, for_size = TextValues.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }

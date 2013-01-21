@@ -26,7 +26,7 @@ public:
   ~Layout() { };
 
   bool Init(const string& Text);
-  string GetDefinition();
+  const string GetDefinition() const;
 
 
 public:

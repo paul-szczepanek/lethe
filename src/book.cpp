@@ -9,9 +9,7 @@ Book::Book()
   OpenMenu();
 }
 
-/** @brief SetBookmark
-  *
-  * @todo: document this function
+/** @brief Marks the current snapshot with additional description
   */
 void Book::SetBookmark(const Properties& Description)
 {

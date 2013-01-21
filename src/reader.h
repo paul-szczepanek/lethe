@@ -9,10 +9,9 @@
 #include "surface.h"
 #include "font.h"
 #include "input.h"
+#include "valuestore.h"
 
 const size_t NUM_LAYOUTS = 2;
-const real REDRAW_TIMEOUT = 5.0;
-const real MIN_TIMEOUT = 0.1;
 
 class Book;
 
@@ -25,8 +24,7 @@ enum orientation {
 class Reader
 {
 public:
-  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP)
-    : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP) { };
+  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP);
   ~Reader();
 
   bool Init();
@@ -47,6 +45,9 @@ private:
   size_t FixLayout();
   Layout& GetCurrentLayout();
 
+  void LoadSettings();
+  void SaveSettings();
+
 
 public:
   string MenuSource;
@@ -57,8 +58,9 @@ private:
   size_t Width;
   size_t Height;
   int BPP;
-  float RedrawCountdown = REDRAW_TIMEOUT;
+  float RedrawCountdown = 0;
   bool RedrawPending = true;
+  ValueStore Settings;
   // screen
   Surface Screen;
   Surface Backdrop;
@@ -89,7 +91,7 @@ private:
   TextBox MainMenu;
   TextBox VerbMenu;
 
-  real Timeout = MIN_TIMEOUT;
+  real Timeout = 0;
   real TimeoutTimer = 0;
 
 #ifdef LOGGER

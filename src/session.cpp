@@ -88,6 +88,7 @@ bool Session::LoadSnapshot(const size_t Index)
   */
 bool Session::Load()
 {
+  // todo: move this up so we can load by sesion name and not filename
   File Save;
   const string& savePath = STORY_DIR + SLASH + BookName + SLASH
                            + Filename + SESSION_EXT;
@@ -230,7 +231,7 @@ const string Session::GetSessionText() const
   }
   text += '\n';
   // snapshots (don't save the first snapshot, it's part of initialisation)
-  for (size_t i = 1, for_size = Snapshots.size(); i < for_size; ++i) {
+  for (size_t i = 1, fSz = Snapshots.size(); i < fSz; ++i) {
     const Snapshot& value = Snapshots[i];
     text += IntoString(value.QueueIndex);
     text += VALUE_SEPARATOR;
@@ -351,6 +352,7 @@ void Session::Reset()
   UserValues.clear();
   AssetStates.clear();
   ValuesHistories.clear();
+  ValuesHistoryNames.clear();
   Snapshots.clear();
   // create the zeroth step so we can go back in history to the start
   Snapshots.push_back(Snapshot(0, 0, 0));

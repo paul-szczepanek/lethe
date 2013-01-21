@@ -2,18 +2,74 @@
 #include "audio.h"
 #include "input.h"
 
+#ifdef LOGGER
+#include "disk.h"
+#endif
+
 const string FRAME_SOLID = "solid";
 const string FRAME_TEXT = "text";
 const string FRAME_MENU = "menu";
 const string FRAME_IMAGE = "image";
 
+const string SKEY_CURRENT_LAYOUT = "current layout";
+const string SKEY_LAYOUTS = "layouts";
+
+const real REDRAW_TIMEOUT = 5.0;
+const real MIN_TIMEOUT = 0.1;
+
+Reader::Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP)
+  : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP),
+    Settings(SETTINGS_FILE)
+{
+  LoadSettings();
+}
+
 Reader::~Reader()
 {
+  SaveSettings();
 #ifdef LOGGER
   if (Logger) {
     delete Logger;
+    Disk::Write(GLog, "log");
   }
 #endif
+}
+
+void Reader::LoadSettings()
+{
+  // load reader layouts
+  for (size_t i = 0; i < ORIENTATION_MAX; ++i) {
+    // default layouts
+    vector<string> layoutStrings;
+    layoutStrings.resize(NUM_LAYOUTS, "0132 3111 1111 0 +000");
+    // overwrite with stored ones
+    const string& key = SKEY_LAYOUTS + IntoString(i);
+    const vector<string>& stored = Settings.GetValues(key);
+    for (size_t j = 0, fSz = min(stored.size(), NUM_LAYOUTS); j < fSz; ++j) {
+      layoutStrings[j] = stored[j];
+    }
+    // init the layouts with deafult or stored layouts strings
+    for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
+      Layouts[i][j].Init(layoutStrings[j]);
+    }
+  }
+  CurrentLayout = Settings.GetSizeT(SKEY_CURRENT_LAYOUT);
+
+  Timeout = MIN_TIMEOUT;
+}
+
+void Reader::SaveSettings()
+{
+  // save reader layouts
+  for (size_t i = 0; i < ORIENTATION_MAX; ++i) {
+    vector<string> layoutStrings;
+    for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
+      layoutStrings.push_back(Layouts[i][j].GetDefinition());
+    }
+    const string& key = SKEY_LAYOUTS + IntoString(i);
+    Settings.SetValues(key, layoutStrings);
+  }
+  Settings.SetValue(SKEY_CURRENT_LAYOUT, IntoString(CurrentLayout));
 }
 
 bool Reader::Init()
@@ -43,24 +99,6 @@ bool Reader::Init()
 
   if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
-  }
-
-  // load layouts
-  // TODO: read from file
-  string layoutStrings[ORIENTATION_MAX][NUM_LAYOUTS] = {
-    {
-      "0132 3111 1111 0 +000",
-      "1032 3311 1111 0 +001"
-    },
-    {
-      "0132 3111 1111 0 -001",
-      "0132 3111 1111 0 -002"
-    }
-  };
-  for (size_t i = 0, for_size = ORIENTATION_MAX; i < for_size; ++i) {
-    for (size_t j = 0, for_size = NUM_LAYOUTS; j < for_size; ++j) {
-      Layouts[i][j].Init(layoutStrings[i][j]);
-    }
   }
 
   QuickMenu.Init(FontMain, FRAME_MENU, BPP);
@@ -366,7 +404,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   WindowBox* boxes[BOX_TYPE_MAX];
 
-  for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
+  for (size_t i = 0; i < BOX_TYPE_MAX; ++i) {
     switch (layout.Order[i]) {
       case boxMain:
         boxes[i] = &MainText;
@@ -389,11 +427,11 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
   size_t splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
-  for (size_t i = 0, for_size = BOX_TYPE_MAX; i < for_size; ++i) {
+  for (size_t i = 0; i < BOX_TYPE_MAX; ++i) {
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
     bool first = (i == 0) || (pos != layout.Side[i-1]);
-    //bool last = (i == for_size-1) || (where != layout.Side[i+1]);
+    //bool last = (i == fSz-1) || (where != layout.Side[i+1]);
 
     boxes[i]->Visible = layout.Active[i];
 

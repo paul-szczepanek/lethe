@@ -4,20 +4,23 @@
  [:main]
   Game Menu
   [?IsInGame()] {
-    \n<Branch this session[session:branch]>
-    \n<Load old session[session:browse]>
-    \n<save[session:save]>
+   \n<Branch this session[session:branch]>
+   \n<Load old session[session:browse]>
+   \n<Save this session now[session:save]>
   }
   \n<browse books[menu:browse]>
-  \n<exit[menu:exit]>
+  \n
+  \n<Quit[menu:exit]>
  [:browse]
-   Open a book:\n
-    [!book = GetBooks()]
-    Available books:\n
-    [!SelectValue(book:open)]
+  Open a book:\n
+  [!book = GetBooks()]
+  Available books:\n
+  [!SelectValue(book:open)]
+  \n
+  \n<Back[menu:main]>
  [:exit]
-   Goodbye
-   [!Quit()]
+  [!Quit()]
+  Settings and sessions saved, goodbye.
  [:close]
   [!QUEUE+=menu:main]
   [!CloseMenu()]
@@ -25,16 +28,24 @@
 [<book>]
  [:open]
   Book\ [!Print(@book)]:
-  \n<New Game[session:new]>
-  \n<Continue Game[session:load]>
+  \n<New Game[book:new]>
+  \n<Continue Game[book:continue]>
   \n<Load Session[book:load]>
+  \n
+  \n<Back[menu:main]>
+ [:new]
+  [!OpenBook(@book)]
+  [!session:new]
+ [:continue]
+  [!OpenBook(@book)]
+  [!session=]
+  [!session:open]
  [:load]
   [!OpenBook(@book)]
   [!session:browse]
 
 [<session>]
  [:new]
-  [!OpenBook(@book)]
   [!NewSession()]
   [!menu:close]
  [:branch]
@@ -48,7 +59,8 @@
   [!session = GetSessions()]
   Available sessions:\n
   [!SelectValue(session:open)]
-  \n<back[menu:main]>
+  \n
+  \n<Back[menu:main]>
  [:open]
   [!LoadSession(@session)]
   [!menu:close]

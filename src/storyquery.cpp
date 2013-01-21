@@ -51,7 +51,7 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
   } else { // we have children so this must be a [?condition]
     if (length == 0 || ExecuteExpression(Noun, expression)) {
       // if the condition is true, execute all the child blocks
-      for (size_t i = 0, forSz = CurBlock.Blocks.size(); i < forSz; ++i) {
+      for (size_t i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
         // if [!<<] used to escape parent break from loop
         size_t backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
         if (backUp > 0) {
@@ -71,7 +71,7 @@ Properties StoryQuery::GetVerbs(const string& Noun)
   Properties Result;
 
   const Page& page = QueryStory.FindPage(Noun);
-  for (size_t i = 0, for_size = page.Verbs.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = page.Verbs.size(); i < fSz; ++i) {
     const VerbBlock& verb = page.Verbs[i];
     if (!verb.VisualName.empty()) {
       if (ExecuteExpression(Noun, verb.BlockTree.Expression)) {

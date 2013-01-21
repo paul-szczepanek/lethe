@@ -241,7 +241,7 @@ bool TextBox::BreakText()
         cleaned[pos - skip] = cleaned[pos];
       }
       // fix the  keyword positions that are beyond this pos
-      for (size_t i = 0, for_size = keywordPos.size(); i < for_size; ++i) {
+      for (size_t i = 0, fSz = keywordPos.size(); i < fSz; ++i) {
         if (keywordPos[i].X > pos) {
           --keywordPos[i].X;
         }
@@ -320,12 +320,12 @@ bool TextBox::BreakText()
   PageHeight = 0;
   lastLineEnd = 0;
   // record visual keyword positions
-  for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
+  for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
     const string& line = Lines[i];
     const size_t lineLength = line.size() + 1;
     const size_t lineEnd = lastLineEnd + lineLength;
 
-    for (size_t j = 0, for_size = keywordPos.size(); j < for_size; ++j) {
+    for (size_t j = 0, fSz = keywordPos.size(); j < fSz; ++j) {
       const size_t_pair& keyPos = keywordPos[j];
       // check if this keyword is on this line
       if (keyPos.X >= lineEnd) {
@@ -391,7 +391,7 @@ void TextBox::RefreshPage()
     Rect dst;
     dst.X = 0;
     dst.Y = 0;
-    for (size_t i = 0, for_size = Lines.size(); i < for_size; ++i) {
+    for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
       PageSurface.PrintText(dst, *FontMain, Lines[i], 255, 255, 255);
       dst.Y += LineHeight;
     }
