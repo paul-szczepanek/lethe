@@ -24,13 +24,19 @@ struct KeywordMap {
   Rect Size;
 };
 
+struct TextLine {
+  TextLine(const string& _Text, size_t _X = 0) : Text(_Text), X(_X) { };
+  string Text;
+  size_t X;
+};
+
 class MouseState;
 
 class TextBox : public WindowBox
 {
 public:
   TextBox() { };
-  ~TextBox() { };
+  virtual ~TextBox() { };
 
   size_t_pair GetMaxSize();
   void SetText(const string NewText);
@@ -42,6 +48,8 @@ public:
   bool Deselect();
   bool GetSelectedKeyword(string& Keyword);
 
+  inline bool Empty() { return Text.empty(); };
+
 private:
   void Scroll();
   bool BreakText();
@@ -52,24 +60,26 @@ private:
 public:
   bool HighlightsDirty = true;
   bool PageDirty = true;
+  bool Centered = false;
 
   PaneState Pane;
 
   size_t ValidateKeywords = 0; // how far to check the text keywords
   Properties ValidKeywords;
 
-private:
+  size_t PageHeight = 0;
+  size_t LineHeight = 0;
+
+protected:
   string Text;
   Rect PageSize;
   Rect PageClip;
 
+private:
   Surface Highlights;
   Surface PageSurface;
 
-  size_t PageHeight = 0;
-  size_t LineHeight = 0;
-
-  vector<string> Lines;
+  vector<TextLine> Lines;
   vector<KeywordMap> Keywords;
 
   size_t SelectedKeyword;

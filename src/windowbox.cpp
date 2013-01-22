@@ -20,9 +20,10 @@ void WindowBox::Draw()
   }
 }
 
+
 /** @brief Set Size of the textbox (resets the page as well)
   */
-void WindowBox::SetSize(Rect NewSize)
+void WindowBox::FixAspectRatio(Rect& NewSize)
 {
   if (AspectW) {
     if (AspectH) {
@@ -39,6 +40,13 @@ void WindowBox::SetSize(Rect NewSize)
       }
     }
   }
+}
+
+/** @brief Set Size of the textbox (resets the page as well)
+  */
+void WindowBox::SetSize(Rect NewSize)
+{
+  FixAspectRatio(NewSize);
 
   NewSize.Blockify();
   if (Size != NewSize) {

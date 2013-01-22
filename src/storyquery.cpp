@@ -346,7 +346,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
 struct OperationNode {
   token::operationName Operation = token::plus;
   Properties Operand;
-  bool Nested = true; //doesn't have operand, copy from result of next
+  bool Nested = true; // nested doesn't have operand, copy from result of next
 };
 
 /** @brief Evaluate Expression
@@ -369,8 +369,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   size_t length = Expression.size();
   size_t pos = 0;
   size_t valuePos = 0;
-  size_t valueEnd = 0; //needed because function names vary in length
-
+  size_t valueEnd = 0; // needed because function names vary in length
   vector<OperationNode> opStack;
   opStack.reserve(16); // too avoid constant allocs
 
@@ -379,8 +378,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   // +,a  +,_ <- @,b  -,func_ <- (,arg  -,_ <- #,1
   // _ <- means that the next pair will write its result there
   // in case of functions it will replace the values that are the func names
-
-  // it's more efficient to scan char by char
   while (pos < length) {
     const char c = Expression[pos];
     bool valueFound = false;
@@ -404,7 +401,6 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
           opFound = true;
           valueEnd = pos;
           valueFound = true;
-
           if (pos > 0) {
             // unless the expression starts with an operator we need
             // a previous op to store the value in
@@ -459,11 +455,9 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   size_t opI = 0; // current operation
   size_t nextOp = 0; // next operation after nesting is finished
   const size_t stackSize = opStack.size();
-
   // traverse the tree, do math operations and accumulate the result
   while (opI < stackSize) {
     bool nested = false;
-
     // go to the end of nested ops
     while (opI < stackSize && opStack[opI].Nested) {
       ++opI;
@@ -561,8 +555,24 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
     }
   }
 
-  if (opStack.empty()) {
+  return !opStack.empty();
+}
+
+bool StoryQuery::CreateDialog(const string& Noun, Dialog& NewDialog)
+{
+  NewDialog.Noun = Noun;
+  // verbs as buttons
+  const Properties& verbs = GetVerbs(Noun);
+  if (verbs.IsEmpty()) {
+    // you can't have a dialog with no buttons
     return false;
+  }
+  NewDialog.Buttons = verbs.TextValues;
+  // contents of the noun used as the message
+  Properties values;
+  GetUserTextValues(Noun, values);
+  for (const string& text : values.TextValues) {
+    NewDialog.Message += text;
   }
   return true;
 }
@@ -670,13 +680,28 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // return session names
       FunctionArgs = QueryBook.GetSessions();
       intArg = 1;
+    } else if (func == "GetSessionName") {
+      // return session names
+      textArgs.clear();
+      FunctionArgs.AddValue(QueryBook.GetSessionName());
+      intArg = 1;
     } else if (func == "SaveSession") {
       // saves the session, doesn't close it
-      intArg = (lint)QueryBook.SaveSession();
+      if (textArgs.empty()) {
+        intArg = (lint)QueryBook.SaveSession();
+      } else {
+        const string& name = textArgs[0];
+        intArg = (lint)QueryBook.SaveSession(name);
+      }
       textArgs.clear();
     } else if (func == "BranchSession") {
       // saves the session and creates a new one from current place in time
-      intArg = (lint)QueryBook.BranchSession();
+      if (textArgs.empty()) {
+        intArg = (lint)QueryBook.BranchSession();
+      } else {
+        const string& name = textArgs[0];
+        intArg = (lint)QueryBook.BranchSession(name);
+      }
       textArgs.clear();
     } else if (func == "LoadSession") {
       // load session or continue last played session if no name given
@@ -698,21 +723,26 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       textArgs.clear();
     } else if (func == "Dialog") {
       // create a dialog
-      intArg = 0;
+      intArg = 1;
+      Dialog dialog;
       for (const string& arg : textArgs) {
-        if (QueryBook.AddDialog(arg)) {
-          intArg = 1;
-          break;
+        if (CreateDialog(arg, dialog)) {
+          QueryBook.AddDialog(dialog);
+        } else {
+          intArg = 0;
         }
       }
       textArgs.clear();
     } else if (func == "Input") {
       // create an input dialog that saves user response in the noun
-      intArg = 0;
+      intArg = 1;
+      Dialog dialog;
+      dialog.Input = true;
       for (const string& arg : textArgs) {
-        if (QueryBook.AddInputDialog(arg)) {
-          intArg = 1;
-          break;
+        if (CreateDialog(arg, dialog)) {
+          QueryBook.AddDialog(dialog);
+        } else {
+          intArg = 0;
         }
       }
       textArgs.clear();

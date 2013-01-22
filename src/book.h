@@ -10,6 +10,13 @@ class Story;
 class Session;
 class Properties;
 
+struct Dialog {
+  string Noun;
+  vector<string> Buttons;
+  string Message;
+  bool Input = false;
+};
+
 class Book
 {
 public:
@@ -27,9 +34,10 @@ public:
   void Quit();
 
   Properties GetSessions(const string& Title = "");
+  const string GetSessionName();
   bool NewSession();
-  bool SaveSession();
-  bool BranchSession();
+  bool SaveSession(const string& NewName = "");
+  bool BranchSession(const string& NewName = "");
   bool LoadSession(const string& SessionName = "");
 
   void SetBookmark(const Properties& Description);
@@ -38,8 +46,7 @@ public:
   bool UndoSnapshot();
   bool RedoSnapshot();
 
-  bool AddDialog(const string& Noun);
-  bool AddInputDialog(const string& Noun);
+  void AddDialog(const Dialog& dialog);
 
   void SetStoryAction(const string_pair& Choice);
   void SetMenuAction(const string_pair& Choice);
@@ -79,8 +86,11 @@ public:
   string BookTitle;
   bool MenuOpen = true;
   bool BookOpen = false;
+  bool DialogOpen = false;
   bool SessionOpen = false;
   bool ActiveBranch = true;
+
+  vector<Dialog> Dialogs;
 
 private:
   Story MenuStory;

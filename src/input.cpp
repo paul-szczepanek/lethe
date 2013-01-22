@@ -1,7 +1,7 @@
 #include "input.h"
 #include <SDL.h>
 
-real Input::limitFPS(ulint& LastTime)
+real Input::LimitFPS(ulint& LastTime)
 {
   // new time after game logic has finished
   const Uint32 newTime = SDL_GetTicks();
@@ -37,17 +37,17 @@ bool Input::Tick(MouseState& Mouse,
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
       case SDL_QUIT:
-        Keys.Escape = true;
+        Keys.Quit = true;
         break;
 
       case SDL_KEYDOWN:
         Keys.KeyPressed = changed = true;
-        if (Keys.InputMode) {
+        if ((key == SDLK_q || key == SDLK_c)
+              && (event.key.keysym.mod & (KMOD_LALT | KMOD_LCTRL))) {
+            Keys.Quit = true;
+        } else if (Keys.InputMode) {
           // input mode where we just grab the letter and leave
-          if (key == SDLK_RETURN) {
-            Keys.InputMode = false;
-          } else if (key == SDLK_ESCAPE) {
-            Keys.InputMode = false;
+           if (key == SDLK_ESCAPE) {
             Keys.Letter = BACKSPACE_CHAR;
           } else if (key == SDLK_BACKSPACE || key == SDLK_DELETE) {
             Keys.Letter = BACKSPACE_CHAR;
@@ -56,6 +56,9 @@ bool Input::Tick(MouseState& Mouse,
                      || SDLK_SPACE == key || SDLK_QUOTE == key
                      || SDLK_UNDERSCORE == key || SDLK_SEMICOLON == key) {
             Keys.Letter = (char)key; // ASCII mapped
+          } else {
+            // invalid input, cancel the press
+            Keys.KeyPressed = changed = false;
           }
         } else {
           // normal, keys as shortcuts mode
@@ -81,10 +84,6 @@ bool Input::Tick(MouseState& Mouse,
             Keys.Undo = true;
           } else if (key == SDLK_r) {
             Keys.Redo = true;
-          } else if (key == SDLK_q || key == SDLK_c) {
-            if (event.key.keysym.mod & (KMOD_LALT | KMOD_LCTRL)) {
-              Keys.Quit = true;
-            }
           }
         }
         break;

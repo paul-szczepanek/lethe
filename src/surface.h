@@ -48,9 +48,10 @@ public:
   size_t H = 0;
   static int BPP;
 
-private:
   static size_t ScreenW;
   static size_t ScreenH;
+
+private:
   static SDL_Surface* Screen;
 
   Rect Clip = { 0, 0, 0, 0 };

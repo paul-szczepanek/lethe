@@ -7,6 +7,7 @@
 class Book;
 class Story;
 class Session;
+class Dialog;
 
 struct Block;
 
@@ -34,6 +35,7 @@ private:
                           bool& IsNum, bool& IsText);
   bool ExecuteFunction(const Properties& FunctionName, Properties& FunctionArgs);
 
+  bool CreateDialog(const string& Noun, Dialog& NewDialog);
 
 public:
   string& Text;

@@ -6,7 +6,7 @@
   [?IsInGame()] {
    \n<Branch this session[session:branch]>
    \n<Load old session[session:browse]>
-   \n<Save this session now[session:save]>
+   \n<Change session name[session:save]>
   }
   \n<browse books[menu:browse]>
   \n
@@ -49,11 +49,11 @@
   [!NewSession()]
   [!menu:close]
  [:branch]
-  [!BranchSession()]
-  [!menu:close]
+  [!branch name=GetSessionName()]
+  [!Input(branch name)]
  [:save]
-  [!SaveSession()]
-  [!menu:close]
+  [!session name=GetSessionName()]
+  [!Input(session name)]
  [:browse]
   [!SaveSession()]
   [!session = GetSessions()]
@@ -63,4 +63,14 @@
   \n<Back[menu:main]>
  [:open]
   [!LoadSession(@session)]
+  [!menu:close]
+
+[<session name>]
+ [:save]
+  [!SaveSession(@session name)]
+  [!menu:close]
+
+[<branch name>]
+ [:branch]
+  [!BranchSession(@session name)]
   [!menu:close]

@@ -13,6 +13,7 @@ public:
 
   void Init(Font& NewFont, const string& Frame = "", int Bpp = 32);
   void SetSize(Rect NewSize);
+  void FixAspectRatio(Rect& NewSize);
 
   virtual void Draw();
   virtual void Reset();

@@ -32,14 +32,10 @@ void Book::SetBookmark(const string& Description)
   CleanWhitespace(mark.Description);
 }
 
-bool Book::AddDialog(const string& Noun)
+void Book::AddDialog(const Dialog& dialog)
 {
-  return true;
-}
-
-bool Book::AddInputDialog(const string& Noun)
-{
-  return true;
+  Dialogs.push_back(dialog);
+  DialogOpen = true;
 }
 
 /** @brief Open book of agiven title
@@ -105,7 +101,7 @@ bool Book::ShowMenu()
 
 void Book::Quit()
 {
-  MenuOpen = SessionOpen = BookOpen = false;
+  MenuOpen = SessionOpen = BookOpen = DialogOpen = false;
 }
 
 bool Book::HideMenu()
@@ -173,7 +169,7 @@ bool Book::OpenStory(const string& Path,
         continue;
       }
       // look for a keyword definition of asset definition
-      if (FindTokenStart(buffer, token::keywordBlockMark) != string::npos) {
+      if (FindTokenStart(buffer, token::keywordBlock) != string::npos) {
         // if it's the second keyword we hit on this run
         if (storyText.empty()) {
           // this is the first keyword we have found
@@ -289,16 +285,23 @@ const string Book::GetMenuVerbs(const string& Noun)
 }
 
 /** @brief If the first element of the pair is a complete action
-  * seperate it and fill the second element and return true
+  * rearrange to fill the proper fields
   */
 bool Book::GetChoice(string_pair& Choice) const
 {
-  // is it a noun:verb?
+  // is the first part of the pair a noun:verb?
   size_t scopePos = FindTokenEnd(Choice.X, token::scope);
   if (scopePos != string::npos) {
-    // rearange the noun:verb into proper places
-    Choice.Y = CutString(Choice.X, scopePos+1, Choice.X.size());
-    Choice.X = CutString(Choice.X, 0, scopePos);
+    const string& verb = CutString(Choice.X, scopePos+1, Choice.X.size());
+    const string& noun = CutString(Choice.X, 0, scopePos);
+    // rearange the noun:verb,value into proper places
+    if (Choice.Y.empty()) {
+      Choice.X = noun;
+    } else {
+      Choice.X = noun + "=" + Choice.Y;
+    }
+    Choice.Y = verb;
+    // noun=value,verb
     return true;
   }
   return false;
@@ -385,7 +388,7 @@ const string Book::ProcessQueue(Story& MyStory,
   }
 
   actions.Reset();
-  return pageText + '\n';
+  return pageText;
 }
 
 /** @brief This returns the text for the quick menu
@@ -540,7 +543,7 @@ bool Book::MakeSessionNameUnique(string& Name,
 
 /** @brief Save current session, trim the excess and rename
   */
-bool Book::BranchSession()
+bool Book::BranchSession(const string& NewName)
 {
   if (SessionOpen) {
     SaveSession();
@@ -551,25 +554,34 @@ bool Book::BranchSession()
     BookSession.Filename = GetFreeSessionFilename(path);
     const vector<string_pair>& namemap = GetSessionNamemap(path);
     const string& turn = IntoString(BookSession.CurrentSnapshot - 1);
-    BookSession.Name = BookSession.Name + " T" + turn + " branch";
+    if (NewName.empty() || NewName == BookSession.Name) {
+      BookSession.Name = BookSession.Name + " T" + turn + " branch";
+    } else {
+      BookSession.Name = NewName;
+    }
     MakeSessionNameUnique(BookSession.Name, namemap);
+    SaveSession();
     return true;
   }
   return false;
 }
 
-bool Book::SaveSession()
+bool Book::SaveSession(const string& NewName)
 {
   if (SessionOpen) {
     const string& path = STORY_DIR + SLASH + BookTitle + SLASH;
     const string& filename = path + BookSession.Filename + ".session";
+    const vector<string_pair>& namemap = GetSessionNamemap(path);
+    if (!NewName.empty() && BookSession.Name != NewName) {
+      BookSession.Name = NewName;
+      MakeSessionNameUnique(BookSession.Name, namemap);
+    }
     Disk::Write(filename, BookSession.GetSessionText());
     // write the meta information for all the session files
     string meta = BookSession.Filename;
     meta += '\n';
     meta += BookSession.Name;
     meta += '\n';
-    const vector<string_pair>& namemap = GetSessionNamemap(path);
     for (const string_pair& name : namemap) {
       if (name.X != BookSession.Filename) {
         meta += name.X;
@@ -584,6 +596,11 @@ bool Book::SaveSession()
     return true;
   }
   return false;
+}
+
+const string Book::GetSessionName()
+{
+  return BookSession.Name;
 }
 
 const string Book::GetFreeSessionFilename(const string& Path)

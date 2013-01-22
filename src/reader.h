@@ -5,6 +5,7 @@
 #include "book.h"
 #include "textbox.h"
 #include "imagebox.h"
+#include "dialogbox.h"
 #include "layout.h"
 #include "surface.h"
 #include "font.h"
@@ -37,6 +38,7 @@ private:
   void PrintFPS(real DeltaTime);
 
   bool ProcessInput(real DeltaTime);
+  bool ProcessDialogs();
 
   bool ReadBook();
   bool ReadMenu();
@@ -76,6 +78,7 @@ private:
   Book MyBook;
   string_pair KeywordAction;
   MouseState Mouse; // we want to remember mouse position between clicks
+  KeysState Keys;
 
   // layout
   orientation CurrentOrientation = landscape;
@@ -91,6 +94,8 @@ private:
   // popups
   TextBox MainMenu;
   TextBox VerbMenu;
+  DialogBox GameDialog;
+  size_t DialogIndex = 0;
 
   real Timeout = 0;
   real TimeoutTimer = 0;

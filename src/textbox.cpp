@@ -12,6 +12,7 @@ void TextBox::SetText(const string NewText)
 {
   Text = NewText;
   Reset();
+  BreakText();
 }
 
 /** @brief Reset Page
@@ -19,9 +20,15 @@ void TextBox::SetText(const string NewText)
   */
 void TextBox::Reset()
 {
-  PageClip.X = PageClip.Y = PageHeight = 0;
   HighlightsDirty = PageDirty = true;
   Keywords.clear();
+  PageClip.X = PageClip.Y = PageHeight = 0;
+  PageClip.W = Size.W - BLOCK_SIZE;
+  PageClip.H = Size.H - BLOCK_SIZE;
+  PageSize.X = Size.X + BLOCK_SIZE / (size_t)2;
+  PageSize.Y = Size.Y + BLOCK_SIZE / (size_t)2;
+  PageSize.W = PageClip.W;
+  PageSize.H = PageClip.H;
 }
 
 /** @brief Draw page onto passed in surface
@@ -173,12 +180,6 @@ bool TextBox::BreakText()
   size_t pos = 0;
   size_t length = Text.size();
   size_t skip = 0; // characters skipped
-  PageClip.W = Size.W - BLOCK_SIZE;
-  PageClip.H = Size.H - BLOCK_SIZE;
-  PageSize.X = Size.X + BLOCK_SIZE / (size_t)2;
-  PageSize.Y = Size.Y + BLOCK_SIZE / (size_t)2;
-  PageSize.W = PageClip.W;
-  PageSize.H = PageClip.H;
 
   // record keywords and their positions and remove syntax symbols
   while(pos < length) {
@@ -312,7 +313,10 @@ bool TextBox::BreakText()
     firstWord = false;
     if (flush || !(pos < length)) { // || in case there's a space at the end
       lastLineEnd = pos;
-      Lines.push_back(line);
+      const size_t textOffset = Centered ?
+                                (PageSize.W - FontMain->GetWidth(line)) / 2
+                                : 0;
+      Lines.push_back(TextLine(line, textOffset));
       firstWord = true;
     }
   }
@@ -321,7 +325,7 @@ bool TextBox::BreakText()
   lastLineEnd = 0;
   // record visual keyword positions
   for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
-    const string& line = Lines[i];
+    const string& line = Lines[i].Text;
     const size_t lineLength = line.size() + 1;
     const size_t lineEnd = lastLineEnd + lineLength;
 
@@ -353,7 +357,7 @@ bool TextBox::BreakText()
         const string& keywordEnd = CutString(line, beg, end);
         newKey.Size.W = FontMain->GetWidth(keywordEnd);
         newKey.Size.H = fontHeight;
-
+        newKey.Size.X += Lines[i].X;
         Keywords.push_back(newKey);
       }
     }
@@ -389,10 +393,10 @@ void TextBox::RefreshPage()
     PageSurface.Init(PageClip.W, max(PageHeight, PageClip.H));
     PageSurface.SetClip(PageClip);
     Rect dst;
-    dst.X = 0;
     dst.Y = 0;
     for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
-      PageSurface.PrintText(dst, *FontMain, Lines[i], 255, 255, 255);
+      dst.X = Lines[i].X;
+      PageSurface.PrintText(dst, *FontMain, Lines[i].Text, 255, 255, 255);
       dst.Y += LineHeight;
     }
   }

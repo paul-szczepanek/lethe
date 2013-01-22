@@ -10,12 +10,16 @@ const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
 
-const string QUEUE_CONTENTS = "[!@QUEUE]";
-const string NOUNS_CONTENTS = "[!@NOUNS]";
-const string PLACE_CONTENTS = "[!@PLACE]";
-const string EXITS_CONTENTS = "[!@EXITS]";
-const string CALLS_CONTENTS = "[!@CALLS]";
-const string QUICK_CONTENTS = "[!@QUICK]";
+const string CONTENTS_START = "[!@";
+const string CONTENTS_END = "]";
+
+const string QUEUE_CONTENTS = CONTENTS_START + "QUEUE" + CONTENTS_END;
+const string NOUNS_CONTENTS = CONTENTS_START + "NOUNS" + CONTENTS_END;
+const string PLACE_CONTENTS = CONTENTS_START + "PLACE" + CONTENTS_END;
+const string EXITS_CONTENTS = CONTENTS_START + "EXITS" + CONTENTS_END;
+const string CALLS_CONTENTS = CONTENTS_START + "CALLS" + CONTENTS_END;
+const string QUICK_CONTENTS = CONTENTS_START + "QUICK" + CONTENTS_END;
+
 
 enum systemNoun {
   systemQueue,
@@ -102,8 +106,8 @@ enum tokenName {
   block,
   stop,
 
-  keywordBlockMark, // not a real token, marks start and end of keyword defs
-  verbBlockMark, // not a real token, marks start of a verb block
+  keywordBlock, // not a real token, marks start and end of keyword defs
+  verbBlock, // not a real token, marks start of a verb block
   assetBlock, // not a real token, marks start of a verb block
 
   TOKEN_NAME_MAX
@@ -144,8 +148,8 @@ const char Start[TOKEN_NAME_MAX] = {
   '{',    //block,
   '<',    //stop
 
-  '[',    //keywordBlockMark,
-  '[',     //verbBlockMark,
+  '[',    //keywordBlock,
+  '[',     //verbBlock,
   '['     //assetBlock,
 };
 
@@ -184,8 +188,8 @@ const char End[TOKEN_NAME_MAX] = {
   '}',    //block,
   '<',    //stop,
 
-  '<',    //keywordBlockMark,
-  ':',    //verbBlockMark,
+  '<',    //keywordBlock,
+  ':',    //verbBlock,
   '$'     //assetBlock,
 };
 
@@ -224,8 +228,8 @@ const size_t Type[TOKEN_NAME_MAX] = {
   isPaired,    //block,
   isWide,    //stop,
 
-  isWide,    //keywordBlockMark,
-  isWide,    //verbBlockMark,
+  isWide,    //keywordBlock,
+  isWide,    //verbBlock,
   isWide    //assetBlock,
 };
 

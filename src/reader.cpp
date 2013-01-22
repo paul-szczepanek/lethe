@@ -98,6 +98,8 @@ bool Reader::Init()
   ReaderButtons.Init(FontMain, FRAME_MENU, BPP);
   MainMenu.Init(FontMain, FRAME_SOLID, BPP);
   VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
+  GameDialog.Init(FontMain, FRAME_SOLID, BPP);
+  MainMenu.Centered = GameDialog.Centered = true;
   MainText.AspectW = 4;
   QuickMenu.AspectW = 4;
   MainImage.AspectW = 4;
@@ -107,11 +109,12 @@ bool Reader::Init()
 
   SetLayout();
 
-  // Main Menu window
+  // Windows not part of the layout
   Rect mainWindow = { Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
                       BLOCK_SIZE, BLOCK_SIZE
                     };
   MainMenu.SetSize(mainWindow);
+  GameDialog.SetSize(mainWindow);
   MainMenu.Visible = true;
 
 #ifdef LOGGER
@@ -133,7 +136,9 @@ bool Reader::Tick(real DeltaTime)
   } else {
     ProcessInput(DeltaTime);
     // process the action queue
-    if (MyBook.MenuOpen) {
+    if (MyBook.DialogOpen) {
+      RedrawPending |= ProcessDialogs();
+    } else if (MyBook.MenuOpen) {
       RedrawPending |= ReadMenu();
     } else if (MyBook.BookOpen) {
       RedrawPending |= ReadBook();
@@ -157,6 +162,43 @@ bool Reader::Tick(real DeltaTime)
   return true;
 }
 
+/** @brief Show new dialogs in the array until no more left.
+  * Builds the textbox from the dialog definition
+  */
+bool Reader::ProcessDialogs()
+{
+  if (MyBook.DialogOpen && !GameDialog.Visible) {
+    if (DialogIndex >= MyBook.Dialogs.size()) {
+      // we've dealt with all the dialogs
+      MyBook.DialogOpen = false;
+      MyBook.Dialogs.clear();
+      DialogIndex = 0;
+    } else {
+      // show the dialog
+      string text;
+      GameDialog.Visible = true;
+      const Dialog& dialog = MyBook.Dialogs[DialogIndex];
+      // prepare the dialog text
+      if (dialog.Input) {
+        GameDialog.EnableInput(dialog.Noun, dialog.Message);
+        text += "\n\n";
+      } else {
+        text += dialog.Message + '\n';
+      }
+      for (const string& button : dialog.Buttons) {
+        text += "\n<" + button + '[' + dialog.Noun + ':' + button + "]>\n";
+      }
+      GameDialog.SetText(text);
+      // center it on the screen
+      GameDialog.Size.H = GameDialog.PageHeight + 2 * BLOCK_SIZE;
+      GameDialog.Size.Y = (Height - GameDialog.Size.H) / 2;
+      GameDialog.SetSize(GameDialog.Size);
+    }
+    return true;
+  }
+  return false;
+}
+
 /** @brief Check the story for pending actions and execute them if needed
   */
 bool Reader::ReadBook()
@@ -169,6 +211,7 @@ bool Reader::ReadBook()
   // this is how far into the text the valid keywords get checked
   MainText.ValidateKeywords = PageSource.size();
   // fill the text from the book
+  PageSource += '\n';
   PageSource += MyBook.ProcessStoryQueue();
   QuickMenuSource = MyBook.GetQuickMenu();
   // clear out old keywords
@@ -191,57 +234,59 @@ bool Reader::ReadMenu()
 
   MenuSource = MyBook.ProcessMenuQueue();
   MainMenu.SetText(MenuSource);
+  MainMenu.Size.H = MainMenu.PageHeight + 2 * BLOCK_SIZE;
+  MainMenu.Size.Y = (Height - MainMenu.Size.H) / 2;
+  MainMenu.SetSize(MainMenu.Size);
   return true;
 }
 
 bool Reader::ProcessInput(real DeltaTime)
 {
-  KeysState keys;
-  RedrawPending = Input::Tick(Mouse, keys);
+  Keys.InputMode = MyBook.DialogOpen;
+  RedrawPending = Input::Tick(Mouse, Keys);
 
-  if (keys.KeyPressed) {
-    if (keys.Escape) {
-      // todo: handle dismissing dialog
-      if (MyBook.MenuOpen) {
-        MyBook.HideMenu();
-      } else {
-        MyBook.ShowMenu();
-      }
-    } else if (keys.SplitShrink) {
+  if (Keys.KeyPressed) {
+    if (Keys.InputMode) {
+      GameDialog.AddCharacter(Keys.Letter);
+    } else if (Keys.SplitShrink) {
       --(GetCurrentLayout().Split);
       SetLayout();
-    } else if (keys.SplitGrow) {
+    } else if (Keys.SplitGrow) {
       ++(GetCurrentLayout().Split);
       SetLayout();
-    } else if (keys.LayoutToggle) {
+    } else if (Keys.LayoutToggle) {
       SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
-    } else if (keys.PgDown) {
+    } else if (Keys.PgDown) {
       MainText.Pane.PaneScroll = 100;
-    } else if (keys.PgUp) {
+    } else if (Keys.PgUp) {
       MainText.Pane.PaneScroll = -100;
-    } else if (keys.Menu) {
+    } else if (Keys.Menu || Keys.Escape) {
       if (MyBook.MenuOpen) {
         MyBook.HideMenu();
       } else {
         MyBook.ShowMenu();
       }
-    } else if (keys.ImageZoom) {
+    } else if (Keys.ImageZoom) {
       //
-    } else if (keys.Undo) {
+    } else if (Keys.Undo) {
       MyBook.UndoSnapshot();
-    } else if (keys.Redo) {
+    } else if (Keys.Redo) {
       MyBook.RedoSnapshot();
-    } else if (keys.Bookmark) {
+    } else if (Keys.Bookmark) {
       MyBook.SetBookmark(QUICK_BOOKMARK);
-    } else if (keys.Quit) {
+    }
+    if (Keys.Quit) {
       MyBook.Quit();
     }
+    Keys.Reset();
   }
 
   if (Mouse.Left) {
     if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
       VerbMenu.Visible = false;
       KeywordAction.clear();
+    } else if (GameDialog.Visible) {
+      GameDialog.Select(Mouse, DeltaTime);
     } else if (MainMenu.Visible) {
       MainMenu.Select(Mouse, DeltaTime);
     } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
@@ -264,6 +309,16 @@ bool Reader::ProcessInput(real DeltaTime)
       VerbMenu.Visible = false;
       KeywordAction.clear();
       VerbMenu.Deselect();
+    } else if (GameDialog.Visible) {
+      if (GameDialog.GetSelectedKeyword(KeywordAction.X)) {
+        // close the dialog and get ready to process the next one
+        ++DialogIndex;
+        GameDialog.Visible = false;
+        // if the dialog had input, send that input to the noun
+        if (GameDialog.Input) {
+          KeywordAction.Y = GameDialog.InputText;
+        }
+      }
     } else if (MainMenu.Visible) {
       MainMenu.GetSelectedKeyword(KeywordAction.X);
     } else if (MyBook.ActiveBranch
@@ -274,6 +329,7 @@ bool Reader::ProcessInput(real DeltaTime)
 
     }
 
+    GameDialog.Deselect();
     MainMenu.Deselect();
     QuickMenu.Deselect();
     MainText.Deselect();
@@ -352,7 +408,10 @@ void Reader::DrawWindows()
   QuickMenu.Draw();
   ReaderButtons.Draw();
   // popups
-  MainMenu.Draw();
+  if (!MainMenu.Empty()) {
+    MainMenu.Draw();
+  }
+  GameDialog.Draw();
   VerbMenu.Draw();
 }
 

@@ -63,7 +63,7 @@ Page::Page(const string& SourceText)
             // we keep looking for a verb difinition until we find it
             // or we hit something illegal
             // this is not ideal but allows for implied scope
-            const size_t verbPos = FindTokenStart(Text, token::verbBlockMark,
+            const size_t verbPos = FindTokenStart(Text, token::verbBlock,
                                                   tokenPos.Y+1);
 
             if (verbPos < length) {

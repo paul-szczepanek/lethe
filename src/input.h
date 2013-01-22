@@ -15,6 +15,23 @@ struct MouseState {
 };
 
 struct KeysState {
+  void Reset() {
+    Letter = '?';
+    InputMode = false;
+    KeyPressed = false;
+    PgUp = false;
+    PgDown = false;
+    Menu = false;
+    SplitGrow = false;
+    SplitShrink = false;
+    LayoutToggle = false;
+    Escape = false;
+    ImageZoom = false;
+    Bookmark = false;
+    Undo = false;
+    Redo = false;
+    Quit = false;
+  }
   char Letter = '?';
   bool InputMode = false;
   bool KeyPressed = false;
@@ -39,7 +56,7 @@ public:
   ~Input() { };
 
   static bool Tick(MouseState& Mouse, KeysState& Keys);
-  static real limitFPS(ulint& LastTime);
+  static real LimitFPS(ulint& LastTime);
 };
 
 #endif // INPUT_H
