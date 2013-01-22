@@ -72,7 +72,6 @@ private:
 
   void InitSession(Story& MyStory, Session& MySession);
   const string GetFreeSessionFilename(const string& Path);
-  const vector<string> GetSessionFilenames(const string& Path);
   const vector<string_pair> GetSessionNamemap(const string& Path);
   bool MakeSessionNameUnique(string& Name, const vector<string_pair>& Namemap);
 

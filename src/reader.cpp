@@ -17,8 +17,8 @@ const string SKEY_LAYOUTS = "layouts";
 const real REDRAW_TIMEOUT = 5.0;
 const real MIN_TIMEOUT = 0.1;
 
-Reader::Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP)
-  : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP),
+Reader::Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP, bool Sound)
+  : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP), Silent(!Sound),
     Settings(SETTINGS_FILE)
 {
   LoadSettings();
@@ -75,28 +75,19 @@ void Reader::SaveSettings()
 bool Reader::Init()
 {
   // init all the critical systems and assets
-  if (!Surface::SystemInit()) {
-    return false;
-  }
-  if (!Font::SystemInit()) {
-    return false;
-  }
-  /*
-  if (!Audio::SystemInit()) {
-    return false;
-  } //*/
-  if (!Screen.InitScreen(Width, Height, BPP)) {
-    return false;
-  }
-  if (!FontSys.Init("mono.ttf", 12)
+  if (!Surface::SystemInit() || !Font::SystemInit()
+      || !Screen.InitScreen(Width, Height, BPP)
+      || !FontSys.Init("mono.ttf", 12)
       || !FontMain.Init("sans.ttf", 20)
       || !FontSmall.Init("serif.ttf", 12)
       || !FontTitle.Init("king.ttf", 24)) {
     return false;
   }
+  if (!Silent && !Audio::SystemInit()) {
+    return false;
+  }
 
   Screen.SetAlpha(255);
-
   if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
   }
@@ -343,7 +334,6 @@ void Reader::DrawBackdrop()
   }
   if (zoom > 1.01d || zoom < 0.99d) {
     Backdrop.Zoom(zoom, zoom);
-    Backdrop.SetAlpha(32);
   }
 
   Rect dst(Backdrop.W, Backdrop.H,

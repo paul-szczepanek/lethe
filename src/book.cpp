@@ -132,7 +132,7 @@ void Book::CloseBook()
 Properties Book::GetBooks()
 {
   Properties result;
-  Disk::ListFiles(STORY_DIR, result.TextValues);
+  result.TextValues = Disk::ListFiles(STORY_DIR);
   return result;
 }
 
@@ -140,7 +140,7 @@ bool Book::OpenMenu()
 {
   GameSession.Name = "game";
   GameSession.BookName = "menu";
-  MenuOpen = OpenStory(MENU_DIR + SLASH, MenuStory);
+  MenuOpen = OpenStory(MENU_DIR, MenuStory);
   InitSession(MenuStory, GameSession);
   return MenuOpen;
 }
@@ -153,49 +153,52 @@ bool Book::Tick(real DeltaTime)
 bool Book::OpenStory(const string& Path,
                      Story& MyStory)
 {
-  string storyText;
-  string buffer;
-  File story;
-  string filename = Path + SLASH + "story";
   MyStory.Reset();
-  if (!story.Read(filename)) {
-    return false;
-  }
+  vector<string> filenames = Disk::ListFiles(Path, STORY_EXT);
+  filenames.push_back(STORY_FILE);
 
-  while (!story.Empty()) {
-    story.GetLine(buffer);
-    StripComments(buffer);
-    if (buffer.empty()) {
-      continue;
-    }
+  // go through all *.story files but read story first
+  size_t i = filenames.size();
+  while (i) { // reverse for loop
+    const string& filename = filenames[--i];
+    string storyText;
+    string buffer;
+    File story;
+    story.Read(Path + SLASH + filename);
 
-    // look for a keyword definition of asset definition
-    if (FindTokenStart(buffer, token::keywordBlockMark) != string::npos) {
-      // if it's the second keyword we hit on this run
-      if (storyText.empty()) {
-        // this is the first keyword we have found
-        storyText = buffer;
-      } else {
-        // parse the text and start a new run
-        MyStory.ParseKeywordDefinition(storyText);
-        storyText = buffer;
+    while (!story.Empty()) {
+      story.GetLine(buffer);
+      StripComments(buffer);
+      if (buffer.empty()) {
+        continue;
       }
-    } else if (FindTokenStart(buffer, token::assetBlockMark) != string::npos) {
-      AddAssetDefinition(buffer);
-    } else if (!storyText.empty()) {
-      // we didn't find a keyword, keep adding lines if we already hit one
-      storyText += '\n';
-      storyText += buffer;
+      // look for a keyword definition of asset definition
+      if (FindTokenStart(buffer, token::keywordBlockMark) != string::npos) {
+        // if it's the second keyword we hit on this run
+        if (storyText.empty()) {
+          // this is the first keyword we have found
+          storyText = buffer;
+        } else {
+          // parse the text and start a new run
+          MyStory.ParseKeywordDefinition(storyText);
+          storyText = buffer;
+        }
+      } else if (FindTokenStart(buffer, token::assetBlock) != string::npos) {
+        AddAssetDefinition(buffer);
+      } else if (!storyText.empty()) {
+        // we didn't find a keyword, keep adding lines if we already hit one
+        storyText += '\n';
+        storyText += buffer;
+      }
+    }
+
+    // last keyword definition
+    if (!storyText.empty()) {
+      MyStory.ParseKeywordDefinition(storyText);
     }
   }
 
-  // last keyword definition
-  if (!storyText.empty()) {
-    MyStory.ParseKeywordDefinition(storyText);
-  }
-  //finished reading the file
   MyStory.Fixate();
-
   return true;
 }
 
@@ -480,33 +483,12 @@ Properties Book::GetSessions(const string& Title)
   return result;
 }
 
-/** @brief Return existing session filename
-  */
-const vector<string> Book::GetSessionFilenames(const string& Path)
-{
-  vector<string> result;
-  vector<string> files;
-  Disk::ListFiles(Path, files);
-  for (const string& file : files) {
-    // find .session files
-    const size_t length = file.size();
-    if (length > SESSION_EXT.size()) {
-      const string& ext = CutString(file, length - SESSION_EXT.size());
-      if (ext == SESSION_EXT) {
-        const string& name = CutString(file, 0, length - SESSION_EXT.size());
-        result.push_back(name);
-      }
-    }
-  }
-  return result;
-}
-
 /** @brief get a list of pairs of filename and session name from the map file
   */
 const vector<string_pair> Book::GetSessionNamemap(const string& Path)
 {
   vector<string_pair> namemap;
-  const vector<string>& files = GetSessionFilenames(Path);
+  const vector<string>& files = Disk::ListFiles(Path, SESSION_EXT, true);
   if (files.empty()) {
     return namemap;
   }

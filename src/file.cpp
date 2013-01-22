@@ -21,7 +21,7 @@ bool File::Read(const string& Filename)
 
 bool File::Empty()
 {
-  return Stream.eof();
+  return !Opened || Stream.eof();
 }
 
 /** @brief Return true only if a non-empty line is returned

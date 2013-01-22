@@ -2,26 +2,47 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-/** @brief Return false if path doesn't exist, add files to vector
+/** @brief Return files of given extension withou stripping the extension
   */
-bool Disk::ListFiles(const string& Path, vector<string>& Files)
+vector<string> Disk::ListFiles(const string& Path,
+                               const string& Extension,
+                               bool StripExtension)
 {
+  vector<string> files;
+  // get raw files
   DIR* directory = opendir(Path.c_str());
   if (directory == NULL) {
     LOG("Error " + IntoString(errno) + " trying to access: " + Path);
-    return false;
+    return files;
   }
-
   struct dirent* content;
   while ((content = readdir(directory)) != NULL) {
     if (DT_DIR != content->d_type) { // ignore . and ..
       string filename(content->d_name);
-      Files.push_back(filename);
+      files.push_back(filename);
     }
   }
 
-  closedir(directory);
-  return true;
+  // filter files
+  if (Extension.empty()) {
+    return files;
+  }
+  vector<string> result;
+  for (const string& file : files) {
+    const size_t length = file.size();
+    if (length > Extension.size()) {
+      const string& ext = CutString(file, length - Extension.size());
+      if (ext == Extension) {
+        if (StripExtension) {
+          const string& name = CutString(file, 0, length - Extension.size());
+          result.push_back(name);
+        } else {
+          result.push_back(file);
+        }
+      }
+    }
+  }
+  return result;
 }
 
 /** @brief Write file to disk and close

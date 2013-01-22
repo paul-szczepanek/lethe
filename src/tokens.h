@@ -104,7 +104,7 @@ enum tokenName {
 
   keywordBlockMark, // not a real token, marks start and end of keyword defs
   verbBlockMark, // not a real token, marks start of a verb block
-  assetBlockMark, // not a real token, marks start of a verb block
+  assetBlock, // not a real token, marks start of a verb block
 
   TOKEN_NAME_MAX
 };
@@ -146,7 +146,7 @@ const char Start[TOKEN_NAME_MAX] = {
 
   '[',    //keywordBlockMark,
   '[',     //verbBlockMark,
-  '['     //assetBlockMark,
+  '['     //assetBlock,
 };
 
 const char End[TOKEN_NAME_MAX] = {
@@ -186,7 +186,7 @@ const char End[TOKEN_NAME_MAX] = {
 
   '<',    //keywordBlockMark,
   ':',    //verbBlockMark,
-  '$'     //assetBlockMark,
+  '$'     //assetBlock,
 };
 
 const size_t Type[TOKEN_NAME_MAX] = {
@@ -226,7 +226,7 @@ const size_t Type[TOKEN_NAME_MAX] = {
 
   isWide,    //keywordBlockMark,
   isWide,    //verbBlockMark,
-  isWide    //assetBlockMark,
+  isWide    //assetBlock,
 };
 
 const tokenName Conditions[NUM_TOKENS_CONDITION] = {

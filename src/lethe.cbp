@@ -13,6 +13,7 @@
 				<Option object_output="../obj/debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="-s" />
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-Wextra" />

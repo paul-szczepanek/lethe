@@ -24,7 +24,7 @@ enum orientation {
 class Reader
 {
 public:
-  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP);
+  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP, bool Sound = true);
   ~Reader();
 
   bool Init();
@@ -58,6 +58,7 @@ private:
   size_t Width;
   size_t Height;
   int BPP;
+  bool Silent;
   float RedrawCountdown = 0;
   bool RedrawPending = true;
   ValueStore Settings;

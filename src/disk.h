@@ -13,7 +13,9 @@ public:
   static bool Write(const string& Filename, const string& Text);
   static bool Delete(const string& Filename);
   static bool Exists(const string& Filename);
-  static bool ListFiles(const string& Path, vector<string>& Files);
+  static vector<string> ListFiles(const string& Path,
+                                  const string& Extension = "",
+                                  bool StripExtension = false);
 };
 
 #endif // DISK_H

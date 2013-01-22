@@ -6,9 +6,18 @@
 string GLog = "";
 #endif
 
-int main ()
+int main (int Count, char* Switches[])
 {
-  Reader reader(1000, 800, 32);
+  bool sound = true;
+
+  for (int i = 0; i < Count; ++i) {
+    const string swtich(Switches[i]);
+    if (swtich == "-s" || swtich == "-silent" || swtich == "-no-sound") {
+      sound = false;
+    }
+  }
+
+  Reader reader(1000, 800, 32, sound);
 
   if (reader.Init()) {
     ulint lastTime = 0;
@@ -16,6 +25,8 @@ int main ()
     while (reader.Tick(deltaTime)) {
       deltaTime = Input::limitFPS(lastTime);
     }
+  } else {
+    return 1;
   }
 
   return 0;
