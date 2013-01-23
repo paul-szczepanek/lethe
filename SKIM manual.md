@@ -332,32 +332,40 @@ Currently available functions:
                      values print a comma separated list: `<v1>, <v2>`.
 - `SelectValue(noun:verb)` - print all noun values as value selections.
                              `<noun=v1:verb>, <noun=v2:verb>`.
-- `GetBooks()` - return book names of books in the book folder.
-- `OpenBook(value)` - try and open a book of given name, return true if
-                      successfull.
-- `CloseBook()` - close the book, save and return to the menu.
-- `IsInGame()` - return true if a book is opened and a session started.
-- `GetSessions(value)` - return user set names of sessions  for the given
-                         book title or if no value given for the currently
-                         book. If no value given and no is book open it will
-                         return no values.
-- `SaveSession()` - save the session to disk now. This gets called for you
-                    automatically when you close the book, try to branch,
-                    load or exit the game altogether (except when force
-                    quitting).
-- `BranchSession()` - save the session and create a new one that starts
-                      at the current point in time.
-- `NewSession()` - start a new session.
-- `LoadSession(value)` - load a session with the given name, if no value is
-                         given continue the last played session. Will start
-                         a new session if no session is present.
 - `Bookmark(value)` - silently create a bookmark at current place. The value
                       will be evaluated to provide the description. If a
                       bookmark is already present it will not be overwritten.
 - `Input(noun)` - will show an input box that will set the value of the noun.
                   The buttons on the input box will be the verbs of the noun.
                   If a number is entered, the integer value will be set in
-                  addition to the text value.
+                  addition to the text value. If the noun had a previous
+                  value it will be shown in the input box.
+
+Also available but mostly useful in the menu:
+
+- `GetBooks()` - return book names of books in the book folder.
+- `OpenBook(value)` - try and open a book of given name, return true if
+                      successfull.
+- `CloseBook()` - close the book, save and return to the menu.
+- `IsInGame()` - return true if a book is opened and a session started.
+- `GetSessionName()` - return the session name currently loaded.
+- `GetSessions(value)` - return user set names of sessions  for the given
+                         book title or if no value given for the currently
+                         book. If no value given and no is book open it will
+                         return no values.
+- `SaveSession(value)` - save the session to disk under a new name if
+                         provided. This gets called for you automatically
+                         when you close the book, try to branch, load or
+                         exit the game altogether (except when force
+                         quitting). Name will be made unique if needed.
+- `BranchSession(value)` - save the session and create a new one that starts
+                           at the current point in time. Use the provided
+                           name if possible. It will default to a unique
+                           name a a clashing one or none is provided.
+- `NewSession()` - start a new session.
+- `LoadSession(value)` - load a session with the given name, if no value is
+                         given continue the last played session. Will start
+                         a new session if no session is present.
 - `OpenMenu()` - open the game menu in the reader.
 - `CloseMenu()` - close the game menu in the reader.
 - `Quit()` - this will call CloseBook() to save the session and then quit

@@ -316,7 +316,19 @@ bool Reader::ProcessInput(real DeltaTime)
         GameDialog.Visible = false;
         // if the dialog had input, send that input to the noun
         if (GameDialog.Input) {
-          KeywordAction.Y = GameDialog.InputText;
+          // if it's possibly a number add that as well
+          string number;
+          for (const char digit : GameDialog.InputText) {
+            if (isdigit(digit)) {
+              number += digit;
+            } else {
+              break;
+            }
+          }
+          if (!number.empty()) {
+            GameDialog.InputText += "+#" + number;
+          }
+          KeywordAction.Y = "=" + GameDialog.InputText;
         }
       }
     } else if (MainMenu.Visible) {

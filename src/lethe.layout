@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
-	<ActiveTarget name="release" />
+	<ActiveTarget name="debug" />
 	<File name="input.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1014" topLine="21" />
@@ -91,7 +91,7 @@
 			<Cursor1 position="324" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="storyquery.cpp" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="storyquery.cpp" open="1" top="1" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="24372" topLine="700" />
 		</Cursor>
@@ -236,7 +236,7 @@
 			<Cursor1 position="638" topLine="2" />
 		</Cursor>
 	</File>
-	<File name="book.cpp" open="1" top="1" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="book.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="10584" topLine="329" />
 		</Cursor>

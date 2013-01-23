@@ -298,7 +298,7 @@ bool Book::GetChoice(string_pair& Choice) const
     if (Choice.Y.empty()) {
       Choice.X = noun;
     } else {
-      Choice.X = noun + "=" + Choice.Y;
+      Choice.X = noun + Choice.Y;
     }
     Choice.Y = verb;
     // noun=value,verb

@@ -1,4 +1,4 @@
-Lethe
+![Lethe](lethe_big.png)
 =====
 
 This is a text adventure engine that rather than a parser uses keywords and drop-down menus you can click on to progress the story. It's a hybrid of a text adventure and a visual novel.
@@ -15,3 +15,4 @@ This was originally being developed for an e-reader (with e-ink, I had an iRex w
 Code GPLed, everything else CC unless noted otherwise.
 Fonts by Matthew Welch http://www.squaregear.net/fonts/.
 Fonts by DejaVu http://dejavu-fonts.org/wiki/License.
+
