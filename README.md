@@ -1,4 +1,4 @@
-![Lethe](lethe_big.png)
+![Lethe](https://github.com/paul-szczepanek/lethe/blob/master/lethe_big.png)
 =====
 
 This is a text adventure engine that rather than a parser uses keywords and drop-down menus you can click on to progress the story. It's a hybrid of a text adventure and a visual novel.
