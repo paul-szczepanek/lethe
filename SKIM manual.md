@@ -228,6 +228,36 @@ unless a break instruction `[!<<]` is encountered.
 Text written outside of `[ ]` will be printed to the screen. Text needs to be
 placed under a verb definition.
 
+Newlines are considered whitespace and replaced with a space for correct flow
+of the next line. You can force a newline by using `\n` in text.
+
+Whitespace around newlines is ignored so you can indent text in the file.
+You can use the escape character `\` to ignore that and force whitespace.
+
+Reserved characters that need to be escaped with `\` in text are:
+
+`< > [ ] { } \ & | // __ == **`
+
+`&` and `|` will work unescaped but will contract whitespace around them
+(changing `R & R` to `R&R`). A combination of two `/` is used for comments so
+you'll have to escape one if you want to use them in text. Same for other
+double character tokens `__ == **`.
+
+All other characters are legal and only treated as special characters
+if within `[ ]` or `< >`.
+
+You can force a style on a line by placing it within pairs of style tokens:
+
+- `**title**` - big, bold font.
+- `__quote__` - small, italic font.
+- `==mono==` - small, mono-spaced font.
+
+If the styled line doesn't start and end on newlines they will be added.
+Styles cannot be nested or placed inside keywords (but keywords may be
+placed within styled lines).
+
+### `Keywords in Text ____________________________________________ <keyword>`
+
 Text can contain `<keywords>` inlined with text. Clicking on them creates a
 menu with a list of possible actions based on the verbs that the user can
 click on.
@@ -237,23 +267,6 @@ click on.
 - `<keyword[noun:verb]>` - keyword which doesn't drop down a menu of available
                            actions but immediately executes the verb under
                            noun. These are called choices.
-
-Newlines are considered whitespace and replaced with a space for correct flow
-of the next line. You can force a newline by using `\n` in text.
-
-Whitespace around newlines is ignored so you can indent text in the file.
-You can use the escape character `\` to ignore that and force whitespace.
-
-Reserved characters that need to be escaped with `\` in text are:
-
-`< > [ ] { } \ & | //`
-
-`&` and `|` will work unescaped but will contract whitespace around them
-(changing `R & R` to `R&R`). A combination of two `/` is used for comments so
-you'll have to escape one if you want to use them in text.
-
-All other characters are legal and only treated as special characters
-if within `[ ]`.
 
 There is one more type of keyword, used mostly internally:
 
@@ -275,7 +288,7 @@ These nouns expect string values of noun:verb that point to valid verbs to
 execute:
 
 - `[<QUEUE>]` - anything placed here will get executed and then removed
-                automatically, this is used to kickstart the story. Any
+                automatically, this is used to kick-start the story. Any
                 action taken by the player will be placed here and executed.
 - `[<CALLS>]` - all values get executed every turn as instructions and
                 remain here until removed. This happens prior to any action
@@ -283,7 +296,7 @@ execute:
 - `[<QUICK>]` - like CALLS, executes every turn but is used to print the
                 quick menu. It should not contain logic as it will only
                 get executed if the quick menu exists in the reader.
-                Values here don't need to be in NOUNS to remain clickable.
+                Values here don't need to be in NOUNS to remain active.
 
 CALLS will not get executed on the turn it is added as it needs to happen
 prior to an action. It can manipulate the QUEUE before it gets executed.
@@ -299,7 +312,7 @@ These nouns expect strings that match names of other valid nouns.
 
 - `[<PLACE>]` - where we are.
 - `[<EXITS>]` - where we can go.
-- `[<NOUNS>]` - a noun must be here to remain clickable in the main pane after
+- `[<NOUNS>]` - a noun must be here to remain active in the main pane after
                 another action has taken place. Text from the previous action
                 by default loses the keywords unless they are found here.
 
@@ -345,7 +358,7 @@ Also available but mostly useful in the menu:
 
 - `GetBooks()` - return book names of books in the book folder.
 - `OpenBook(value)` - try and open a book of given name, return true if
-                      successfull.
+                      successful.
 - `CloseBook()` - close the book, save and return to the menu.
 - `IsInGame()` - return true if a book is opened and a session started.
 - `GetSessionName()` - return the session name currently loaded.
@@ -361,7 +374,7 @@ Also available but mostly useful in the menu:
 - `BranchSession(value)` - save the session and create a new one that starts
                            at the current point in time. Use the provided
                            name if possible. It will default to a unique
-                           name a a clashing one or none is provided.
+                           name if a clashing one or none is provided.
 - `NewSession()` - start a new session.
 - `LoadSession(value)` - load a session with the given name, if no value is
                          given continue the last played session. Will start
