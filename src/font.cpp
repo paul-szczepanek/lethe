@@ -52,7 +52,7 @@ size_t Font::GetHeight() const
   */
 size_t Font::GetLineSkip() const
 {
-  return 0.5 * TTF_FontLineSkip(SDLFont);
+  return 0.2 * TTF_FontLineSkip(SDLFont);
 }
 
 /** @brief Return the size of the surface the text would need

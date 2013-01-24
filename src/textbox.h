@@ -7,7 +7,7 @@
 struct PaneState {
   PaneState () { };
   size_t PaneDragY = 0;
-  int PaneScroll = 0;
+  size_t Y = 0;
   real DragTimeout = 0.25;
   bool PaneDown = false;
   bool PaneUp = false;
@@ -26,7 +26,6 @@ struct TextLine {
   const string Text;
   const Font* LineFont;
   const Rect Size;
-  Surface LineSurface;
 };
 
 class MouseState;
@@ -42,8 +41,10 @@ public:
   void Init(Font& TextBoxFont, const string& Frame, const int Bpp);
 
   size_t_pair GetMaxSize();
-  void SetText(const string NewText);
+  void SetText(const string& NewText);
+  void AddText(const string& NewText);
 
+  void Scroll(lint PaneScroll);
   void Draw();
   void Reset();
 
@@ -51,10 +52,12 @@ public:
   bool Deselect();
   bool GetSelectedKeyword(string& Keyword);
 
-  inline bool Empty() { return Text.empty(); };
+  inline bool Empty() {
+    return Text.empty();
+  };
 
 private:
-  void Scroll();
+  void ResetText();
   bool BreakText();
   void RefreshPage();
   void RefreshHighlights();
@@ -64,30 +67,43 @@ public:
   bool HighlightsDirty = true;
   bool PageDirty = true;
   bool Centered = false;
-
-  PaneState Pane;
+  size_t PageHeight = 0;
+  size_t PageWidth = 0;
 
   size_t ValidateKeywords = 0; // how far to check the text keywords
   Properties ValidKeywords;
 
-  size_t PageHeight = 0;
-  size_t LineHeight = 0;
+  Rect PageSize;
 
 protected:
   string Text;
-  Rect PageSize;
-  Rect PageClip;
-
+  PaneState Pane;
   vector<Font*> Fonts;
 
 private:
   Surface Highlights;
   Surface PageSurface;
 
+  size_t SelectedKeyword = 0;
+
   vector<TextLine> Lines;
   vector<KeywordMap> Keywords;
 
-  size_t SelectedKeyword;
+  Colour TextColour;
 };
+
+inline void ShiftPositions(vector<size_t_pair>& Positions,
+                           const size_t Beyond,
+                           const size_t Offset)
+{
+  for (size_t_pair& pos : Positions) {
+    if (pos.X >= Beyond) {
+      pos.X += Offset;
+    }
+    if (pos.Y >= Beyond) {
+      pos.Y += Offset;
+    }
+  }
+}
 
 #endif // TEXTBOX_H

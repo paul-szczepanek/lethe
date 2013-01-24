@@ -44,13 +44,14 @@ private:
   bool ReadBook();
   bool ReadMenu();
 
+  bool ShowVerbMenu(const string& VerbsText);
+
   size_t SetLayout(size_t LayoutIndex = NUM_LAYOUTS);
   size_t FixLayout();
   Layout& GetCurrentLayout();
 
   void LoadSettings();
   void SaveSettings();
-
 
 public:
   string MenuSource;
@@ -92,7 +93,7 @@ private:
   TextBox QuickMenu;
   WindowBox ReaderButtons;
 
-  // popups
+  // pop-ups
   TextBox MainMenu;
   TextBox VerbMenu;
   DialogBox GameDialog;

@@ -47,17 +47,17 @@ void Reader::LoadSettings()
     // overwrite with stored ones
     const string& key = SKEY_LAYOUTS + IntoString(i);
     Settings.GetValue(key, layoutStrings);
-    // init the layouts with deafult or stored layouts strings
+    // initialise the layouts with default or stored layouts strings
     for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
       Layouts[i][j].Init(layoutStrings[j]);
     }
   }
   Settings.GetValue(SKEY_CURRENT_LAYOUT, CurrentLayout);
 
-  // font defults
+  // font defaults
   FontNames = { "sans.ttf", "king.ttf", "serif.ttf", "mono.ttf" };
   FontNames.resize(TEXT_STYLE_MAX);
-  // replaced deafults with saved ones if present
+  // replaced defaults with saved ones if present
   Settings.GetValue(SKEY_FONT_NAMES, FontNames);
 
   Settings.GetValue(SKEY_FONT_SCALE, FontScale);
@@ -85,7 +85,7 @@ void Reader::SaveSettings()
 
 bool Reader::InitFonts()
 {
-  size_t fonstSizes[TEXT_STYLE_MAX] = { 20, 40, 16, 16 };
+  size_t fonstSizes[TEXT_STYLE_MAX] = { 20, 46, 16, 16 };
   Fonts.resize(TEXT_STYLE_MAX);
   const real scale = (real)FontScale / 100.f;
   for (size_t i = 0; i < TEXT_STYLE_MAX; ++i) {
@@ -101,7 +101,7 @@ bool Reader::InitFonts()
 
 bool Reader::Init()
 {
-  // init all the critical systems and assets
+  // initialise all the critical systems and assets
   if (!Surface::SystemInit()
       || !Font::SystemInit()
       || !Screen.InitScreen(Width, Height, BPP)
@@ -168,7 +168,7 @@ bool Reader::Tick(real DeltaTime)
       // both menu and book are closed, quit
       return false;
     }
-    // game logic migh have hidden the menu
+    // game logic might have hidden the menu
     MainMenu.Visible = MyBook.MenuOpen;
   }
 
@@ -185,7 +185,7 @@ bool Reader::Tick(real DeltaTime)
 }
 
 /** @brief Show new dialogs in the array until no more left.
-  * Builds the textbox from the dialog definition
+  * Builds the text box from the dialog definition
   */
 bool Reader::ProcessDialogs()
 {
@@ -233,14 +233,14 @@ bool Reader::ReadBook()
   // this is how far into the text the valid keywords get checked
   MainText.ValidateKeywords = PageSource.size();
   // fill the text from the book
-  PageSource += '\n';
-  PageSource += MyBook.ProcessStoryQueue();
+  PageSource = MyBook.ProcessStoryQueue();
+  //PageSource += '\n';
   QuickMenuSource = MyBook.GetQuickMenu();
   // clear out old keywords
   MainText.ValidKeywords.Reset();
   MyBook.GetStoryNouns(MainText.ValidKeywords);
   // actually set the received text to be shown
-  MainText.SetText(PageSource);
+  MainText.AddText(PageSource);
   QuickMenu.SetText(QuickMenuSource);
   return true;
 }
@@ -279,9 +279,9 @@ bool Reader::ProcessInput(real DeltaTime)
     } else if (Keys.LayoutToggle) {
       SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
     } else if (Keys.PgDown) {
-      MainText.Pane.PaneScroll = 100;
+      MainText.Scroll(100);
     } else if (Keys.PgUp) {
-      MainText.Pane.PaneScroll = -100;
+      MainText.Scroll(-100);
     } else if (Keys.Menu || Keys.Escape) {
       if (MyBook.MenuOpen) {
         MyBook.HideMenu();
@@ -317,7 +317,7 @@ bool Reader::ProcessInput(real DeltaTime)
     }
   } else if (Mouse.LeftUp) {
     Mouse.LeftUp = false;
-    // touch released, see if we cliked on something interactive
+    // touch released, see if we clicked on something interactive
     // verb menu -> main menu -> quick menu -> main text
     if (VerbMenu.Visible) {
       if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
@@ -327,7 +327,7 @@ bool Reader::ProcessInput(real DeltaTime)
           MyBook.SetStoryAction(KeywordAction);
         }
       }
-      // cleanup after action
+      // clean up after action
       VerbMenu.Visible = false;
       KeywordAction.clear();
       VerbMenu.Deselect();
@@ -375,22 +375,41 @@ bool Reader::ProcessInput(real DeltaTime)
         } else if (MyBook.ActiveBranch) {
           MyBook.SetStoryAction(KeywordAction);
         } else {
-          // show a popup to ask to branch the story
+          // show a pop-up to ask to branch the story
         }
         KeywordAction.clear();
       } else {
         // we clicked on a keyword, create a menu full of verbs
-        const string& VerbsText = MyBook.GetStoryVerbs(KeywordAction.X);
-        if (!VerbsText.empty()) {
-          VerbMenu.Visible = true;
-          VerbMenu.SetText(VerbsText);
-          const size_t_pair& maxSize = VerbMenu.GetMaxSize();
-          Rect boxSize(maxSize.X, maxSize.Y, Mouse.X, Mouse.Y);
-          VerbMenu.SetSize(boxSize);
-        }
+        const string& verbsText = MyBook.GetStoryVerbs(KeywordAction.X);
+        ShowVerbMenu(verbsText);
       }
     }
   }
+  return true;
+}
+
+bool Reader::ShowVerbMenu(const string& VerbsText)
+{
+  if (VerbsText.empty()) {
+    return false;
+  }
+  Rect verbSize(Width, Height, Mouse.X, Mouse.Y);
+  // break text according to maximum size (whole screen)
+  VerbMenu.SetSize(verbSize);
+  VerbMenu.SetText(VerbsText);
+  // check if it's off screen when sized down to minimum size
+  verbSize.H = VerbMenu.PageHeight + VerbMenu.Size.H - VerbMenu.PageSize.H;
+  verbSize.W = VerbMenu.PageWidth + VerbMenu.Size.W - VerbMenu.PageSize.W;
+  verbSize.H += BLOCK_SIZE;
+  verbSize.W += BLOCK_SIZE;
+  if (verbSize.X + verbSize.W > Width) {
+    verbSize.X = Width - verbSize.W;
+  }
+  if (verbSize.Y + verbSize.H > Height) {
+    verbSize.Y = Height - verbSize.H;
+  }
+  VerbMenu.SetSize(verbSize);
+  VerbMenu.Visible = true;
   return true;
 }
 
@@ -401,12 +420,12 @@ void Reader::RedrawScreen(real DeltaTime)
   DrawWindows();
   PrintFPS(DeltaTime);
 #ifdef LOGGER
-  const size_t maxlog = 1024;
+  const size_t maxlog = 10240;
   if (GLog.size() > maxlog) {
-    GLog = GLog.substr(GLog.size() - maxlog, maxlog);
+    GLog = CutString(GLog, GLog.size() - maxlog);
   }
   Logger->SetText(GLog);
-  Logger->Pane.PaneScroll = 10000;
+  Logger->Scroll(10000);
   Logger->Draw();
 #endif
   Surface::SystemDraw();
@@ -441,7 +460,7 @@ void Reader::DrawWindows()
   MainText.Draw();
   QuickMenu.Draw();
   ReaderButtons.Draw();
-  // popups
+  // pop-ups
   if (!MainMenu.Empty()) {
     MainMenu.Draw();
   }
@@ -474,7 +493,7 @@ size_t Reader::FixLayout()
   } else {
     LOG("layout impossible on this screen");
     return CurrentLayout;
-    // TODO: try a fallback
+    // TODO: try a fall-back
   }
 }
 
@@ -514,7 +533,6 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
     bool first = (i == 0) || (pos != layout.Side[i-1]);
-    //bool last = (i == fSz-1) || (where != layout.Side[i+1]);
 
     boxes[i]->Visible = layout.Active[i];
 

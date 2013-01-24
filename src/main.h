@@ -65,6 +65,16 @@ typedef long int lint;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
+typedef struct Colour {
+  Colour() { };
+  Colour(usint _R, usint _G, usint _B, usint _A)
+  : R(_R), G(_G), B(_B), A(_A) { };
+  usint R = 255;
+  usint G = 255;
+  usint B = 255;
+  usint A = 255;
+} Colour;
+
 typedef struct string_pair {
   string_pair(string _X, string _Y) : X(_X), Y(_Y) { };
   string_pair() { };
@@ -120,8 +130,8 @@ typedef struct Rect {
   };
   size_t W;
   size_t H;
-  size_t X;
-  size_t Y;
+  lint X;
+  lint Y;
 } Rect;
 
 template <typename T> inline string IntoString(const T& Thing)
