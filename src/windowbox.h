@@ -11,7 +11,7 @@ public:
   WindowBox() { };
   virtual ~WindowBox() { };
 
-  void Init(Font& NewFont, const string& Frame = "", int Bpp = 32);
+  virtual void Init(const string& Frame = "", const int Bpp = 32);
   void SetSize(Rect NewSize);
   void FixAspectRatio(Rect& NewSize);
 
@@ -31,8 +31,6 @@ public:
   bool ShowUp = false;
   bool ShowDown = false;
   bool ShowIcon = false;
-
-  Font* FontMain;
 
   size_t AspectW = 0;
   size_t AspectH = 0;

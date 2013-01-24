@@ -5,29 +5,28 @@
 #include "properties.h"
 
 struct PaneState {
-  PaneState ()
-    : PaneDragY(0), PaneScroll(0), DragTimeout(0.25),
-      PaneDown(false), PaneUp(false) { };
-  ~PaneState () { };
-  size_t PaneDragY;
-  int PaneScroll;
-  real DragTimeout;
-  bool PaneDown;
-  bool PaneUp;
+  PaneState () { };
+  size_t PaneDragY = 0;
+  int PaneScroll = 0;
+  real DragTimeout = 0.25;
+  bool PaneDown = false;
+  bool PaneUp = false;
 };
 
 struct KeywordMap {
   KeywordMap(const string& keyName)
     : Keyword(keyName) { };
-  ~KeywordMap() { };
-  string Keyword;
+  const string Keyword;
   Rect Size;
 };
 
 struct TextLine {
-  TextLine(const string& _Text, size_t _X = 0) : Text(_Text), X(_X) { };
-  string Text;
-  size_t X;
+  TextLine(const string& _Text, const Font* _LineFont, const Rect _Size)
+    : Text(_Text), LineFont(_LineFont), Size(_Size) { };
+  const string Text;
+  const Font* LineFont;
+  const Rect Size;
+  Surface LineSurface;
 };
 
 class MouseState;
@@ -37,6 +36,10 @@ class TextBox : public WindowBox
 public:
   TextBox() { };
   virtual ~TextBox() { };
+
+  void Init(vector<Font>& TextBoxFonts, const string& Frame,
+            const int Bpp);
+  void Init(Font& TextBoxFont, const string& Frame, const int Bpp);
 
   size_t_pair GetMaxSize();
   void SetText(const string NewText);
@@ -74,6 +77,8 @@ protected:
   string Text;
   Rect PageSize;
   Rect PageClip;
+
+  vector<Font*> Fonts;
 
 private:
   Surface Highlights;

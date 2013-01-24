@@ -20,6 +20,13 @@ const string EXITS_CONTENTS = CONTENTS_START + "EXITS" + CONTENTS_END;
 const string CALLS_CONTENTS = CONTENTS_START + "CALLS" + CONTENTS_END;
 const string QUICK_CONTENTS = CONTENTS_START + "QUICK" + CONTENTS_END;
 
+enum textStyle {
+  styleMain,
+  styleTitle,
+  styleQuote,
+  styleMono,
+  TEXT_STYLE_MAX
+};
 
 enum systemNoun {
   systemQueue,
@@ -106,9 +113,13 @@ enum tokenName {
   block,
   stop,
 
-  keywordBlock, // not a real token, marks start and end of keyword defs
-  verbBlock, // not a real token, marks start of a verb block
-  assetBlock, // not a real token, marks start of a verb block
+  keywordBlock,// not a real token, marks start and end of keyword defs
+  verbBlock,   // not a real token, marks start of a verb block
+  assetBlock,  // not a real token, marks start of a verb block
+
+  styleTitle,
+  styleMono,
+  styleQuote,
 
   TOKEN_NAME_MAX
 };
@@ -149,8 +160,12 @@ const char Start[TOKEN_NAME_MAX] = {
   '<',    //stop
 
   '[',    //keywordBlock,
-  '[',     //verbBlock,
-  '['     //assetBlock,
+  '[',    //verbBlock,
+  '[',    //assetBlock,
+
+  '*',    //styleTitle,
+  '=',    //styleMono,
+  '_'     //styleQuote,
 };
 
 const char End[TOKEN_NAME_MAX] = {
@@ -190,47 +205,55 @@ const char End[TOKEN_NAME_MAX] = {
 
   '<',    //keywordBlock,
   ':',    //verbBlock,
-  '$'     //assetBlock,
+  '$',    //assetBlock,
+
+  '*',    //styleTitle,
+  '=',    //styleMono,
+  '_'     //styleQuote,
 };
 
 const size_t Type[TOKEN_NAME_MAX] = {
-  isWide,    //comment,
+  isWide,       //comment,
 
-  isPaired,    //keyword,
-  isPaired,    //expression,
+  isPaired,     //keyword,
+  isPaired,     //expression,
 
-  0,    //condition,
-  0,    //instruction,
+  0,            //condition,
+  0,            //instruction,
 
-  0,    //scope,
+  0,            //scope,
 
-  isWide,    //contains,
-  isWide,    //notContains,
-  0,    //equals,
-  isWide,    //notEquals,
-  isWide,    //equalsOrLess,
-  isWide,    //equalsOrMore,
-  0,    //isMore,
-  0,    //isLess,
+  isWide,       //contains,
+  isWide,       //notContains,
+  0,            //equals,
+  isWide,       //notEquals,
+  isWide,       //equalsOrLess,
+  isWide,       //equalsOrMore,
+  0,            //isMore,
+  0,            //isLess,
 
-  0,   //and,
-  0,    //or,
+  0,            //and,
+  0,            //or,
 
-  isWide,    //add,
-  isWide,    //remove,
-  0,    //assign,
+  isWide,       //add,
+  isWide,       //remove,
+  0,            //assign,
 
-  0,    //number,
-  0,    //value,
-  isPaired,    //function,
+  0,            //number,
+  0,            //value,
+  isPaired,     //function,
 
-  0,    //separator,
-  isPaired,    //block,
-  isWide,    //stop,
+  0,            //separator,
+  isPaired,     //block,
+  isWide,       //stop,
 
-  isWide,    //keywordBlock,
-  isWide,    //verbBlock,
-  isWide    //assetBlock,
+  isWide,       //keywordBlock,
+  isWide,       //verbBlock,
+  isWide,       //assetBlock,
+
+  isWide|isPaired, //styleTitle,
+  isWide|isPaired, //styleMono,
+  isWide|isPaired  //styleQuote,
 };
 
 const tokenName Conditions[NUM_TOKENS_CONDITION] = {

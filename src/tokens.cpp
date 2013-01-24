@@ -133,7 +133,8 @@ string CleanEscapeCharacters(const string& Text)
   return clean;
 }
 
-/** @brief FindToken
+/** @brief Find Token depending on its type, paired tokens pretend the text
+  * in between is part of the token for returning position
   *
   * \return a pair of begin and end positions of the token
   */
@@ -150,19 +151,28 @@ size_t_pair FindToken(const string& Text,
   char tokenB = token::End[TokenName];
   size_t type = token::Type[TokenName];
 
-  while (pos < End) {
-    if (IsSpecial(Text, pos, tokenA)) {
-      if (type & token::isWide) {
-        // if it's two char token check for other char and return if found
-        if (IsSpecial(Text, pos+1, tokenB)) {
-          return size_t_pair(pos, pos+1);
+  if ((type & token::isPaired) && (type & token::isWide)) {
+    // return if matching pair found like ** **
+    while (pos < End - 1) {
+      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
+        size_t match = pos;
+        while (++match < End - 1) {
+          if (IsSpecial(Text, match, tokenB)
+              && IsSpecial(Text, match+1, tokenB)) {
+            return size_t_pair(pos, match + 1);
+          }
         }
-      } else if (type & token::isPaired) {
-        // return if matching pair found like [ ]
+        break;
+      }
+      ++pos;
+    }
+  } else if (type & token::isPaired) {
+    // return if matching pair found like [ ]
+    while (pos < End) {
+      if (IsSpecial(Text, pos, tokenA)) {
         size_t match = pos;
         size_t matchCount = 1;
-
-        while (++match <= End) {
+        while (++match < End) {
           if (IsSpecial(Text, match, tokenA)) {
             ++matchCount;
           }
@@ -171,12 +181,25 @@ size_t_pair FindToken(const string& Text,
           }
         }
         break;
-      } else {
-        // if it's a single char token return when found
+      }
+      ++pos;
+    }
+  } else if (type & token::isWide) {
+    // if it's two char token check for other char and return if found
+    while (pos < End - 1) {
+      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
+        return size_t_pair(pos, pos+1);
+      }
+      ++pos;
+    }
+  } else {
+    // if it's a single char token return when found
+    while (pos < End) {
+      if (IsSpecial(Text, pos, tokenA)) {
         return size_t_pair(pos, pos);
       }
+      ++pos;
     }
-    ++pos;
   }
 
   // nothing found

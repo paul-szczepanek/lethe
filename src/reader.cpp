@@ -12,6 +12,8 @@ const string FRAME_MENU = "menu";
 const string FRAME_IMAGE = "image";
 
 const string SKEY_CURRENT_LAYOUT = "current layout";
+const string SKEY_FONT_NAMES = "fonts";
+const string SKEY_FONT_SCALE = "font scale";
 const string SKEY_LAYOUTS = "layouts";
 
 const real REDRAW_TIMEOUT = 5.0;
@@ -44,16 +46,21 @@ void Reader::LoadSettings()
     layoutStrings.resize(NUM_LAYOUTS, "0132 3111 1111 0 +000");
     // overwrite with stored ones
     const string& key = SKEY_LAYOUTS + IntoString(i);
-    const vector<string>& stored = Settings.GetValues(key);
-    for (size_t j = 0, fSz = min(stored.size(), NUM_LAYOUTS); j < fSz; ++j) {
-      layoutStrings[j] = stored[j];
-    }
+    Settings.GetValue(key, layoutStrings);
     // init the layouts with deafult or stored layouts strings
     for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
       Layouts[i][j].Init(layoutStrings[j]);
     }
   }
-  CurrentLayout = Settings.GetSizeT(SKEY_CURRENT_LAYOUT);
+  Settings.GetValue(SKEY_CURRENT_LAYOUT, CurrentLayout);
+
+  // font defults
+  FontNames = { "sans.ttf", "king.ttf", "serif.ttf", "mono.ttf" };
+  FontNames.resize(TEXT_STYLE_MAX);
+  // replaced deafults with saved ones if present
+  Settings.GetValue(SKEY_FONT_NAMES, FontNames);
+
+  Settings.GetValue(SKEY_FONT_SCALE, FontScale);
 
   Timeout = MIN_TIMEOUT;
 }
@@ -67,38 +74,53 @@ void Reader::SaveSettings()
       layoutStrings.push_back(Layouts[i][j].GetDefinition());
     }
     const string& key = SKEY_LAYOUTS + IntoString(i);
-    Settings.SetValues(key, layoutStrings);
+    Settings.SetValue(key, layoutStrings);
   }
   Settings.SetValue(SKEY_CURRENT_LAYOUT, IntoString(CurrentLayout));
+
+  // fonts
+  Settings.SetValue(SKEY_FONT_NAMES, FontNames);
+  Settings.SetValue(SKEY_FONT_SCALE, FontScale);
+}
+
+bool Reader::InitFonts()
+{
+  size_t fonstSizes[TEXT_STYLE_MAX] = { 20, 40, 16, 16 };
+  Fonts.resize(TEXT_STYLE_MAX);
+  const real scale = (real)FontScale / 100.f;
+  for (size_t i = 0; i < TEXT_STYLE_MAX; ++i) {
+    if (!Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
+      return false;
+    }
+  }
+  if (!FontSys.Init("mono.ttf", 12 * scale)) {
+    return false;
+  }
+  return true;
 }
 
 bool Reader::Init()
 {
   // init all the critical systems and assets
-  if (!Surface::SystemInit() || !Font::SystemInit()
+  if (!Surface::SystemInit()
+      || !Font::SystemInit()
       || !Screen.InitScreen(Width, Height, BPP)
-      || !FontSys.Init("mono.ttf", 12)
-      || !FontMain.Init("sans.ttf", 20)
-      || !FontSmall.Init("serif.ttf", 12)
-      || !FontTitle.Init("king.ttf", 24)) {
-    return false;
-  }
-  if (!Silent && !Audio::SystemInit()) {
+      || (!Silent && !Audio::SystemInit())
+      || !InitFonts()) {
     return false;
   }
 
-  Screen.SetAlpha(255);
   if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
   }
 
-  QuickMenu.Init(FontMain, FRAME_MENU, BPP);
-  MainText.Init(FontMain, FRAME_TEXT, BPP);
-  MainImage.Init(FontMain, FRAME_IMAGE, BPP);
-  ReaderButtons.Init(FontMain, FRAME_MENU, BPP);
-  MainMenu.Init(FontMain, FRAME_SOLID, BPP);
-  VerbMenu.Init(FontMain, FRAME_SOLID, BPP);
-  GameDialog.Init(FontMain, FRAME_SOLID, BPP);
+  QuickMenu.Init(Fonts, FRAME_MENU, BPP);
+  MainText.Init(Fonts, FRAME_TEXT, BPP);
+  MainImage.Init(FRAME_IMAGE, BPP);
+  ReaderButtons.Init(FRAME_MENU, BPP);
+  MainMenu.Init(Fonts, FRAME_SOLID, BPP);
+  VerbMenu.Init(Fonts, FRAME_SOLID, BPP);
+  GameDialog.Init(Fonts, FRAME_SOLID, BPP);
   MainMenu.Centered = GameDialog.Centered = true;
   MainText.AspectW = 4;
   QuickMenu.AspectW = 4;

@@ -1,11 +1,19 @@
 //***************** starting place, exits, inventory and tools *****************
 
-[<QUEUE> = your room:go] // this is what gets executed when book is opened
+[<QUEUE> = chapter 1:open] // this is what gets executed when book is opened
 [<PLACE>] // we start nowhere
 [<EXITS> = your room] // assign default value so we can enter our starting room
 [<NOUNS>] // these are the nouns that stay highlighted in old text
 [<QUICK> = self:visible, self:list] // these get executed to print the quickmenu
 [<CALLS>]
+
+[<chapter 1>]
+ [:open]
+  **Chapter One**
+  ==Development==
+  __Bad analogies are like
+  dictionary definitions written in rebus puzzles__
+  [!your room:go]
 
 //******************** background setting **************************************
 
@@ -39,10 +47,10 @@
     \nObjects:\n
     [!Keyword(@NOUNS)] // and all the things that are there
 
+//************************ pattern for places  *********************************
 // These patterns are defined per story.
 // This way you can define the game to work like a regular IF with places and
 // an inventory.
-//************************ pattern for places  *********************************
 
 [<[room]>] // pattern definition because noun after [< is blank
            // we will store items here

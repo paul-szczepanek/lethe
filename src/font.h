@@ -15,10 +15,10 @@ public:
   static bool SystemInit();
 
   bool Init(const string& Filename, const size_t Size);
-  size_t GetHeight();
-  size_t GetLineSkip();
-  size_t GetWidth(const string& Text);
-  size_t_pair GetSize(const string& Text);
+  size_t GetHeight() const;
+  size_t GetLineSkip() const;
+  size_t GetWidth(const string& Text) const;
+  size_t_pair GetSize(const string& Text) const;
 
 
 public:

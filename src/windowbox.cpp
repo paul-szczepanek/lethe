@@ -1,10 +1,8 @@
 #include "windowbox.h"
 
-void WindowBox::Init(Font& NewFont,
-                     const string& Frame,
-                     int Bpp)
+void WindowBox::Init(const string& Frame,
+                     const int Bpp)
 {
-  FontMain = &NewFont;
   if (!Frame.empty()) {
     FrameName = Frame;
   }

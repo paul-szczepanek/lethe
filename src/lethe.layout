@@ -51,7 +51,7 @@
 			<Cursor1 position="2571" topLine="34" />
 		</Cursor>
 	</File>
-	<File name="story.h" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="story.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="618" topLine="0" />
 		</Cursor>
@@ -71,12 +71,12 @@
 			<Cursor1 position="615" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="valuestore.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="valuestore.h" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="460" topLine="12" />
 		</Cursor>
 	</File>
-	<File name="tokens.cpp" open="0" top="0" tabpos="32" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="tokens.cpp" open="1" top="0" tabpos="32" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="7759" topLine="263" />
 		</Cursor>
@@ -91,7 +91,7 @@
 			<Cursor1 position="324" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="storyquery.cpp" open="1" top="1" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="storyquery.cpp" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="24372" topLine="700" />
 		</Cursor>
@@ -106,12 +106,12 @@
 			<Cursor1 position="1265" topLine="9" />
 		</Cursor>
 	</File>
-	<File name="tokens.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="tokens.h" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="260" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="textbox.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="textbox.cpp" open="1" top="1" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="281" topLine="2" />
 		</Cursor>
@@ -121,7 +121,7 @@
 			<Cursor1 position="237" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="font.cpp" open="0" top="0" tabpos="45" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="font.cpp" open="1" top="0" tabpos="45" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="1084" topLine="6" />
 		</Cursor>
@@ -136,7 +136,7 @@
 			<Cursor1 position="1950" topLine="66" />
 		</Cursor>
 	</File>
-	<File name="font.h" open="0" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="font.h" open="1" top="0" tabpos="20" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="403" topLine="0" />
 		</Cursor>
@@ -186,7 +186,7 @@
 			<Cursor1 position="1483" topLine="17" />
 		</Cursor>
 	</File>
-	<File name="valuestore.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="valuestore.cpp" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="962" topLine="0" />
 		</Cursor>
@@ -208,7 +208,7 @@
 	</File>
 	<File name="main.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1132" topLine="28" />
+			<Cursor1 position="3942" topLine="133" />
 		</Cursor>
 	</File>
 	<File name="textbox.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">

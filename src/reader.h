@@ -32,6 +32,7 @@ public:
   bool Tick(real DeltaTime);
 
 private:
+  bool InitFonts();
   void RedrawScreen(real DeltaTime);
   void DrawWindows();
   void DrawBackdrop();
@@ -69,10 +70,10 @@ private:
   Surface Backdrop;
 
   // media
-  Font FontMain;
-  Font FontSmall;
-  Font FontTitle;
   Font FontSys;
+  vector<Font> Fonts;
+  vector<string> FontNames;
+  size_t FontScale = 100;
 
   // logic
   Book MyBook;
@@ -104,5 +105,7 @@ private:
   TextBox* Logger = NULL;
 #endif
 };
+
+void OverwriteValues(vector<string>& defaults, const vector<string>& stored);
 
 #endif // READER_H

@@ -11,11 +11,21 @@ public:
   ~ValueStore();
 
   inline const string& GetValue(const string& Key);
-  inline void SetValue(const string& Key, const string& Value);
-  inline vector<string> GetValues(const string& Key);
-  inline void SetValues(const string& Key, const vector<string>& Values);
 
-  inline size_t GetSizeT(const string& Key);
+  inline void SetValue(const string& Key, const string& Value);
+  inline void SetValue(const string& Key, const size_t& Value);
+  inline void SetValue(const string& Key, const real& Value);
+  inline void SetValue(const string& Key, const vector<string>& Values);
+
+  inline bool GetValue(const string& Key, vector<string>& Values);
+
+  inline bool GetValue(const string& Key, size_t& Value);
+  inline bool GetValue(const string& Key, real& Value);
+  inline bool GetValue(const string& Key, string& Value);
+
+private:
+  inline vector<string> GetValues(const string& Key);
+
 
 private:
   map<string, string> StoredValues;
@@ -44,7 +54,64 @@ inline vector<string> ValueStore::GetValues(const string& Key)
   return values;
 }
 
-inline void ValueStore::SetValues(const string& Key,
+/** @brief Returns only the values that will fit in the passed in vector
+  */
+inline bool ValueStore::GetValue(const string& Key,
+                                  vector<string>& Values)
+{
+  const vector<string>& stored = GetValues(Key);
+  if (!stored.empty()) {
+    // Overwrite the defalts with new values but only if they're present
+    for (size_t i = 0, fSz = min(Values.size(), stored.size()); i < fSz; ++i) {
+      Values[i] = stored[i];
+    }
+    return true;
+  }
+  return false;
+}
+
+inline const string& ValueStore::GetValue(const string& Key)
+{
+  return StoredValues[Key];
+}
+
+inline bool ValueStore::GetValue(const string& Key,
+                                 size_t& Value)
+{
+  const string& value = StoredValues[Key];
+  if (value.empty()) {
+    return false;
+  } else {
+    Value = IntoSizeT(value);
+    return true;
+  }
+}
+
+inline bool ValueStore::GetValue(const string& Key,
+                                 real& Value)
+{
+  const string& value = StoredValues[Key];
+  if (value.empty()) {
+    return false;
+  } else {
+    Value = IntoReal(value);
+    return true;
+  }
+}
+
+inline bool ValueStore::GetValue(const string& Key,
+                                 string& Value)
+{
+  const string& value = StoredValues[Key];
+  if (value.empty()) {
+    return false;
+  } else {
+    Value = value;
+    return true;
+  }
+}
+
+inline void ValueStore::SetValue(const string& Key,
                                   const vector<string>& Values)
 {
   string value;
@@ -58,25 +125,22 @@ inline void ValueStore::SetValues(const string& Key,
   StoredValues[Key] = value;
 }
 
-inline const string& ValueStore::GetValue(const string& Key)
-{
-  return StoredValues[Key];
-}
-
 inline void ValueStore::SetValue(const string& Key,
                                  const string& Value)
 {
   StoredValues[Key] = Value;
 }
 
-inline size_t ValueStore::GetSizeT(const string& Key)
+inline void ValueStore::SetValue(const string& Key,
+                                 const real& Value)
 {
-  const string& value = StoredValues[Key];
-  if (value.empty()) {
-    return (size_t)0;
-  } else {
-    return IntoSizeT(value);
-  }
+  StoredValues[Key] = IntoString(Value);
+}
+
+inline void ValueStore::SetValue(const string& Key,
+                                 const size_t& Value)
+{
+  StoredValues[Key] = IntoString(Value);
 }
 
 inline bool IsKey(const string& Key)

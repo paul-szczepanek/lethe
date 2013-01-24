@@ -3,11 +3,20 @@ Don't hand edit (or if you do, keep the spacing)
 [current layout]
 0
 
+[font scale]
+100
+
+[fonts]
+sans.ttf
+king.ttf
+serif.ttf
+mono.ttf
+
 [layouts0]
 0132 3111 1111 0 +003
 1032 3311 1111 0 +009
 
 [layouts1]
-0132 3111 1111 0 +000
-0132 3111 1111 0 +003
+0132 3111 1111 0 +001
+0132 3111 1111 0 -001
 

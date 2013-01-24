@@ -8,11 +8,11 @@ void DialogBox::DrawInput()
   if (InputDirty) {
     string text = InputText + "_";
     // scroll text offscreen if it doesn't fit
-    while (!text.empty() && FontMain->GetWidth(text) > PageSize.W) {
+    while (!text.empty() && Fonts[styleMain]->GetWidth(text) > PageSize.W) {
       // keep eating a character from the left until we fit
       text = "..." + CutString(text, 4);
     }
-    InputSurface.CreateText(*FontMain, text, 255, 255, 255);
+    InputSurface.CreateText(*Fonts[styleMain], text, 255, 255, 255);
     InputDirty = false;
   }
   InputSurface.Draw(PageSize);

@@ -5,8 +5,28 @@
 const Uint16 RIGHT_MARGIN = BLOCK_SIZE;
 const real DRAG_TIMEOUT = 0.1;
 
-/** @brief Set page text
-  * resets the cached pages
+void TextBox::Init(vector<Font>& TextBoxFonts,
+                   const string& Frame,
+                   const int Bpp)
+{
+  WindowBox::Init(Frame, Bpp);
+
+  for (size_t i = 0, fSz = TEXT_STYLE_MAX; i < fSz; ++i) {
+    Font& font = TextBoxFonts[min(i, TextBoxFonts.size())];
+    Fonts.push_back(&font);
+  }
+}
+
+void TextBox::Init(Font& TextBoxFont,
+                   const string& Frame,
+                   const int Bpp)
+{
+  WindowBox::Init(Frame, Bpp);
+
+  Fonts.resize(TEXT_STYLE_MAX, &TextBoxFont);
+}
+
+/** @brief Resets the cached pages and breaks new text
   */
 void TextBox::SetText(const string NewText)
 {
@@ -15,8 +35,7 @@ void TextBox::SetText(const string NewText)
   BreakText();
 }
 
-/** @brief Reset Page
-  * clears cached surfaces
+/** @brief recalculates size and marks surfaces dirty
   */
 void TextBox::Reset()
 {
@@ -146,18 +165,18 @@ void TextBox::Scroll()
 size_t_pair TextBox::GetMaxSize()
 {
   size_t_pair maxSize;
-  size_t lineSkip = FontMain->GetLineSkip();
+  size_t lineSkip = Fonts[styleMain]->GetLineSkip();
   string text;
   size_t newline = 0;
   size_t pos = 0;
   maxSize.Y += lineSkip;
-  LineHeight = FontMain->GetHeight() + lineSkip;
+  LineHeight = Fonts[styleMain]->GetHeight() + lineSkip;
 
   // check sizes for all ines of text to make sure we can fit them unwrapped
   while (newline != string::npos) {
     newline = FindCharacter(Text, '\n', pos);
     text = CutString(Text, pos, newline);
-    maxSize.X = max(maxSize.X, FontMain->GetWidth(text));
+    maxSize.X = max(maxSize.X, Fonts[styleMain]->GetWidth(text));
     maxSize.Y += LineHeight;
     pos = newline;
     ++pos;
@@ -168,43 +187,116 @@ size_t_pair TextBox::GetMaxSize()
   return maxSize;
 }
 
-/** @brief word wrap and find keywords
-  * fills in Lines and Keywords
+struct FontChange {
+  FontChange(Font* _LineFont, size_t _Position)
+  : LineFont(_LineFont), Position(_Position) {}
+  Font* LineFont;
+  size_t Position;
+};
+
+/** @brief Word wrap and find keywords, fills in Lines and Keywords
   */
 bool TextBox::BreakText()
 {
+  // record font changes and strip the formatting
+  size_t pos = 0;
+  size_t length = Text.size();
+  vector<FontChange> fontChanges;
+  string plain;
+  while(pos < length) {
+    const size_t_pair& titlePos = FindToken(Text, token::styleTitle, pos);
+    const size_t_pair& quotePos = FindToken(Text, token::styleQuote, pos);
+    const size_t_pair& monoPos = FindToken(Text, token::styleMono, pos);
+    size_t_pair changePos;
+    Font* lineFont;
+    // find which formatting is closest
+    if (titlePos.X < quotePos.X) {
+      if (titlePos.X < monoPos.X) {
+        changePos = titlePos;
+        lineFont = Fonts[styleTitle];
+      } else {
+        changePos = monoPos;
+        lineFont = Fonts[styleMono];
+      }
+    } else {
+      if (quotePos.X < monoPos.X) {
+        changePos = quotePos;
+        lineFont = Fonts[styleQuote];
+      } else {
+        changePos = monoPos;
+        lineFont = Fonts[styleMono];
+      }
+    }
+    //only bother if there's a non-zero length text
+    if (changePos.X == string::npos) {
+      // we're done, no more formatting
+      plain += CutString(Text, pos);
+      pos = length;
+    } else if (changePos.X != changePos.Y - 3) {
+      plain += CutString(Text, pos, changePos.X);
+      // insert a newline in front to make sure it breaks
+      if (!plain.empty()) {
+        if (plain[plain.size()-1] == ' ') {
+          plain[plain.size()-1] = '\n';
+        } else if (plain[plain.size()-1] != '\n') {
+          plain += '\n';
+        }
+      }
+      // move beyond the formatting
+      pos = changePos.Y + 1;
+      // reuse last entry if it's at the same position
+      // this happens if two styles come one after another
+      if (!fontChanges.empty() && fontChanges.back().Position == plain.size()) {
+        fontChanges.back().LineFont = lineFont;
+      } else {
+        fontChanges.push_back(FontChange(lineFont, plain.size()));
+      }
+      // remove the formatting from text
+      plain += CutString(Text, changePos.X + 2, changePos.Y - 1);
+      // and another newline at the end of formatting
+      if (Text.size() > changePos.Y + 1) {
+        if (Text[changePos.Y + 1] == ' ') {
+          plain += '\n';
+          ++pos; // skip the space
+        } else if (Text[changePos.Y + 1] != '\n') {
+          plain += '\n';
+        }
+      }
+      fontChanges.push_back(FontChange(Fonts[styleMain], plain.size()));
+    }
+  }
+
+  // record keywords and their positions and remove syntax symbols
   vector<size_t_pair> keywordPos;
   vector<string> keywordNames;
   string cleaned;
   string realName;
-  size_t pos = 0;
-  size_t length = Text.size();
+  pos = 0;
+  length = plain.size();
   size_t skip = 0; // characters skipped
-
-  // record keywords and their positions and remove syntax symbols
   while(pos < length) {
     // keywordPos store the positions in the cleaned string and need fixing
-    size_t_pair namePos = FindToken(Text, token::keyword, pos);
+    size_t_pair namePos = FindToken(plain, token::keyword, pos);
     // quit if no more keywords
     if (namePos.X == string::npos) {
       break;
     }
-    const size_t_pair realNamePos = FindToken(Text, token::expression,
+    const size_t_pair realNamePos = FindToken(plain, token::expression,
                                     pos, namePos.Y);
     // copy up to the keyword
-    cleaned += CutString(Text, pos, namePos.X);
+    cleaned += CutString(plain, pos, namePos.X);
     pos = namePos.Y + 1;
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
-      realName = CutString(Text, realNamePos.X+1, realNamePos.Y);
+      realName = CutString(plain, realNamePos.X+1, realNamePos.Y);
       namePos.Y = realNamePos.X;
     } else {
-      realName = CutString(Text, namePos.X+1, namePos.Y);
+      realName = CutString(plain, namePos.X+1, namePos.Y);
     }
 
     // check keywords found in a position earlier than set threshold to see
     // if they're still valid
-    const bool validKeyword = (pos < ValidateKeywords) ?
+    const bool validKeyword = pos < ValidateKeywords ?
                               ValidKeywords.ContainsValue(realName)
                               : true;
     if (validKeyword) {
@@ -212,7 +304,7 @@ bool TextBox::BreakText()
     }
 
     // copy the keyword
-    cleaned += CutString(Text, namePos.X+1, namePos.Y);
+    cleaned += CutString(plain, namePos.X+1, namePos.Y);
     // fix up the position for after removing the tokens and real name
     namePos.X -= skip;
     namePos.Y -= ++skip; // +1 for opening <
@@ -227,12 +319,11 @@ bool TextBox::BreakText()
 
   // add remaining characters after the last keyword
   if (pos < length) {
-    cleaned += CutString(Text, pos);
+    cleaned += CutString(plain, pos);
   }
 
   length = cleaned.size();
   skip = pos = 0;
-
   // remove escape characters
   while(pos < length) {
     const char c = cleaned[pos];
@@ -262,8 +353,8 @@ bool TextBox::BreakText()
 
   Lines.clear();
   Keywords.clear();
-  size_t lineSkip = FontMain->GetLineSkip();
-  size_t fontHeight = FontMain->GetHeight();
+  size_t lineSkip = Fonts[styleMain]->GetLineSkip();
+  size_t fontHeight = Fonts[styleMain]->GetHeight();
   LineHeight = fontHeight + lineSkip;
   size_t lastLineEnd = 0;
   size_t lastPos = 0;
@@ -273,6 +364,9 @@ bool TextBox::BreakText()
   pos = 0;
 
   // break the text into lines that fit within the textbox width
+  size_t fontChangeI = 0;
+  Font* currentFont = Fonts[styleMain];
+  PageHeight = 0;
   while(pos < length) {
     bool flush = false;
     //find space
@@ -300,7 +394,7 @@ bool TextBox::BreakText()
     // test print the line
     string line = CutString(cleaned, lastLineEnd, pos);
     // did we fit in?
-    if (FontMain->GetWidth(line) < PageClip.W || firstWord) {
+    if (Fonts[styleMain]->GetWidth(line) < PageClip.W || firstWord) {
       lastPos = pos;
     } else {
       // overflow, revert to last position and print that
@@ -312,21 +406,34 @@ bool TextBox::BreakText()
     ++pos;
     firstWord = false;
     if (flush || !(pos < length)) { // || in case there's a space at the end
-      lastLineEnd = pos;
-      const size_t textOffset = Centered ?
-                                (PageSize.W - FontMain->GetWidth(line)) / 2
-                                : 0;
-      Lines.push_back(TextLine(line, textOffset));
+      if (fontChangeI < fontChanges.size()
+          && fontChanges[fontChangeI].Position <= lastLineEnd) {
+        // change font and ready for next change
+        currentFont = fontChanges[fontChangeI].LineFont;
+        ++fontChangeI;
+      }
+      // size up the line
+      Rect lineSize;
+      lineSize.W = currentFont->GetWidth(line);
+      lineSize.H = currentFont->GetHeight();
+      lineSize.X = Centered ? (PageSize.W - lineSize.W) / 2 : 0;
+      lineSize.Y = PageHeight;
+      // ready for the next line
+      PageHeight += lineSize.H + currentFont->GetLineSkip();
       firstWord = true;
+      lastLineEnd = pos;
+      // create new line ready for printing
+      Lines.push_back(TextLine(line, currentFont, lineSize));
     }
   }
 
-  PageHeight = 0;
   lastLineEnd = 0;
   // record visual keyword positions
   for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
-    const string& line = Lines[i].Text;
-    const size_t lineLength = line.size() + 1;
+    const string& lineText = Lines[i].Text;
+    const Font& lineFont = *(Lines[i].LineFont);
+    const Rect& lineSize = Lines[i].Size;
+    const size_t lineLength = lineText.size() + 1;
     const size_t lineEnd = lastLineEnd + lineLength;
 
     for (size_t j = 0, fSz = keywordPos.size(); j < fSz; ++j) {
@@ -340,29 +447,24 @@ bool TextBox::BreakText()
         // there may be multiple keywords referencing the same noun
         // they can also be split across multiple lines
         KeywordMap newKey(keywordNames[j]);
-
         // get positions relative to line start
         const size_t beg = keyPos.X < lastLineEnd? 0 : keyPos.X - lastLineEnd;
         const size_t end = keyPos.Y > lineEnd?
                            lineLength : keyPos.Y - lastLineEnd;
-
         // find where the keyword starts
+        newKey.Size.X = lineSize.X;
         if (beg) {
-          const string& keywordStart = CutString(line, 0, beg);
-          newKey.Size.X = FontMain->GetWidth(keywordStart);
+          const string& keywordStart = CutString(lineText, 0, beg);
+          newKey.Size.X += lineFont.GetWidth(keywordStart);
         }
-        newKey.Size.Y = PageHeight;
-
+        newKey.Size.Y = lineSize.Y;
         // find where the keyword ends
-        const string& keywordEnd = CutString(line, beg, end);
-        newKey.Size.W = FontMain->GetWidth(keywordEnd);
-        newKey.Size.H = fontHeight;
-        newKey.Size.X += Lines[i].X;
+        const string& keywordEnd = CutString(lineText, beg, end);
+        newKey.Size.W = lineFont.GetWidth(keywordEnd);
+        newKey.Size.H = lineSize.H;
         Keywords.push_back(newKey);
       }
     }
-
-    PageHeight += LineHeight;
     lastLineEnd = lineEnd;
   }
 
@@ -392,12 +494,9 @@ void TextBox::RefreshPage()
     }
     PageSurface.Init(PageClip.W, max(PageHeight, PageClip.H));
     PageSurface.SetClip(PageClip);
-    Rect dst;
-    dst.Y = 0;
     for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
-      dst.X = Lines[i].X;
-      PageSurface.PrintText(dst, *FontMain, Lines[i].Text, 255, 255, 255);
-      dst.Y += LineHeight;
+      PageSurface.PrintText(Lines[i].Size, *Lines[i].LineFont,
+                            Lines[i].Text, 255, 255, 255);
     }
   }
 }

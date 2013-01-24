@@ -43,21 +43,21 @@ bool Font::Init(const string& Filename,
 
 /** @brief Get font height
   */
-size_t Font::GetHeight()
+size_t Font::GetHeight() const
 {
   return TTF_FontHeight(SDLFont);
 }
 
 /** @brief Get font line skip
   */
-size_t Font::GetLineSkip()
+size_t Font::GetLineSkip() const
 {
   return 0.5 * TTF_FontLineSkip(SDLFont);
 }
 
 /** @brief Return the size of the surface the text would need
   */
-size_t Font::GetWidth(const string& Text)
+size_t Font::GetWidth(const string& Text) const
 {
   int width = 0;
   int height = 0;
@@ -69,7 +69,7 @@ size_t Font::GetWidth(const string& Text)
 
 /** @brief Return the size of the surface the text would need
   */
-size_t_pair Font::GetSize(const string& Text)
+size_t_pair Font::GetSize(const string& Text) const
 {
   int width = 0;
   int height = 0;
