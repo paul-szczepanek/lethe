@@ -47,6 +47,23 @@ const string SystemNounNames[SYSTEM_NOUN_MAX] = {
   QUICK
 };
 
+enum buttonType {
+  buttonMenu,
+  buttonBookmark,
+  buttonDisk,
+  buttonHistory,
+  buttonLayout,
+  BUTTON_TYPE_MAX
+};
+
+const string ButtonTypeNames[BUTTON_TYPE_MAX] = {
+  "menu",
+  "bookmark",
+  "disk",
+  "history",
+  "layout"
+};
+
 namespace token
 {
 const size_t NUM_TOKENS_INSTRUCTION = 4;

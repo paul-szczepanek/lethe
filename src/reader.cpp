@@ -19,7 +19,7 @@ const string SKEY_LAYOUTS = "layouts";
 const real REDRAW_TIMEOUT = 5.0;
 const real MIN_TIMEOUT = 0.1;
 
-Reader::Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP, bool Sound)
+Reader::Reader(lint ReaderWidth, lint ReaderHeight, int ReaderBPP, bool Sound)
   : Width(ReaderWidth), Height(ReaderHeight), BPP(ReaderBPP), Silent(!Sound),
     Settings(SETTINGS_FILE)
 {
@@ -99,6 +99,54 @@ bool Reader::InitFonts()
   return true;
 }
 
+void Reader::InitWindows()
+{
+  // Windows not part of the dynamic layout use the screen size
+  const Rect mainWindowSize(Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
+                            BLOCK_SIZE, BLOCK_SIZE);
+
+  // popups
+  VerbMenu.Init(Fonts, FRAME_SOLID, BPP);
+  GameDialog.Init(Fonts, FRAME_SOLID, BPP);
+  GameDialog.Centered = true;
+  GameDialog.SetSize(mainWindowSize);
+  // noun menu with minimum width
+  QuickMenu.Init(Fonts, FRAME_MENU, BPP);
+  QuickMenu.AspectW = 4;
+  // main game view with minimum width
+  MainText.Init(Fonts, FRAME_TEXT, BPP);
+  MainText.AspectW = 4;
+  // the game menu with centred text
+  MainMenu.Init(Fonts, FRAME_SOLID, BPP);
+  MainMenu.Centered = true;
+  MainMenu.Visible = true;
+  MainMenu.SetSize(mainWindowSize);
+  // the image window with a fixed aspect ration
+  MainImage.Init(FRAME_IMAGE, BPP);
+  MainImage.AspectW = 4;
+  MainImage.AspectH = 2;
+  // the reader buttons with buttons ordered by importance as they
+  // disappear when there is not enough space for them
+  ReaderButtons.Init(FRAME_MENU, BPP);
+  ReaderButtons.AspectW = 100; // keep the buttons on a thin line
+  ReaderButtons.AspectH = 2;
+  ReaderButtons.AddButton(buttonMenu);
+  ReaderButtons.AddButton(buttonLayout);
+  ReaderButtons.AddButton(buttonBookmark);
+  ReaderButtons.AddButton(buttonDisk);
+  ReaderButtons.AddButton(buttonHistory);
+  // set buttons to reflect game variables
+  ReaderButtons.SetButtonState(buttonLayout, CurrentLayout);
+
+#ifdef LOGGER
+  GLog = "Log";
+  Logger = new TextBox();
+  Logger->Visible = true;
+  Logger->Init(FontSys, "", BPP);
+  Logger->SetText("LOG");
+#endif
+}
+
 bool Reader::Init()
 {
   // initialise all the critical systems and assets
@@ -113,41 +161,8 @@ bool Reader::Init()
   if (!Backdrop.LoadImage("data/bg.png")) {
     Backdrop.Init(Width, Height);
   }
-
-  QuickMenu.Init(Fonts, FRAME_MENU, BPP);
-  MainText.Init(Fonts, FRAME_TEXT, BPP);
-  MainImage.Init(FRAME_IMAGE, BPP);
-  ReaderButtons.Init(FRAME_MENU, BPP);
-  MainMenu.Init(Fonts, FRAME_SOLID, BPP);
-  VerbMenu.Init(Fonts, FRAME_SOLID, BPP);
-  GameDialog.Init(Fonts, FRAME_SOLID, BPP);
-  MainMenu.Centered = GameDialog.Centered = true;
-  MainText.AspectW = 4;
-  QuickMenu.AspectW = 4;
-  MainImage.AspectW = 4;
-  MainImage.AspectH = 2;
-  ReaderButtons.AspectW = 100;
-  ReaderButtons.AspectH = 2;
-
+  InitWindows();
   SetLayout();
-
-  // Windows not part of the layout
-  Rect mainWindow = { Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
-                      BLOCK_SIZE, BLOCK_SIZE
-                    };
-  MainMenu.SetSize(mainWindow);
-  GameDialog.SetSize(mainWindow);
-  MainMenu.Visible = true;
-
-#ifdef LOGGER
-  GLog = "Log";
-  Logger = new TextBox();
-  Logger->Visible = true;
-  Logger->Init(FontSys, "", BPP);
-  Logger->SetSize(MainImage.Size);
-  Logger->SetText("LOG");
-#endif
-
   return true;
 }
 
@@ -191,7 +206,7 @@ bool Reader::ProcessDialogs()
 {
   if (MyBook.DialogOpen && !GameDialog.Visible) {
     if (DialogIndex >= MyBook.Dialogs.size()) {
-      // we've dealt with all the dialogs
+      // all the dialogs displayed, reset the stack
       MyBook.DialogOpen = false;
       MyBook.Dialogs.clear();
       DialogIndex = 0;
@@ -201,7 +216,7 @@ bool Reader::ProcessDialogs()
       GameDialog.Visible = true;
       const Dialog& dialog = MyBook.Dialogs[DialogIndex];
       // prepare the dialog text
-      if (dialog.Input) {
+      if (dialog.InputBox) {
         GameDialog.EnableInput(dialog.Noun, dialog.Message);
         text += "\n\n";
       } else {
@@ -211,7 +226,7 @@ bool Reader::ProcessDialogs()
         text += "\n<" + button + '[' + dialog.Noun + ':' + button + "]>\n";
       }
       GameDialog.SetText(text);
-      // center it on the screen
+      // centre it on the screen
       GameDialog.Size.H = GameDialog.PageHeight + 2 * BLOCK_SIZE;
       GameDialog.Size.Y = (Height - GameDialog.Size.H) / 2;
       GameDialog.SetSize(GameDialog.Size);
@@ -254,11 +269,15 @@ bool Reader::ReadMenu()
   }
   TimeoutTimer = Timeout;
 
+  MainMenu.SetText("");
   MenuSource = MyBook.ProcessMenuQueue();
+  Rect maxSize(Width - 2 * BLOCK_SIZE, Height, BLOCK_SIZE, 0);
+  MainMenu.SetSize(maxSize);
   MainMenu.SetText(MenuSource);
-  MainMenu.Size.H = MainMenu.PageHeight + 2 * BLOCK_SIZE;
-  MainMenu.Size.Y = (Height - MainMenu.Size.H) / 2;
-  MainMenu.SetSize(MainMenu.Size);
+  Rect fitSize = MainMenu.GetTextSize();
+  fitSize.X += (maxSize.W - fitSize.W) / 2;
+  fitSize.Y += (maxSize.H - fitSize.H) / 2;
+  MainMenu.SetSize(fitSize);
   return true;
 }
 
@@ -303,22 +322,9 @@ bool Reader::ProcessInput(real DeltaTime)
     Keys.Reset();
   }
 
-  if (Mouse.Left) {
-    if (VerbMenu.Visible && !VerbMenu.Select(Mouse, DeltaTime)) {
-      VerbMenu.Visible = false;
-      KeywordAction.clear();
-    } else if (GameDialog.Visible) {
-      GameDialog.Select(Mouse, DeltaTime);
-    } else if (MainMenu.Visible) {
-      MainMenu.Select(Mouse, DeltaTime);
-    } else if (!QuickMenu.Select(Mouse, DeltaTime)) {
-      QuickMenu.Deselect();
-      MainText.Select(Mouse, DeltaTime);
-    }
-  } else if (Mouse.LeftUp) {
-    Mouse.LeftUp = false;
-    // touch released, see if we clicked on something interactive
-    // verb menu -> main menu -> quick menu -> main text
+  // releasing the button commits to an action
+  if (Mouse.LeftUp) {
+    // verb -> dialog -> menu -> quick -> main text -> buttons
     if (VerbMenu.Visible) {
       if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
         if (MainMenu.Visible) {
@@ -326,18 +332,17 @@ bool Reader::ProcessInput(real DeltaTime)
         } else {
           MyBook.SetStoryAction(KeywordAction);
         }
+        // clean up after action
+        KeywordAction.clear();
+        VerbMenu.Visible = false;
       }
-      // clean up after action
-      VerbMenu.Visible = false;
-      KeywordAction.clear();
-      VerbMenu.Deselect();
     } else if (GameDialog.Visible) {
       if (GameDialog.GetSelectedKeyword(KeywordAction.X)) {
         // close the dialog and get ready to process the next one
         ++DialogIndex;
         GameDialog.Visible = false;
         // if the dialog had input, send that input to the noun
-        if (GameDialog.Input) {
+        if (GameDialog.InputBox) {
           // if it's possibly a number add that as well
           string number;
           for (const char digit : GameDialog.InputText) {
@@ -355,36 +360,69 @@ bool Reader::ProcessInput(real DeltaTime)
       }
     } else if (MainMenu.Visible) {
       MainMenu.GetSelectedKeyword(KeywordAction.X);
-    } else if (MyBook.ActiveBranch
-               && QuickMenu.GetSelectedKeyword(KeywordAction.X)) {
+    } else if (QuickMenu.GetSelectedKeyword(KeywordAction.X)
+               || MainText.GetSelectedKeyword(KeywordAction.X)) {
+      if (!MyBook.ActiveBranch) {
+        // show a pop-up to ask to branch the story
+        KeywordAction.clear();
+      }
+    } else if (ReaderButtons.GetSelectedButton(ButtonAction, ButtonState)) {
+      switch (ButtonAction) {
+        case buttonMenu:
+          ReaderButtons.SetButtonState(buttonMenu, 0);
+          MyBook.ShowMenu();
+          break;
+        case buttonLayout:
+          SetLayout(ButtonState);
+          break;
 
-    } else if (MyBook.ActiveBranch
-               && MainText.GetSelectedKeyword(KeywordAction.X)) {
-
+        default:
+          break;
+      }
+      ButtonAction = BUTTON_TYPE_MAX;
     }
 
-    GameDialog.Deselect();
-    MainMenu.Deselect();
-    QuickMenu.Deselect();
-    MainText.Deselect();
+    Mouse.LeftUp = false;
 
     if (!KeywordAction.X.empty()) {
       if (MyBook.GetChoice(KeywordAction)) {
+        // the keyword is a choice and has both noun and verb ready
         if (MainMenu.Visible) {
           MyBook.SetMenuAction(KeywordAction);
-        } else if (MyBook.ActiveBranch) {
-          MyBook.SetStoryAction(KeywordAction);
         } else {
-          // show a pop-up to ask to branch the story
+          MyBook.SetStoryAction(KeywordAction);
         }
         KeywordAction.clear();
-      } else {
+      } else if (!VerbMenu.Visible) {
         // we clicked on a keyword, create a menu full of verbs
-        const string& verbsText = MyBook.GetStoryVerbs(KeywordAction.X);
-        ShowVerbMenu(verbsText);
+        if (MainMenu.Visible) {
+          const string& verbsText = MyBook.GetMenuVerbs(KeywordAction.X);
+          ShowVerbMenu(verbsText);
+        } else {
+          const string& verbsText = MyBook.GetStoryVerbs(KeywordAction.X);
+          ShowVerbMenu(verbsText);
+        }
       }
     }
   }
+
+  if (VerbMenu.Visible) {
+    // if we click anywhere outside the verb menu, hide it
+    if (!VerbMenu.HandleInput(Mouse, DeltaTime) && Mouse.Left) {
+      VerbMenu.Visible = false;
+      KeywordAction.clear();
+    }
+  } else if (GameDialog.Visible) {
+    GameDialog.HandleInput(Mouse, DeltaTime);
+  } else if (MainMenu.Visible) {
+    MainMenu.HandleInput(Mouse, DeltaTime);
+  } else {
+
+    QuickMenu.HandleInput(Mouse, DeltaTime);
+    ReaderButtons.HandleInput(Mouse);
+    MainText.HandleInput(Mouse, DeltaTime);
+  }
+
   return true;
 }
 
@@ -398,17 +436,14 @@ bool Reader::ShowVerbMenu(const string& VerbsText)
   VerbMenu.SetSize(verbSize);
   VerbMenu.SetText(VerbsText);
   // check if it's off screen when sized down to minimum size
-  verbSize.H = VerbMenu.PageHeight + VerbMenu.Size.H - VerbMenu.PageSize.H;
-  verbSize.W = VerbMenu.PageWidth + VerbMenu.Size.W - VerbMenu.PageSize.W;
-  verbSize.H += BLOCK_SIZE;
-  verbSize.W += BLOCK_SIZE;
-  if (verbSize.X + verbSize.W > Width) {
-    verbSize.X = Width - verbSize.W;
+  Rect fitSize = VerbMenu.GetTextSize();
+  if (fitSize.X + fitSize.W > Width) {
+    fitSize.X = Width - fitSize.W;
   }
-  if (verbSize.Y + verbSize.H > Height) {
-    verbSize.Y = Height - verbSize.H;
+  if (fitSize.Y + fitSize.H > Height) {
+    fitSize.Y = Height - fitSize.H;
   }
-  VerbMenu.SetSize(verbSize);
+  VerbMenu.SetSize(fitSize);
   VerbMenu.Visible = true;
   return true;
 }
@@ -527,7 +562,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     }
   }
 
-  size_t splitH = 0, splitV = 0;
+  lint splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
   for (size_t i = 0; i < BOX_TYPE_MAX; ++i) {
     // check if neighbours are on the same side

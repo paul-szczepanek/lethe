@@ -6,6 +6,7 @@
 #include "textbox.h"
 #include "imagebox.h"
 #include "dialogbox.h"
+#include "buttonbox.h"
 #include "layout.h"
 #include "surface.h"
 #include "font.h"
@@ -25,7 +26,7 @@ enum orientation {
 class Reader
 {
 public:
-  Reader(int ReaderWidth, int ReaderHeight, int ReaderBPP, bool Sound = true);
+  Reader(lint ReaderWidth, lint ReaderHeight, int ReaderBPP, bool Sound = true);
   ~Reader();
 
   bool Init();
@@ -33,6 +34,7 @@ public:
 
 private:
   bool InitFonts();
+  void InitWindows();
   void RedrawScreen(real DeltaTime);
   void DrawWindows();
   void DrawBackdrop();
@@ -59,8 +61,8 @@ public:
   string QuickMenuSource;
 
 private:
-  size_t Width;
-  size_t Height;
+  lint Width;
+  lint Height;
   int BPP;
   bool Silent;
   float RedrawCountdown = 0;
@@ -81,6 +83,8 @@ private:
   string_pair KeywordAction;
   MouseState Mouse; // we want to remember mouse position between clicks
   KeysState Keys;
+  buttonType ButtonAction = BUTTON_TYPE_MAX;
+  size_t ButtonState = 0;
 
   // layout
   orientation CurrentOrientation = landscape;
@@ -91,7 +95,7 @@ private:
   ImageBox MainImage;
   TextBox MainText;
   TextBox QuickMenu;
-  WindowBox ReaderButtons;
+  ButtonBox ReaderButtons;
 
   // pop-ups
   TextBox MainMenu;

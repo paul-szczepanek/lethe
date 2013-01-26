@@ -11,26 +11,26 @@ class Surface
 {
 public:
   Surface() { };
-  Surface(size_t Width, size_t Height);
+  Surface(lint Width, lint Height);
   Surface(const string& Filename);
   ~Surface();
 
   static bool SystemInit();
   static bool SystemDraw();
 
-  bool InitScreen(size_t ScreenWidth, size_t ScreenHeight, int ScreenBPP);
+  bool InitScreen(lint ScreenWidth, lint ScreenHeight, int ScreenBPP);
   bool Init();
-  bool Init(size_t Width, size_t Height);
-  bool LoadImage(const string& Filename);
+  bool Init(lint Width, lint Height);
+  bool LoadImage(const string& NewFilename = "");
   bool Zoom(real X, real Y);
-  bool SetAlpha(size_t Alpha);
+  bool SetAlpha(usint Alpha);
   bool Draw(Surface& Destination, const Rect& Position);
   bool Draw(Surface& Destination);
   bool Draw(const Rect& Position);
-  bool Draw(const size_t X, const size_t Y);
+  bool Draw(const lint X, const lint Y);
   bool Draw();
   bool DrawRectangle(const Rect& Rectangle, usint R, usint G, usint B);
-  void Trim(size_t ClipW, size_t ClipH);
+  void Trim(lint ClipW, lint ClipH);
   void SetClip(const Rect& NewClip);
   bool Blank();
   bool Unload();
@@ -44,15 +44,16 @@ private:
 
 
 public:
-  size_t W = 0;
-  size_t H = 0;
+  lint W = 0;
+  lint H = 0;
   static int BPP;
 
-  static size_t ScreenW;
-  static size_t ScreenH;
+  static lint ScreenW;
+  static lint ScreenH;
 
 private:
   static SDL_Surface* Screen;
+  string Filename;
 
   Rect Clip = { 0, 0, 0, 0 };
   SDL_Surface* SDLSurface = NULL;

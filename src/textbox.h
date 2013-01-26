@@ -40,16 +40,15 @@ public:
             const int Bpp);
   void Init(Font& TextBoxFont, const string& Frame, const int Bpp);
 
-  size_t_pair GetMaxSize();
   void SetText(const string& NewText);
   void AddText(const string& NewText);
+  Rect GetTextSize();
 
   void Scroll(lint PaneScroll);
-  void Draw();
+  virtual void Draw();
   void Reset();
 
-  bool Select(MouseState& Mouse, real DeltaTime);
-  bool Deselect();
+  bool HandleInput(MouseState& Mouse, const real DeltaTime);
   bool GetSelectedKeyword(string& Keyword);
 
   inline bool Empty() {
@@ -67,8 +66,8 @@ public:
   bool HighlightsDirty = true;
   bool PageDirty = true;
   bool Centered = false;
-  size_t PageHeight = 0;
-  size_t PageWidth = 0;
+  lint PageHeight = 0;
+  lint PageWidth = 0;
 
   size_t ValidateKeywords = 0; // how far to check the text keywords
   Properties ValidKeywords;

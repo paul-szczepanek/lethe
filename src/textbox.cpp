@@ -25,6 +25,22 @@ void TextBox::Init(Font& TextBoxFont,
   Fonts.resize(TEXT_STYLE_MAX, &TextBoxFont);
 }
 
+/** @brief Use the broken text as guide to shrink the box
+  */
+Rect TextBox::GetTextSize()
+{
+  Rect fitSize = Size;
+  const lint newW = PageWidth + Size.W - PageSize.W + BLOCK_SIZE;
+  const lint newH = PageHeight + Size.H - PageSize.H + BLOCK_SIZE;
+  // resize if at least one dimension shrunk (but not if the other grew)
+  if ((newW < Size.W && newH <= Size.H)
+      || (newH < Size.H && newW <= Size.W)) {
+    fitSize.W = newW;
+    fitSize.H = newH;
+  }
+  return fitSize;
+}
+
 /** @brief Resets the cached pages and breaks new text
   */
 void TextBox::SetText(const string& NewText)
@@ -65,8 +81,8 @@ void TextBox::AddText(const string& NewText)
   */
 void TextBox::Reset()
 {
-  PageSize.X = Size.X + BLOCK_SIZE / (size_t)2;
-  PageSize.Y = Size.Y + BLOCK_SIZE / (size_t)2;
+  PageSize.X = Size.X + BLOCK_SIZE / 2;
+  PageSize.Y = Size.Y + BLOCK_SIZE / 2;
   PageSize.W = Size.W - BLOCK_SIZE;
   PageSize.H = Size.H - BLOCK_SIZE;
   ResetText();
@@ -91,71 +107,62 @@ bool TextBox::GetSelectedKeyword(string& Keyword)
 {
   if (SelectedKeyword < Keywords.size()) {
     Keyword = Keywords[SelectedKeyword].Keyword;
+    SelectedKeyword = Keywords.size();
+    HighlightsDirty = true;
     return true;
   }
   return false;
 }
 
-/** @brief Deselect keywords
-  * reset the currently selected keyword
-  */
-bool TextBox::Deselect()
-{
-  const size_t oldSelectedKeyword = SelectedKeyword;
-  SelectedKeyword = Keywords.size();
-  HighlightsDirty = true;
-  Pane.DragTimeout = DRAG_TIMEOUT;
-  return (oldSelectedKeyword != SelectedKeyword);
-}
-
 /** @brief Select keywords
-  * \return true if we hit a keyword
+  * \return true if the mouse is clicked inside of the box
   */
-bool TextBox::Select(MouseState& Mouse,
-                     real DeltaTime)
+bool TextBox::HandleInput(MouseState& Mouse,
+                          const real DeltaTime)
 {
-  if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
-      || (Mouse.Y < Size.Y) || (Mouse.Y > Size.Y + Size.H)) {
-    Pane.DragTimeout = DRAG_TIMEOUT;
-    return false;
-  }
+  bool inside = (Mouse.Left || Mouse.LeftUp) && Visible;
+  size_t newSelected = Keywords.size();
+  // no click has the same effect as being outside
+  if (inside) {
+    if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
+        || (Mouse.Y < Size.Y) || (Mouse.Y > Size.Y + Size.H)) {
+      Pane.DragTimeout = DRAG_TIMEOUT;
+      inside = false;
+    } else {
+      // translate screen position to text surface position
+      const lint X = Mouse.X - PageSize.X;
+      const lint Y = Mouse.Y - (PageSize.Y - Pane.Y );
+      // find selected keyword
+      for (size_t i = 0, fSz = Keywords.size(); i < fSz; ++i) {
+        if ((Keywords[i].Size.X < X)
+            && (Keywords[i].Size.Y < Y)
+            && (X < Keywords[i].Size.X + Keywords[i].Size.W)
+            && (Y < Keywords[i].Size.Y + Keywords[i].Size.H)) {
+          newSelected = i;
+          break;
+        }
+      }
 
-  // translate screen position to text surface position
-  const Uint16 X = Mouse.X - PageSize.X;
-  const Uint16 Y = Mouse.Y - (PageSize.Y - Pane.Y );
-  // find selected keyword
-  size_t oldSelectedKeyword = SelectedKeyword;
-  size_t keywordsNum = Keywords.size();
-  SelectedKeyword = keywordsNum;
-
-  for (size_t i = 0, forSize = keywordsNum; i < forSize; ++i) {
-    if ((Keywords[i].Size.X < X)
-        && (Keywords[i].Size.Y < Y)
-        && (X < Keywords[i].Size.X + Keywords[i].Size.W)
-        && (Y < Keywords[i].Size.Y + Keywords[i].Size.H)) {
-      SelectedKeyword = i;
-      break;
+      // if nothing selected try and drag the page instead
+      if (newSelected < Keywords.size()) {
+        Pane.DragTimeout = DRAG_TIMEOUT;
+      } else if (Pane.DragTimeout <= 0.f) {
+        Scroll(Pane.PaneDragY - Mouse.Y);
+        Pane.PaneDragY = Mouse.Y;
+      } else {
+        Pane.PaneDragY = Mouse.Y;
+        Pane.DragTimeout -= DeltaTime;
+      }
     }
   }
 
-  if (oldSelectedKeyword != SelectedKeyword) {
-    // selected keyword has changed
+  if (newSelected != SelectedKeyword) {
+    // selected keyword has changed, repaint the highlights
     HighlightsDirty = true;
-    oldSelectedKeyword = SelectedKeyword;
+    SelectedKeyword = newSelected;
   }
 
-  // nothing selected, try and drag the page instead
-  if (SelectedKeyword < keywordsNum) {
-    Pane.DragTimeout = DRAG_TIMEOUT;
-  } else if (Pane.DragTimeout <= 0.f) {
-    Scroll(Pane.PaneDragY - Mouse.Y);
-    Pane.PaneDragY = Mouse.Y;
-  } else {
-    Pane.PaneDragY = Mouse.Y;
-    Pane.DragTimeout -= DeltaTime;
-  }
-
-  return true;
+  return inside;
 }
 
 /** @brief Scroll the page by moving the text clipping rectangle
@@ -185,33 +192,9 @@ void TextBox::Scroll(lint PaneScroll)
   }
 }
 
-size_t_pair TextBox::GetMaxSize()
-{
-  size_t_pair maxSize;
-  size_t lineSkip = Fonts[styleMain]->GetLineSkip();
-  string text;
-  size_t newline = 0;
-  size_t pos = 0;
-  maxSize.Y += lineSkip;
-
-  // check sizes for all lines of text to make sure we can fit them unwrapped
-  while (newline != string::npos) {
-    newline = FindCharacter(Text, '\n', pos);
-    text = CutString(Text, pos, newline);
-    maxSize.X = max(maxSize.X, Fonts[styleMain]->GetWidth(text));
-    maxSize.Y += Fonts[styleMain]->GetHeight() + lineSkip;
-    pos = newline;
-    ++pos;
-  }
-
-  maxSize.X += BLOCK_SIZE;
-  maxSize.Y += BLOCK_SIZE;
-  return maxSize;
-}
-
 struct FontChange {
   FontChange(Font* _LineFont, size_t _Position)
-  : LineFont(_LineFont), Position(_Position) {}
+    : LineFont(_LineFont), Position(_Position) {}
   Font* LineFont;
   size_t Position;
 };

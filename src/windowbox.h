@@ -16,7 +16,7 @@ public:
   void FixAspectRatio(Rect& NewSize);
 
   virtual void Draw();
-  virtual void Reset();
+  virtual void Reset() { };
   bool DrawFrame();
   bool BuildFrame();
 
@@ -26,14 +26,15 @@ public:
   Rect Size;
 
   bool Active = false;
+  bool FrameVisible = false;
   bool Visible = false;
 
   bool ShowUp = false;
   bool ShowDown = false;
   bool ShowIcon = false;
 
-  size_t AspectW = 0;
-  size_t AspectH = 0;
+  int AspectW = 0;
+  int AspectH = 0;
 
 private:
   string FrameName;

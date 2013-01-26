@@ -737,7 +737,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       // create an input dialog that saves user response in the noun
       intArg = 1;
       Dialog dialog;
-      dialog.Input = true;
+      dialog.InputBox = true;
       for (const string& arg : textArgs) {
         if (CreateDialog(arg, dialog)) {
           QueryBook.AddDialog(dialog);

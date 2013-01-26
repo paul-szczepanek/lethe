@@ -23,7 +23,7 @@ public:
   Surface InputSurface;
 
   bool InputDirty = false;
-  bool Input = false;
+  bool InputBox = false;
 };
 
 #endif // DIALOGBOX_H

@@ -14,7 +14,7 @@ struct Dialog {
   string Noun;
   vector<string> Buttons;
   string Message;
-  bool Input = false;
+  bool InputBox = false;
 };
 
 class Book

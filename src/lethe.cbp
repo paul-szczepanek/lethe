@@ -51,6 +51,8 @@
 		<Unit filename="audio.h" />
 		<Unit filename="book.cpp" />
 		<Unit filename="book.h" />
+		<Unit filename="buttonbox.cpp" />
+		<Unit filename="buttonbox.h" />
 		<Unit filename="dialogbox.cpp" />
 		<Unit filename="dialogbox.h" />
 		<Unit filename="disk.cpp" />

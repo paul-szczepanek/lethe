@@ -20,8 +20,8 @@ const uint32_t MASK_A = 0xFF000000;
 
 SDL_Surface* Surface::Screen = NULL;
 int Surface::BPP = 32;
-size_t Surface::ScreenW = 0;
-size_t Surface::ScreenH = 0;
+lint Surface::ScreenW = 0;
+lint Surface::ScreenH = 0;
 
 /** @brief Initialise the SDL
   */
@@ -55,8 +55,8 @@ Surface::Surface(const string& Filename)
   LoadImage(Filename);
 }
 
-Surface::Surface(size_t Width,
-                 size_t Height)
+Surface::Surface(lint Width,
+                 lint Height)
 {
   Init(Width, Height);
 }
@@ -68,8 +68,8 @@ Surface::~Surface()
 
 /** @brief Prepare the screen for drawing, needs to be called first
   */
-bool Surface::InitScreen(size_t ScreenWidth,
-                         size_t ScreenHeight,
+bool Surface::InitScreen(lint ScreenWidth,
+                         lint ScreenHeight,
                          int ScreenBPP)
 {
   Unload();
@@ -88,14 +88,19 @@ bool Surface::InitScreen(size_t ScreenWidth,
   return OnInit();
 }
 
-/** @brief Load Image
+/** @brief Load Image, unload old and store filename for future reloads
   */
-bool Surface::LoadImage(const string& Filename)
+bool Surface::LoadImage(const string& NewFilename)
 {
+  if (!NewFilename.empty() && NewFilename != Filename) {
+    Filename = NewFilename;
+  }
   Unload();
-  SDLSurface = IMG_Load(Filename.c_str());
-  if (!SDLSurface) {
-    LOG(Filename + " - image missing");
+  if (!Filename.empty()) {
+    SDLSurface = IMG_Load(Filename.c_str());
+    if (!SDLSurface) {
+      LOG(Filename + " - image missing");
+    }
   }
 
   return OnInit();
@@ -110,8 +115,8 @@ bool Surface::Init()
 
 /** @brief create an empty surface of given size
   */
-bool Surface::Init(size_t Width,
-                   size_t Height)
+bool Surface::Init(lint Width,
+                   lint Height)
 {
   Unload();
   SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height,
@@ -121,7 +126,7 @@ bool Surface::Init(size_t Width,
 
 /** @brief Set global surface alpha
   */
-bool Surface::SetAlpha(size_t Alpha)
+bool Surface::SetAlpha(usint Alpha)
 {
   if (SDLSurface) {
     SDL_SetAlpha(SDLSurface, SDL_SRCALPHA, Alpha);
@@ -211,8 +216,8 @@ bool Surface::Draw(const Rect& Position)
 
 /** @brief Draw onto the screen at X, Y
   */
-bool Surface::Draw(const size_t X,
-                   const size_t Y)
+bool Surface::Draw(const lint X,
+                   const lint Y)
 {
   SDL_Rect dst = { (Sint16)X, (Sint16)Y, (Uint16)W, (Uint16)H };
   if (SDLSurface && Screen) {
@@ -323,8 +328,8 @@ bool Surface::CreateText(const Font& TextFont,
 
 /** @brief Set clip by width and height only, centering the clipped area
   */
-void Surface::Trim(size_t ClipW,
-                   size_t ClipH)
+void Surface::Trim(lint ClipW,
+                   lint ClipH)
 {
   ClipW = min(ClipW, W);
   ClipH = min(ClipH, H);

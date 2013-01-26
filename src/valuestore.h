@@ -57,7 +57,7 @@ inline vector<string> ValueStore::GetValues(const string& Key)
 /** @brief Returns only the values that will fit in the passed in vector
   */
 inline bool ValueStore::GetValue(const string& Key,
-                                  vector<string>& Values)
+                                 vector<string>& Values)
 {
   const vector<string>& stored = GetValues(Key);
   if (!stored.empty()) {
@@ -112,7 +112,7 @@ inline bool ValueStore::GetValue(const string& Key,
 }
 
 inline void ValueStore::SetValue(const string& Key,
-                                  const vector<string>& Values)
+                                 const vector<string>& Values)
 {
   string value;
   if (!Values.empty()) {

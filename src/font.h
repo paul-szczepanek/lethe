@@ -15,9 +15,9 @@ public:
   static bool SystemInit();
 
   bool Init(const string& Filename, const size_t Size);
-  size_t GetHeight() const;
-  size_t GetLineSkip() const;
-  size_t GetWidth(const string& Text) const;
+  lint GetHeight() const;
+  lint GetLineSkip() const;
+  lint GetWidth(const string& Text) const;
   size_t_pair GetSize(const string& Text) const;
 
 

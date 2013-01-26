@@ -4,6 +4,7 @@ void WindowBox::Init(const string& Frame,
                      const int Bpp)
 {
   if (!Frame.empty()) {
+    FrameVisible = true;
     FrameName = Frame;
   }
   BPP = Bpp;
@@ -19,13 +20,13 @@ void WindowBox::Draw()
 }
 
 
-/** @brief Set Size of the textbox (resets the page as well)
+/** @brief Enforce aspect ratio or minimum size
   */
 void WindowBox::FixAspectRatio(Rect& NewSize)
 {
   if (AspectW) {
     if (AspectH) {
-      size_t maxH = NewSize.W * ((real)AspectH / (real)AspectW);
+      lint maxH = NewSize.W * ((real)AspectH / (real)AspectW);
       if (maxH < AspectH * BLOCK_SIZE) {
         maxH = AspectH * BLOCK_SIZE;
       }
@@ -37,10 +38,14 @@ void WindowBox::FixAspectRatio(Rect& NewSize)
         NewSize.W = AspectW * BLOCK_SIZE;
       }
     }
+  } else if (AspectH) {
+    if (NewSize.H < AspectH * BLOCK_SIZE) {
+      NewSize.H = AspectH * BLOCK_SIZE;
+    }
   }
 }
 
-/** @brief Set Size of the textbox (resets the page as well)
+/** @brief Set Size (resets the page as well)
   */
 void WindowBox::SetSize(Rect NewSize)
 {
@@ -54,18 +59,12 @@ void WindowBox::SetSize(Rect NewSize)
   }
 }
 
-/** @brief Does nothing
-  */
-void WindowBox::Reset()
-{
-}
-
 /** @brief Open the frame file and construct the image of the frame
   */
 bool WindowBox::BuildFrame()
 {
   // only bother if we have a frame template
-  if (FrameName.empty()) {
+  if (!FrameVisible) {
     return false;
   }
   FrameSurface.Init(Size.W, Size.H);
@@ -73,7 +72,7 @@ bool WindowBox::BuildFrame()
   Surface spritePage;
   if (!spritePage.LoadImage(FRAMES_DIR+SLASH+FrameName+".png")) {
     LOG(FrameName+" - frame image missing");
-    FrameName.clear();
+    FrameVisible = false;
     return false;
   } else if (spritePage.W != BLOCK_SIZE * 4) {
     //TODO: stretch SpritePage if needed
@@ -170,17 +169,19 @@ bool WindowBox::BuildFrame()
 
 bool WindowBox::DrawFrame()
 {
-  FrameSurface.Draw(Size);
+  if (FrameVisible) {
+    FrameSurface.Draw(Size);
 
-  if (ShowUp) {
-    FrameUp.Draw(UpDst);
+    if (ShowUp) {
+      FrameUp.Draw(UpDst);
+    }
+    if (ShowDown) {
+      FrameDown.Draw(DownDst);
+    }
+    if (ShowIcon) {
+      FrameIcon.Draw(IconDst);
+    }
+    return true;
   }
-  if (ShowDown) {
-    FrameDown.Draw(DownDst);
-  }
-  if (ShowIcon) {
-    FrameIcon.Draw(IconDst);
-  }
-
   return false;
 }

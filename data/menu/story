@@ -11,6 +11,9 @@
   \n<browse books[menu:browse]>
   \n
   \n<Quit[menu:exit]>
+  [?IsInGame()] {
+   \n<Back to Game[menu:close]>
+  }
  [:browse]
   Open a book:\n
   [!book = GetBooks()]

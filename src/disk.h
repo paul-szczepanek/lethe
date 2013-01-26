@@ -16,6 +16,8 @@ public:
   static vector<string> ListFiles(const string& Path,
                                   const string& Extension = "",
                                   bool StripExtension = false);
+  static vector<string> GetFileSeries(const string& Path,
+                                      const string& Stem = "");
 };
 
 #endif // DISK_H

@@ -43,11 +43,11 @@ bool Input::Tick(MouseState& Mouse,
       case SDL_KEYDOWN:
         Keys.KeyPressed = changed = true;
         if ((key == SDLK_q || key == SDLK_c)
-              && (event.key.keysym.mod & (KMOD_LALT | KMOD_LCTRL))) {
-            Keys.Quit = true;
+            && (event.key.keysym.mod & (KMOD_LALT | KMOD_LCTRL))) {
+          Keys.Quit = true;
         } else if (Keys.InputMode) {
           // input mode where we just grab the letter and leave
-           if (key == SDLK_ESCAPE) {
+          if (key == SDLK_ESCAPE) {
             Keys.Letter = BACKSPACE_CHAR;
           } else if (key == SDLK_BACKSPACE || key == SDLK_DELETE) {
             Keys.Letter = BACKSPACE_CHAR;

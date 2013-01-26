@@ -23,12 +23,12 @@ void DialogBox::EnableInput(const string& Noun,
 {
   InputNoun = Noun;
   InputText = Value;
-  Input = InputDirty = true;
+  InputBox = InputDirty = true;
 }
 
 void DialogBox::AddCharacter(const char NewChar)
 {
-  if (Input) {
+  if (InputBox) {
     InputDirty = true;
     if (NewChar != BACKSPACE_CHAR) {
       InputText += NewChar;
@@ -44,7 +44,7 @@ void DialogBox::Draw()
 {
   if (Visible) {
     TextBox::Draw();
-    if (Input) {
+    if (InputBox) {
       DrawInput();
     }
   }

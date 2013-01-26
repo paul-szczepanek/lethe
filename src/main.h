@@ -31,6 +31,13 @@ using std::ofstream;
 using std::ifstream;
 using std::find;
 
+typedef float real;
+typedef unsigned short int usint;
+typedef unsigned long int ulint;
+typedef long int lint;
+typedef unsigned int uint;
+typedef unsigned char uchar;
+
 #define LOGGER
 
 #ifdef LOGGER
@@ -48,6 +55,7 @@ const string STORY_DIR = DATA_DIR + SLASH + "books";
 const string MENU_DIR = DATA_DIR + SLASH + "menu";
 const string FONTS_DIR = DATA_DIR + SLASH + "fonts";
 const string FRAMES_DIR = DATA_DIR + SLASH + "frames";
+const string BUTTONS_DIR = DATA_DIR + SLASH + "buttons";
 const string SESSION_EXT = ".session";
 const string STORY_EXT = ".story";
 const string STORY_FILE = "story";
@@ -56,19 +64,12 @@ const string QUICK_BOOKMARK = "Quick bookmark";
 const string SETTINGS_FILE = DATA_DIR + SLASH + "settings";
 const char BACKSPACE_CHAR = (char)8;
 
-const size_t BLOCK_SIZE = 32;
-
-typedef float real;
-typedef unsigned short int usint;
-typedef unsigned long int ulint;
-typedef long int lint;
-typedef unsigned int uint;
-typedef unsigned char uchar;
+const lint BLOCK_SIZE = 32;
 
 typedef struct Colour {
   Colour() { };
   Colour(usint _R, usint _G, usint _B, usint _A)
-  : R(_R), G(_G), B(_B), A(_A) { };
+    : R(_R), G(_G), B(_B), A(_A) { };
   usint R = 255;
   usint G = 255;
   usint B = 255;
@@ -109,7 +110,7 @@ typedef struct real_pair {
 
 typedef struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
-  Rect(size_t _W, size_t _H, size_t _X = 0, size_t _Y = 0)
+  Rect(lint _W, lint _H, lint _X = 0, lint _Y = 0)
     : W(_W), H(_H), X(_X), Y(_Y) { };
   bool operator!= (const Rect& other) const {
     return !(*this == other);
@@ -119,17 +120,17 @@ typedef struct Rect {
   };
   // align size to block size
   void Blockify() {
-    W = max(W, 2u*(size_t)BLOCK_SIZE);
-    H = max(H, 2u*(size_t)BLOCK_SIZE);
-    size_t newW = W - (W % BLOCK_SIZE);
-    size_t newH = H - (H % BLOCK_SIZE);
-    X += (W - newW) / (size_t)2;
-    Y += (H - newH) / (size_t)2;
+    W = max(W, 2*(lint)BLOCK_SIZE);
+    H = max(H, 2*(lint)BLOCK_SIZE);
+    lint newW = W - (W % BLOCK_SIZE);
+    lint newH = H - (H % BLOCK_SIZE);
+    X += (W - newW) / 2;
+    Y += (H - newH) / 2;
     W = newW;
     H = newH;
   };
-  size_t W;
-  size_t H;
+  lint W;
+  lint H;
   lint X;
   lint Y;
 } Rect;

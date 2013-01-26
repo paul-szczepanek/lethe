@@ -4,8 +4,8 @@
 #include "main.h"
 
 struct MouseState {
-  uint X = 0;
-  uint Y = 0;
+  lint X = 0;
+  lint Y = 0;
   bool Left = false;
   bool Middle = false;
   bool Right = false;

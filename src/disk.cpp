@@ -45,6 +45,52 @@ vector<string> Disk::ListFiles(const string& Path,
   return result;
 }
 
+/** @brief Return files that start with the stem (stem0, stem1, etc.)
+  */
+vector<string> Disk::GetFileSeries(const string& Path,
+                                   const string& Stem)
+{
+  vector<string> files;
+  // get raw files
+  DIR* directory = opendir(Path.c_str());
+  if (directory == NULL) {
+    LOG("Error " + IntoString(errno) + " trying to access: " + Path);
+    return files;
+  }
+  struct dirent* content;
+  while ((content = readdir(directory)) != NULL) {
+    if (DT_DIR != content->d_type) { // ignore . and ..
+      string filename(content->d_name);
+      files.push_back(filename);
+    }
+  }
+
+  // filter files
+  if (Stem.empty()) {
+    return files;
+  }
+  vector<string> result;
+  size_t series = 0;
+  bool found = true;
+  while (found) {
+    found = false;
+    const string suffix = IntoString(series);
+    const string match = Stem + suffix;
+    for (const string& file : files) {
+      if (file.size() > match.size()) {
+        const string& name = CutString(file, 0, match.size());
+        if (name == match) {
+          result.push_back(file);
+          found = true;
+          ++series;
+          break;
+        }
+      }
+    }
+  }
+  return result;
+}
+
 /** @brief Write file to disk and close
   */
 bool Disk::Write(const string& Filename, const string& Text)
