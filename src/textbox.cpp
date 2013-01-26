@@ -367,11 +367,19 @@ bool TextBox::BreakText()
   size_t lastLineEnd = 0;
   size_t lastPos = 0;
   Font* currentFont = Fonts[styleMain];
+  size_t oldLineSkip = currentFont->GetLineSkip();
   pos = 0;
   length = plain.size();
 
   // break the text into lines that fit within the text box width
   while(pos < length) {
+    // did we hit a font change?
+    if (fontChangeI < fontChanges.size()
+        && fontChanges[fontChangeI].Position <= pos) {
+      // change font and ready for next change
+      currentFont = fontChanges[fontChangeI].LineFont;
+      ++fontChangeI;
+    }
     bool flush = false;
     //find space
     size_t space = plain.find(' ', pos);
@@ -411,17 +419,9 @@ bool TextBox::BreakText()
     firstWord = false;
     if (flush || !(pos < length)) { // || in case there's a space at the end
       // use the larger line skip
-      size_t oldLineSkip = currentFont->GetLineSkip();
-      // did we hit a font change?
-      if (fontChangeI < fontChanges.size()
-          && fontChanges[fontChangeI].Position <= lastLineEnd) {
-        // change font and ready for next change
-        currentFont = fontChanges[fontChangeI].LineFont;
-        ++fontChangeI;
-      }
-
       const size_t lineSkip = currentFont->GetLineSkip();
       PageHeight += max(oldLineSkip, lineSkip);
+      oldLineSkip = lineSkip;
       // size up the line
       Rect lineSize;
       lineSize.W = currentFont->GetWidth(line);
