@@ -19,7 +19,7 @@ void Book::SetBookmark(const Properties& Description)
   if (mark.Description.empty()) {
     StoryQuery query(*this, BookStory, BookSession, mark.Description);
     for (const string& text : Description.TextValues) {
-      query.ExecuteExpression(QUEUE, text);
+      query.ExecuteExpression(QUEUE, INSTRUCTION_START+text+INSTRUCTION_END);
     }
     CleanWhitespace(mark.Description);
   }
@@ -95,7 +95,31 @@ bool Book::LoadSnapshot(const size_t SnapshotIndex)
 
 bool Book::ShowMenu()
 {
+  if (!MenuOpen) {
+    MenuOpen = true;
+    GameSession.AddQueueValue("main:menu");
+  }
+  return MenuOpen;
+}
+
+bool Book::ShowSaveMenu()
+{
   MenuOpen = true;
+  GameSession.AddQueueValue("game:session");
+  return MenuOpen;
+}
+
+bool Book::ShowHistoryMenu()
+{
+  MenuOpen = true;
+  GameSession.AddQueueValue("game:history");
+  return MenuOpen;
+}
+
+bool Book::ShowBookmarkMenu()
+{
+  MenuOpen = true;
+  GameSession.AddQueueValue("game:bookmark");
   return MenuOpen;
 }
 
@@ -136,7 +160,7 @@ bool Book::OpenMenu()
 {
   GameSession.Name = "game";
   GameSession.BookName = "menu";
-  MenuOpen = OpenStory(MENU_DIR, MenuStory);
+  OpenStory(MENU_DIR, MenuStory);
   InitSession(MenuStory, GameSession);
   return MenuOpen;
 }
@@ -363,7 +387,7 @@ const string Book::ProcessQueue(Story& MyStory,
   Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
-  const size_t safety = 1000; // to stop user generated infite loops
+  const size_t safety = 1000; // to stop user generated infinite loops
   size_t i = 0;
   // collect all the queue values here to look for system calls
   Properties pool;

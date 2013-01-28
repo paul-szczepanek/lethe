@@ -31,6 +31,9 @@ public:
 
   bool ShowMenu();
   bool HideMenu();
+  bool ShowSaveMenu();
+  bool ShowHistoryMenu();
+  bool ShowBookmarkMenu();
   void Quit();
 
   Properties GetSessions(const string& Title = "");
@@ -84,7 +87,7 @@ private:
 
 public:
   string BookTitle;
-  bool MenuOpen = true;
+  bool MenuOpen = false;
   bool BookOpen = false;
   bool DialogOpen = false;
   bool SessionOpen = false;

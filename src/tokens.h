@@ -12,6 +12,8 @@ const string QUICK = "QUICK";
 
 const string CONTENTS_START = "[!@";
 const string CONTENTS_END = "]";
+const string INSTRUCTION_START = "[!";
+const string INSTRUCTION_END = "]";
 
 const string QUEUE_CONTENTS = CONTENTS_START + "QUEUE" + CONTENTS_END;
 const string NOUNS_CONTENTS = CONTENTS_START + "NOUNS" + CONTENTS_END;

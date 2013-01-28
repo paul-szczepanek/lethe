@@ -133,8 +133,8 @@ void Reader::InitWindows()
   ReaderButtons.AddButton(buttonMenu);
   ReaderButtons.AddButton(buttonLayout);
   ReaderButtons.AddButton(buttonBookmark);
-  ReaderButtons.AddButton(buttonDisk);
   ReaderButtons.AddButton(buttonHistory);
+  ReaderButtons.AddButton(buttonDisk);
   // set buttons to reflect game variables
   ReaderButtons.SetButtonState(buttonLayout, CurrentLayout);
 
@@ -163,6 +163,7 @@ bool Reader::Init()
   }
   InitWindows();
   SetLayout();
+  MyBook.ShowMenu();
   return true;
 }
 
@@ -374,6 +375,15 @@ bool Reader::ProcessInput(real DeltaTime)
           break;
         case buttonLayout:
           SetLayout(ButtonState);
+          break;
+        case buttonHistory:
+          MyBook.ShowHistoryMenu();
+          break;
+        case buttonDisk:
+          MyBook.ShowSaveMenu();
+          break;
+        case buttonBookmark:
+          MyBook.ShowBookmarkMenu();
           break;
 
         default:

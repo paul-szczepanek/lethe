@@ -1,79 +1,160 @@
-[<QUEUE> = menu:main]
+[<QUEUE>]
 
 [<menu>]
- [:main]
-  Game Menu
+ [:close]
+  [!CloseMenu()]
+ [:quit]
+  [!Quit()]
+  Settings and sessions saved, goodbye.
+
+//**********************************
+
+[<main>]
+ [:menu]
+  **Game Menu**
   [?IsInGame()] {
-   \n<Branch this session[session:branch]>
-   \n<Load old session[session:browse]>
-   \n<Change session name[session:save]>
+   <Continue Playing[menu:close]>
+   \n<Manage Session[main:session]>
+   \n\n
   }
-  \n<browse books[menu:browse]>
+  <Open Book[main:books]>
+  \n<Options[main:options]>
   \n
-  \n<Quit[menu:exit]>
-  [?IsInGame()] {
-   \n<Back to Game[menu:close]>
-  }
- [:browse]
-  Open a book:\n
+  \n<Quit[menu:quit]>
+
+ [:options] 
+  **Options**
+  font size
+  \nfont colour
+  \nUI size
+  \ntext only mode
+  \n
+  \n<Back to Main Menu[main:menu]>
+
+ [:books]
+  **Choose a Book:**
   [!book = GetBooks()]
   Available books:\n
   [!SelectValue(book:open)]
   \n
-  \n<Back[menu:main]>
- [:exit]
-  [!Quit()]
-  Settings and sessions saved, goodbye.
- [:close]
-  [!QUEUE+=menu:main]
-  [!CloseMenu()]
+  \n<Back to Main Menu[main:menu]>
+
+ [:session]
+  **Session**
+  <Branch this session[session:branch]>
+  \n<Change session name[session:change name]>
+  \n<Load old session[main:load]>
+  \n<Session History[main:history]>
+  \n
+  \n<Back to Main Menu[main:menu]>
+
+ [:history]
+  [!history:menu]
+  \n
+  \n<Back to Session Menu[main:session]>
+
+ [:load]
+  [!SaveSession()]
+  [!session = GetSessions()]
+  **Available sessions:**
+  [!SelectValue(session:open)]
+  \n
+  \n<Back to Main Menu[main:menu]>
+
+
+//**********************************
+
+[<game>]
+ [:session]
+  <Branch this session[session:branch]>
+  \n<Change session name[session:change name]>
+  \n<Load old session[game:load]>
+  \n
+  \n<Continue Playing[menu:close]>
+
+ [:load]
+  [!SaveSession()]
+  [!session = GetSessions()]
+  **Available sessions:**
+  [!SelectValue(session:open)]
+  \n
+  \n<Back to Session Menu[game:session]>
+
+ [:history]
+  [!history:menu]
+  \n
+  \n<Continue Playing[menu:close]>
+
+ [:bookmark]
+  [!bookmark name=]
+  [!Input(bookmark name)]
+
+//**********************************
 
 [<book>]
  [:open]
-  Book\ [!Print(@book)]:
-  \n<New Game[book:new]>
+  **[!Print(@book)]**
+  <New Game[book:new]>
   \n<Continue Game[book:continue]>
   \n<Load Session[book:load]>
   \n
-  \n<Back[menu:main]>
+  \n<Back to Book List[main:books]>
+
  [:new]
   [!OpenBook(@book)]
   [!session:new]
+
  [:continue]
   [!OpenBook(@book)]
   [!session=]
   [!session:open]
+
  [:load]
   [!OpenBook(@book)]
-  [!session:browse]
+  [!main:load]
+
+//**********************************
 
 [<session>]
+ [:bookmark]
+  [!bookmark name=]
+  [!Input(bookmark name)]
+
  [:new]
   [!NewSession()]
   [!menu:close]
+
  [:branch]
   [!branch name=GetSessionName()]
   [!Input(branch name)]
- [:save]
+
+ [:change name]
   [!session name=GetSessionName()]
   [!Input(session name)]
- [:browse]
-  [!SaveSession()]
-  [!session = GetSessions()]
-  Available sessions:\n
-  [!SelectValue(session:open)]
-  \n
-  \n<Back[menu:main]>
+
  [:open]
   [!LoadSession(@session)]
   [!menu:close]
 
+//**********************************
+[<history>]
+ [:menu]
+  **History**
+  1 2 3
+
+//*********** dialogs ************* 
+
 [<session name>]
- [:save]
+ [:change name]
   [!SaveSession(@session name)]
   [!menu:close]
 
 [<branch name>]
- [:branch]
+ [:branch session]
   [!BranchSession(@session name)]
+  [!menu:close]
+
+[<bookmark name>]
+ [:add bookmark]
+  [!UserBookmark(@bookmark name)]
   [!menu:close]

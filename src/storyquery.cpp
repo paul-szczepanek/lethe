@@ -292,7 +292,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       Properties values;
       EvaluateExpression(values, evaluate, isNum, isText);
 
-      // executy [!noun:verb] commands and [!noun=value] assignments
+      // execute [!noun:verb] commands and [!noun=value] assignments
       for (const string& text : values.TextValues) {
         string noun, verb;
         if (ExtractNounVerb(text, noun, verb)) {
@@ -719,6 +719,16 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
     } else if (func == "Bookmark") {
       // create a bookmark using the argument to produce the text
       QueryBook.SetBookmark(FunctionArgs);
+      intArg = 1;
+      textArgs.clear();
+    } else if (func == "UserBookmark") {
+      // create a bookmark using the argument to produce the text
+      // overwrites any previous bookmark at that place
+      string bookmarkDesc;
+      for (const string& arg : textArgs) {
+        bookmarkDesc += arg;
+      }
+      QueryBook.SetBookmark(bookmarkDesc);
       intArg = 1;
       textArgs.clear();
     } else if (func == "Dialog") {
