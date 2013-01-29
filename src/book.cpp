@@ -5,6 +5,7 @@
 #include "disk.h"
 
 const string FIRST_PLAY = "First Playthrough";
+const size_t HISTORY_PAGE = 200;
 
 Book::Book()
 {
@@ -38,7 +39,7 @@ void Book::AddDialog(const Dialog& dialog)
   DialogOpen = true;
 }
 
-/** @brief Open book of agiven title
+/** @brief Open book of a given title
   *
   * open the file containing the story and feed it to StoryDefinition to parse
   * one keyword block at a time
@@ -318,7 +319,7 @@ bool Book::GetChoice(string_pair& Choice) const
   if (scopePos != string::npos) {
     const string& verb = CutString(Choice.X, scopePos+1, Choice.X.size());
     const string& noun = CutString(Choice.X, 0, scopePos);
-    // rearange the noun:verb,value into proper places
+    // rearrange the noun:verb,value into proper places
     if (Choice.Y.empty()) {
       Choice.X = noun;
     } else {
@@ -338,7 +339,8 @@ void Book::SetStoryAction(const string_pair& Choice)
 
 /** @brief Add the action to the queue for later execution
   */
-void Book::SetAction(const string_pair& Choice, Session& MySession)
+void Book::SetAction(const string_pair& Choice,
+                     Session& MySession)
 {
   //check for value assignment first
   const size_t assignPos = FindTokenEnd(Choice.X, token::assign);
@@ -404,7 +406,8 @@ const string Book::ProcessQueue(Story& MyStory,
     actions.AddValue(expression);
     // call the actions scheduled for every turn
     query.ExecuteExpression(CALLS, CALLS_CONTENTS);
-    // only one value present during this call, unless it has been removed
+    // only one value present in QUEUE during this execution,
+    // unless it has been removed by one of the CALLS
     query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);
     // if the execution added more actions, add the to the pool
     pool.AddValues(actions);
@@ -443,7 +446,7 @@ bool Book::NewSession()
 
 /** @brief Loading a non-existent file will start a new game, trying to load
   * an empty session name will continue the last available session
-  * It will start a new session if no old ones are avaiable
+  * It will start a new session if no old ones are available
   */
 bool Book::LoadSession(const string& SessionName)
 {
@@ -476,7 +479,7 @@ bool Book::LoadSession(const string& SessionName)
           return BookSession.Load();
         }
       }
-      // session name not found so it's the first playthrough or a new game
+      // session name not found so it's the first play-through or a new game
       // session already initialised, no loading needed, add start bookmark
       Bookmark& mark = BookSession.CreateBookmark();
       mark.Description = "Story beginning";
@@ -539,8 +542,8 @@ const vector<string_pair> Book::GetSessionNamemap(const string& Path)
   return namemap;
 }
 
-/** @brief Mangle the name so it's unique based on the namemap
-  * \return false if the name was alrady unique
+/** @brief Mangle the name so it's unique based on the name map
+  * \return false if the name was already unique
   */
 bool Book::MakeSessionNameUnique(string& Name,
                                  const vector<string_pair>& Namemap)
@@ -634,4 +637,78 @@ const string Book::GetFreeSessionFilename(const string& Path)
     ++i;
   }
   return IntoString(i);
+}
+
+void Book::GetSnapshots(Properties& SnapshotItems)
+{
+  // find the range ending with the desired location
+  const size_t desiredEnd = max((size_t)SnapshotItems.IntValue, HISTORY_PAGE);
+  const size_t last = min(desiredEnd, BookSession.Snapshots.size());
+  const size_t first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  SnapshotItems.IntValue = last;
+  // print all the snapshots in range
+  for (size_t i = first; i < last; ++i) {
+    // find the "noun:verb" or bookmark
+    const Snapshot& snap = BookSession.Snapshots[i];
+    const size_t index = snap.QueueIndex;
+    const auto it = BookSession.Bookmarks.find(index - 1);
+    string entry = IntoString(index) + ". ";
+    if (it != BookSession.Bookmarks.end()) {
+      // use the bookmark for this history entry
+      entry += it->second.Description;
+    } else {
+      // extract noun and verb
+      string_pair action;
+      action.X = BookSession.QueueHistory[index - 1];
+      GetChoice(action);
+      // add as "1. verb noun"
+      entry += action.Y + ' ' + action.X;
+    }
+    if (index == BookSession.CurrentSnapshot - 1) {
+      entry += " - present -";
+    }
+    SnapshotItems.AddValue(entry);
+  }
+}
+
+void Book::GetBookmarks(Properties& SnapshotItems)
+{
+  const size_t desiredEnd = max((size_t)SnapshotItems.IntValue, HISTORY_PAGE);
+  const size_t last = min(desiredEnd, BookSession.Bookmarks.size());
+  const size_t first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  SnapshotItems.IntValue = last;
+  size_t i = 0;
+  // the bookmarks are sorted but not contiguous so we iterate
+  // until we pass over the range we want
+  for (const auto& mark : BookSession.Bookmarks) {
+    if (first > ++i) {
+      continue;
+    } else if (i > last) {
+      break;
+    }
+    const size_t index = mark.first;
+    string entry = IntoString(index) + ". " + mark.second.Description;
+    if (index == BookSession.CurrentSnapshot - 1) {
+      entry += " - present -";
+    }
+    SnapshotItems.AddValue(entry);
+  }
+}
+
+bool Book::LoadSnapshot(const string& Description)
+{
+  // extract the index from the snapshot description
+  const size_t indexPos = FindCharacter(Description, '.');
+  if (indexPos && indexPos != string::npos) {
+    const string& indexName = CutString(Description, 0, indexPos);
+    const size_t index = IntoInt(indexName);
+    LoadSnapshot(index);
+    return true;
+  }
+  return false;
+}
+
+size_t Book::GetCurrentSnapshot()
+{
+  return BookSession.CurrentSnapshot;
 }

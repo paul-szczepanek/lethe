@@ -534,7 +534,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
           if (isdigit(numberText[0])) {
             target.IntValue += IntoInt(numberText);
           } else { // this a noun, find its value
-            GetUserInteger(numberText, operand);
+            GetUserInteger(numberText, target);
           }
         }
         IsNum = true;
@@ -625,7 +625,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       for (const string& arg : textArgs) {
         const size_t scopePos = FindTokenEnd(arg, token::scope);
         if (scopePos != string::npos) {
-          // rearange the noun:verb into proper places
+          // rearrange the noun:verb into proper places
           const string& noun = CutString(arg, 0, scopePos);
           const string& verb = CutString(arg, scopePos + 1);
           const Properties& values = GetValues(noun);
@@ -730,6 +730,25 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       }
       QueryBook.SetBookmark(bookmarkDesc);
       intArg = 1;
+      textArgs.clear();
+    } else if (func == "LoadSnapshot") {
+      // Load the given snapshot
+      intArg = 0;
+      if (!textArgs.empty()) {
+        intArg = (lint)QueryBook.LoadSnapshot(textArgs[0]);
+        textArgs.clear();
+      }
+    } else if (func == "GetSnapshots") {
+      // return snapshots with descriptions, range based on the int value
+      textArgs.clear();
+      QueryBook.GetSnapshots(FunctionArgs);
+    } else if (func == "GetBookmarks") {
+      // return snapshots with bookmarks only
+      textArgs.clear();
+      QueryBook.GetBookmarks(FunctionArgs);
+    } else if (func == "GetSnapshotIndex") {
+      // return current snapshot index
+      intArg = QueryBook.GetCurrentSnapshot();
       textArgs.clear();
     } else if (func == "Dialog") {
       // create a dialog

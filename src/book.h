@@ -43,6 +43,11 @@ public:
   bool BranchSession(const string& NewName = "");
   bool LoadSession(const string& SessionName = "");
 
+  bool LoadSnapshot(const string& Description);
+  void GetSnapshots(Properties& SnapshotItems);
+  void GetBookmarks(Properties& SnapshotItems);
+  size_t GetCurrentSnapshot();
+
   void SetBookmark(const Properties& Description);
   void SetBookmark(const string& Description);
   bool LoadSnapshot(const size_t SnapshotIndex);
@@ -84,6 +89,7 @@ private:
   const string GetFreeSessionFilename(const string& Path);
   const vector<string_pair> GetSessionNamemap(const string& Path);
   bool MakeSessionNameUnique(string& Name, const vector<string_pair>& Namemap);
+
 
 public:
   string BookTitle;

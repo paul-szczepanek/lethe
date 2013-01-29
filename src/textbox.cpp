@@ -33,9 +33,10 @@ Rect TextBox::GetTextSize()
   const lint newW = PageWidth + Size.W - PageSize.W + BLOCK_SIZE;
   const lint newH = PageHeight + Size.H - PageSize.H + BLOCK_SIZE;
   // resize if at least one dimension shrunk (but not if the other grew)
-  if ((newW < Size.W && newH <= Size.H)
-      || (newH < Size.H && newW <= Size.W)) {
+  if (newW < Size.W) {
     fitSize.W = newW;
+  }
+  if (newH < Size.H) {
     fitSize.H = newH;
   }
   return fitSize;
@@ -154,6 +155,8 @@ bool TextBox::HandleInput(MouseState& Mouse,
         Pane.DragTimeout -= DeltaTime;
       }
     }
+  } else {
+    Pane.DragTimeout = DRAG_TIMEOUT;
   }
 
   if (newSelected != SelectedKeyword) {

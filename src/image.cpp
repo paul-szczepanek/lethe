@@ -97,7 +97,7 @@ void CentreWithin(Rect& Size,
 bool Image::Tick(real DeltaTime)
 {
   if (Playing && Media.Visible) {
-    //  reload if the size of the window chaged
+    // reload if the size of the window changed
     if (WindowSize != Media.ImageWindowSize) {
       Playing = false;
       return Play();

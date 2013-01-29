@@ -6,7 +6,7 @@
 			<Cursor1 position="37" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="book.h" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="book.h" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="446" topLine="18" />
 		</Cursor>
@@ -28,7 +28,7 @@
 	</File>
 	<File name="session.h" open="0" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1068" topLine="32" />
+			<Cursor1 position="1072" topLine="23" />
 		</Cursor>
 	</File>
 	<File name="mediamanager.h" open="0" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -51,7 +51,7 @@
 			<Cursor1 position="2571" topLine="34" />
 		</Cursor>
 	</File>
-	<File name="story.h" open="0" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="story.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="618" topLine="0" />
 		</Cursor>
@@ -76,7 +76,7 @@
 			<Cursor1 position="2018" topLine="5" />
 		</Cursor>
 	</File>
-	<File name="tokens.cpp" open="0" top="0" tabpos="32" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="tokens.cpp" open="1" top="0" tabpos="32" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="3898" topLine="135" />
 		</Cursor>
@@ -106,12 +106,12 @@
 			<Cursor1 position="2356" topLine="46" />
 		</Cursor>
 	</File>
-	<File name="tokens.h" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="tokens.h" open="1" top="1" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="333" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="textbox.cpp" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="textbox.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="11659" topLine="356" />
 		</Cursor>
@@ -181,7 +181,7 @@
 			<Cursor1 position="277" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="session.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="session.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="952" topLine="15" />
 		</Cursor>
@@ -191,7 +191,7 @@
 			<Cursor1 position="443" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="properties.h" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="properties.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="3274" topLine="80" />
 		</Cursor>
@@ -201,7 +201,7 @@
 			<Cursor1 position="344" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="reader.cpp" open="0" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="reader.cpp" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="7567" topLine="251" />
 		</Cursor>
@@ -216,12 +216,12 @@
 			<Cursor1 position="176" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="main.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="main.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="234" topLine="90" />
 		</Cursor>
 	</File>
-	<File name="textbox.h" open="0" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="textbox.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="944" topLine="9" />
 		</Cursor>
@@ -246,9 +246,9 @@
 			<Cursor1 position="1271" topLine="3" />
 		</Cursor>
 	</File>
-	<File name="book.cpp" open="1" top="1" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="book.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="11038" topLine="382" />
+			<Cursor1 position="10913" topLine="363" />
 		</Cursor>
 	</File>
 	<File name="imagebox.cpp" open="0" top="0" tabpos="43" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -258,7 +258,7 @@
 	</File>
 	<File name="image.cpp" open="0" top="0" tabpos="44" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2231" topLine="57" />
+			<Cursor1 position="14" topLine="0" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

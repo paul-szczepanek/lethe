@@ -361,6 +361,7 @@ Also available but mostly useful in the menu:
                       successful.
 - `CloseBook()` - close the book, save and return to the menu.
 - `IsInGame()` - return true if a book is opened and a session started.
+- `GetSnapshots(#number)` - return a list of snapshots up until #number
 - `GetSessionName()` - return the session name currently loaded.
 - `GetSessions(value)` - return user set names of sessions  for the given
                          book title or if no value given for the currently
@@ -379,6 +380,10 @@ Also available but mostly useful in the menu:
 - `LoadSession(value)` - load a session with the given name, if no value is
                          given continue the last played session. Will start
                          a new session if no session is present.
+- `UserBookmark(value)` - silently create a bookmark at current place using
+                          the provided text value as description. The text
+                          value can be provided by the player. This will
+                          overwrite any previous bookmark at this place.
 - `OpenMenu()` - open the game menu in the reader.
 - `CloseMenu()` - close the game menu in the reader.
 - `Quit()` - this will call CloseBook() to save the session and then quit

@@ -272,7 +272,8 @@ bool Reader::ReadMenu()
 
   MainMenu.SetText("");
   MenuSource = MyBook.ProcessMenuQueue();
-  Rect maxSize(Width - 2 * BLOCK_SIZE, Height, BLOCK_SIZE, 0);
+  Rect maxSize(Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
+               BLOCK_SIZE, BLOCK_SIZE);
   MainMenu.SetSize(maxSize);
   MainMenu.SetText(MenuSource);
   Rect fitSize = MainMenu.GetTextSize();
@@ -377,12 +378,15 @@ bool Reader::ProcessInput(real DeltaTime)
           SetLayout(ButtonState);
           break;
         case buttonHistory:
+          ReaderButtons.SetButtonState(buttonHistory, 0);
           MyBook.ShowHistoryMenu();
           break;
         case buttonDisk:
+          ReaderButtons.SetButtonState(buttonDisk, 0);
           MyBook.ShowSaveMenu();
           break;
         case buttonBookmark:
+          ReaderButtons.SetButtonState(buttonBookmark, 0);
           MyBook.ShowBookmarkMenu();
           break;
 

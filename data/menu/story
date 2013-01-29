@@ -1,5 +1,7 @@
 [<QUEUE>]
 
+//**********************************
+
 [<menu>]
  [:close]
   [!CloseMenu()]
@@ -49,9 +51,38 @@
   \n<Back to Main Menu[main:menu]>
 
  [:history]
+  [!history=#99999999]
+  [!:browse history]
+
+ [:browse history]
+  **History**
+  <Older History[main:history prev]>\n
   [!history:menu]
+  \n<More Recent History[main:history next]>
+  [?#bookmarks only=#1] {
+   \n\n<Show All Steps[main:bookmarks off]>
+  }
+  [?#bookmarks only=#0] {
+   \n\n<Show Only Bookmarks[main:bookmarks on]>
+  }
   \n
   \n<Back to Session Menu[main:session]>
+
+ [:bookmarks on]
+  [!bookmarks only=#1]
+  [!:browse history]
+
+ [:bookmarks off]
+  [!bookmarks only=#0]
+  [!:browse history]
+
+ [:history next]
+  [!history+=#4]
+  [!:browse history]
+
+ [:history prev]
+  [!history-=#4]
+  [!:browse history]
 
  [:load]
   [!SaveSession()]
@@ -81,9 +112,38 @@
   \n<Back to Session Menu[game:session]>
 
  [:history]
+  [!history=#99999999]
+  [!:browse history]
+
+ [:browse history]
+  **History**
+  <Older History[game:history prev]>\n
   [!history:menu]
+  \n<More Recent History[game:history next]>
+  [?#bookmarks only=#1] {
+   \n\n<Show All Steps[game:bookmarks off]>
+  }
+  [?#bookmarks only=#0] {
+   \n\n<Show Only Bookmarks[game:bookmarks on]>
+  }
   \n
   \n<Continue Playing[menu:close]>
+
+ [:bookmarks on]
+  [!bookmarks only=#1]
+  [!:browse history]
+
+ [:bookmarks off]
+  [!bookmarks only=#0]
+  [!:browse history]
+
+ [:history next]
+  [!history+=#4]
+  [!:browse history]
+
+ [:history prev]
+  [!history-=#4]
+  [!:browse history]
 
  [:bookmark]
   [!bookmark name=]
@@ -137,10 +197,23 @@
   [!menu:close]
 
 //**********************************
+
+[<bookmarks only>=#1]
+
 [<history>]
  [:menu]
-  **History**
-  1 2 3
+  [?#bookmarks only=#1] {
+   [!history = GetBookmarks(#history)]
+   __[!SelectValue(history:open)]__
+  }
+  [?#bookmarks only=#0] {
+   [!history = GetSnapshots(#history)]
+   __[!SelectValue(history:open)]__
+  }
+
+ [:open]
+  [!LoadSnapshot(@history)]
+  [!menu:close]
 
 //*********** dialogs ************* 
 

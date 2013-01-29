@@ -96,10 +96,10 @@ inline void ShiftPositions(vector<size_t_pair>& Positions,
                            const size_t Offset)
 {
   for (size_t_pair& pos : Positions) {
-    if (pos.X >= Beyond) {
+    if (pos.X > Beyond) {
       pos.X += Offset;
     }
-    if (pos.Y >= Beyond) {
+    if (pos.Y > Beyond) {
       pos.Y += Offset;
     }
   }
