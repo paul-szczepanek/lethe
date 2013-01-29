@@ -22,6 +22,37 @@ const string EXITS_CONTENTS = CONTENTS_START + "EXITS" + CONTENTS_END;
 const string CALLS_CONTENTS = CONTENTS_START + "CALLS" + CONTENTS_END;
 const string QUICK_CONTENTS = CONTENTS_START + "QUICK" + CONTENTS_END;
 
+enum bookFunction {
+  bookFunctionSize,
+  bookFunctionPlay,
+  bookFunctionStop,
+  bookFunctionKeyword,
+  bookFunctionSelectValue,
+  bookFunctionPrint,
+  bookFunctionCloseMenu,
+  bookFunctionOpenMenu,
+  bookFunctionCloseBook,
+  bookFunctionOpenBook,
+  bookFunctionQuit,
+  bookFunctionGetBooks,
+  bookFunctionIsInGame,
+  bookFunctionGetSessions,
+  bookFunctionGetSessionName,
+  bookFunctionSaveSession,
+  bookFunctionBranchSession,
+  bookFunctionLoadSession,
+  bookFunctionNewSession,
+  bookFunctionBookmark,
+  bookFunctionUserBookmark,
+  bookFunctionLoadSnapshot,
+  bookFunctionGetSnapshots,
+  bookFunctionGetBookmarks,
+  bookFunctionGetSnapshotIndex,
+  bookFunctionDialog,
+  bookFunctionInput,
+  BOOK_FUNCTION_MAX
+};
+
 enum systemNoun {
   systemQueue,
   systemNouns,

@@ -575,208 +575,273 @@ bool StoryQuery::CreateDialog(const string& Noun, Dialog& NewDialog)
   return true;
 }
 
+const map<const string, const size_t> FunctionNameMap = {
+  { "Size", bookFunctionSize },
+  { "Play", bookFunctionPlay },
+  { "Stop", bookFunctionStop },
+  { "Keyword", bookFunctionKeyword },
+  { "SelectValue", bookFunctionSelectValue },
+  { "Print", bookFunctionPrint },
+  { "CloseMenu", bookFunctionCloseMenu },
+  { "OpenMenu", bookFunctionOpenMenu },
+  { "CloseBook", bookFunctionCloseBook },
+  { "OpenBook", bookFunctionOpenBook },
+  { "Quit", bookFunctionQuit },
+  { "GetBooks", bookFunctionGetBooks },
+  { "IsInGame", bookFunctionIsInGame },
+  { "GetSessions", bookFunctionGetSessions },
+  { "GetSessionName", bookFunctionGetSessionName },
+  { "SaveSession", bookFunctionSaveSession },
+  { "BranchSession", bookFunctionBranchSession },
+  { "LoadSession", bookFunctionLoadSession },
+  { "NewSession", bookFunctionNewSession },
+  { "Bookmark", bookFunctionBookmark },
+  { "UserBookmark", bookFunctionUserBookmark },
+  { "LoadSnapshot", bookFunctionLoadSnapshot },
+  { "GetSnapshots", bookFunctionGetSnapshots },
+  { "GetBookmarks", bookFunctionGetBookmarks },
+  { "GetSnapshotIndex", bookFunctionGetSnapshotIndex },
+  { "Dialog", bookFunctionDialog },
+  { "Input", bookFunctionInput }
+};
+
 /** @brief Executes all functions on all argument values
   */
 bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
                                  Properties& FunctionArgs)
 {
+  lint& intArg = FunctionArgs.IntValue;
+  vector<string>& textArgs = FunctionArgs.TextValues;
   for (const string& func : FunctionName.TextValues) {
-    // execute function
-    // TODO: hash the function names
-    lint& intArg = FunctionArgs.IntValue;
-    vector<string>& textArgs = FunctionArgs.TextValues;
-    if (func == "Size") {
-      // return number of values
-      intArg = 0;
-      for (const string& arg : textArgs) {
-        const Properties nounValues = GetValues(arg);
-        intArg += nounValues.TextValues.size();
-      }
-      textArgs.clear();
-    } else if (func == "Play") {
-      // activate asset
-      for (const string& arg : textArgs) {
-        if (!QueryBook.GetAssetState(arg)) {
-          QueryBook.SetAssetState(arg, true);
+    // translate string into an enum
+    size_t functionIndex = BOOK_FUNCTION_MAX;
+    const auto it = FunctionNameMap.find(func);
+    if (it != FunctionNameMap.end()) {
+      functionIndex = it->second;
+    }
+    switch (functionIndex) {
+      case bookFunctionSize:
+        // return number of values
+        intArg = 0;
+        for (const string& arg : textArgs) {
+          const Properties nounValues = GetValues(arg);
+          intArg += nounValues.TextValues.size();
         }
-        LOG(arg + " - play");
-      }
-      textArgs.clear();
-      intArg = 1;
-    } else if (func == "Stop") {
-      // deactivate asset
-      for (const string& arg : textArgs) {
-        if (!QueryBook.GetAssetState(arg)) {
-          QueryBook.SetAssetState(arg, false);
-        }
-        LOG(arg + " - stop");
-      }
-      textArgs.clear();
-      intArg = 1;
-    } else if (func == "Keyword") {
-      // print a list of values
-      Text += FunctionArgs.PrintKeywordList();
-      textArgs.clear();
-      intArg = 1;
-    } else if (func == "SelectValue") {
-      // print a list of <value[noun=value:verb]>
-      for (const string& arg : textArgs) {
-        const size_t scopePos = FindTokenEnd(arg, token::scope);
-        if (scopePos != string::npos) {
-          // rearrange the noun:verb into proper places
-          const string& noun = CutString(arg, 0, scopePos);
-          const string& verb = CutString(arg, scopePos + 1);
-          const Properties& values = GetValues(noun);
-          Text += values.PrintValueSelectList(noun, verb, "\n");
-        }
-      }
-      textArgs.clear();
-      intArg = 1;
-    } else if (func == "Print") {
-      // print a list of values as keywords
-      Text += FunctionArgs.PrintPlainList();
-      textArgs.clear();
-      intArg = 1;
-    } else if (func == "CloseMenu") {
-      // close main menu, show book
-      intArg = (lint)QueryBook.HideMenu();
-      textArgs.clear();
-    } else if (func == "OpenMenu") {
-      // show main menu
-      intArg = (lint)QueryBook.ShowMenu();
-      textArgs.clear();
-    } else if (func == "CloseBook") {
-      // saves the sessions and closes the book
-      QueryBook.CloseBook();
-      intArg = 1;
-      textArgs.clear();
-    } else if (func == "OpenBook") {
-      // try values until you open a book
-      intArg = 0;
-      for (const string& arg : textArgs) {
-        if (QueryBook.OpenBook(arg)) {
-          intArg = 1;
-          break;
-        }
-      }
-      textArgs.clear();
-    } else if (func == "Quit") {
-      // Exit the reader
-      textArgs.clear();
-      intArg = 1;
-      QueryBook.CloseBook();
-      QueryBook.Quit();
-    } else if (func == "GetBooks") {
-      // return book names
-      FunctionArgs = QueryBook.GetBooks();
-      intArg = 1;
-    } else if (func == "IsInGame") {
-      // return 1 if a book is open
-      textArgs.clear();
-      intArg = (lint)QueryBook.SessionOpen;
-    } else if (func == "GetSessions") {
-      // return session names
-      FunctionArgs = QueryBook.GetSessions();
-      intArg = 1;
-    } else if (func == "GetSessionName") {
-      // return session names
-      textArgs.clear();
-      FunctionArgs.AddValue(QueryBook.GetSessionName());
-      intArg = 1;
-    } else if (func == "SaveSession") {
-      // saves the session, doesn't close it
-      if (textArgs.empty()) {
-        intArg = (lint)QueryBook.SaveSession();
-      } else {
-        const string& name = textArgs[0];
-        intArg = (lint)QueryBook.SaveSession(name);
-      }
-      textArgs.clear();
-    } else if (func == "BranchSession") {
-      // saves the session and creates a new one from current place in time
-      if (textArgs.empty()) {
-        intArg = (lint)QueryBook.BranchSession();
-      } else {
-        const string& name = textArgs[0];
-        intArg = (lint)QueryBook.BranchSession(name);
-      }
-      textArgs.clear();
-    } else if (func == "LoadSession") {
-      // load session or continue last played session if no name given
-      if (textArgs.empty()) {
-        intArg = (lint)QueryBook.LoadSession();
-      } else {
-        const string& name = textArgs[0];
-        intArg = (lint)QueryBook.LoadSession(name);
         textArgs.clear();
-      }
-    } else if (func == "NewSession") {
-      // start new session
-      textArgs.clear();
-      intArg = (lint)QueryBook.NewSession();
-    } else if (func == "Bookmark") {
-      // create a bookmark using the argument to produce the text
-      QueryBook.SetBookmark(FunctionArgs);
-      intArg = 1;
-      textArgs.clear();
-    } else if (func == "UserBookmark") {
-      // create a bookmark using the argument to produce the text
-      // overwrites any previous bookmark at that place
-      string bookmarkDesc;
-      for (const string& arg : textArgs) {
-        bookmarkDesc += arg;
-      }
-      QueryBook.SetBookmark(bookmarkDesc);
-      intArg = 1;
-      textArgs.clear();
-    } else if (func == "LoadSnapshot") {
-      // Load the given snapshot
-      intArg = 0;
-      if (!textArgs.empty()) {
-        intArg = (lint)QueryBook.LoadSnapshot(textArgs[0]);
+        break;
+      case bookFunctionPlay:
+        // activate asset
+        for (const string& arg : textArgs) {
+          if (!QueryBook.GetAssetState(arg)) {
+            QueryBook.SetAssetState(arg, true);
+          }
+          LOG(arg + " - play");
+        }
         textArgs.clear();
-      }
-    } else if (func == "GetSnapshots") {
-      // return snapshots with descriptions, range based on the int value
-      textArgs.clear();
-      QueryBook.GetSnapshots(FunctionArgs);
-    } else if (func == "GetBookmarks") {
-      // return snapshots with bookmarks only
-      textArgs.clear();
-      QueryBook.GetBookmarks(FunctionArgs);
-    } else if (func == "GetSnapshotIndex") {
-      // return current snapshot index
-      intArg = QueryBook.GetCurrentSnapshot();
-      textArgs.clear();
-    } else if (func == "Dialog") {
-      // create a dialog
-      intArg = 1;
-      Dialog dialog;
-      for (const string& arg : textArgs) {
-        if (CreateDialog(arg, dialog)) {
-          QueryBook.AddDialog(dialog);
-        } else {
-          intArg = 0;
+        intArg = 1;
+        break;
+      case bookFunctionStop:
+        // deactivate asset
+        for (const string& arg : textArgs) {
+          if (!QueryBook.GetAssetState(arg)) {
+            QueryBook.SetAssetState(arg, false);
+          }
+          LOG(arg + " - stop");
         }
-      }
-      textArgs.clear();
-    } else if (func == "Input") {
-      // create an input dialog that saves user response in the noun
-      intArg = 1;
-      Dialog dialog;
-      dialog.InputBox = true;
-      for (const string& arg : textArgs) {
-        if (CreateDialog(arg, dialog)) {
-          QueryBook.AddDialog(dialog);
-        } else {
-          intArg = 0;
+        textArgs.clear();
+        intArg = 1;
+        break;
+      case bookFunctionKeyword:
+        // print a list of values
+        Text += FunctionArgs.PrintKeywordList();
+        textArgs.clear();
+        intArg = 1;
+        break;
+      case bookFunctionSelectValue:
+        // print a list of <value[noun=value:verb]>
+        for (const string& arg : textArgs) {
+          const size_t scopePos = FindTokenEnd(arg, token::scope);
+          if (scopePos != string::npos) {
+            // rearrange the noun:verb into proper places
+            const string& noun = CutString(arg, 0, scopePos);
+            const string& verb = CutString(arg, scopePos + 1);
+            const Properties& values = GetValues(noun);
+            Text += values.PrintValueSelectList(noun, verb, "\n");
+          }
         }
-      }
-      textArgs.clear();
-    } else {
-      LOG(func + " - function doesn't exist!");
-      textArgs.clear();
-      return false;
+        textArgs.clear();
+        intArg = 1;
+        break;
+      case bookFunctionPrint:
+        // print a list of values as keywords
+        Text += FunctionArgs.PrintPlainList();
+        textArgs.clear();
+        intArg = 1;
+        break;
+      case bookFunctionCloseMenu:
+        // close main menu, show book
+        intArg = (lint)QueryBook.HideMenu();
+        textArgs.clear();
+        break;
+      case bookFunctionOpenMenu:
+        // show main menu
+        intArg = (lint)QueryBook.ShowMenu();
+        textArgs.clear();
+        break;
+      case bookFunctionCloseBook:
+        // saves the sessions and closes the book
+        QueryBook.CloseBook();
+        intArg = 1;
+        textArgs.clear();
+        break;
+      case bookFunctionOpenBook:
+        // try values until you open a book
+        intArg = 0;
+        for (const string& arg : textArgs) {
+          if (QueryBook.OpenBook(arg)) {
+            intArg = 1;
+            break;
+          }
+        }
+        textArgs.clear();
+        break;
+      case bookFunctionQuit:
+        // Exit the reader
+        textArgs.clear();
+        intArg = 1;
+        QueryBook.CloseBook();
+        QueryBook.Quit();
+        break;
+      case bookFunctionGetBooks:
+        // return book names
+        FunctionArgs = QueryBook.GetBooks();
+        intArg = 1;
+        break;
+      case bookFunctionIsInGame:
+        // return 1 if a book is open
+        textArgs.clear();
+        intArg = (lint)QueryBook.SessionOpen;
+        break;
+      case bookFunctionGetSessions:
+        // return session names
+        FunctionArgs = QueryBook.GetSessions();
+        intArg = 1;
+        break;
+      case bookFunctionGetSessionName:
+        // return session names
+        textArgs.clear();
+        FunctionArgs.AddValue(QueryBook.GetSessionName());
+        intArg = 1;
+        break;
+      case bookFunctionSaveSession:
+        // saves the session, doesn't close it
+        if (textArgs.empty()) {
+          intArg = (lint)QueryBook.SaveSession();
+        } else {
+          const string& name = textArgs[0];
+          intArg = (lint)QueryBook.SaveSession(name);
+        }
+        textArgs.clear();
+        break;
+      case bookFunctionBranchSession:
+        // saves the session and creates a new one from current place in time
+        if (textArgs.empty()) {
+          intArg = (lint)QueryBook.BranchSession();
+        } else {
+          const string& name = textArgs[0];
+          intArg = (lint)QueryBook.BranchSession(name);
+        }
+        textArgs.clear();
+        break;
+      case bookFunctionLoadSession:
+        // load session or continue last played session if no name given
+        if (textArgs.empty()) {
+          intArg = (lint)QueryBook.LoadSession();
+        } else {
+          const string& name = textArgs[0];
+          intArg = (lint)QueryBook.LoadSession(name);
+          textArgs.clear();
+        }
+        break;
+      case bookFunctionNewSession:
+        // start new session
+        textArgs.clear();
+        intArg = (lint)QueryBook.NewSession();
+        break;
+      case bookFunctionBookmark:
+        // create a bookmark using the argument to produce the text
+        QueryBook.SetBookmark(FunctionArgs);
+        intArg = 1;
+        textArgs.clear();
+        break;
+      case bookFunctionUserBookmark:
+        // create a bookmark using the argument to produce the text
+        // overwrites any previous bookmark at that place
+        {
+          string bookmarkDesc;
+          for (const string& arg : textArgs) {
+            bookmarkDesc += arg;
+          }
+          QueryBook.SetBookmark(bookmarkDesc);
+        }
+        intArg = 1;
+        textArgs.clear();
+        break;
+      case bookFunctionLoadSnapshot:
+        // Load the given snapshot
+        intArg = 0;
+        if (!textArgs.empty()) {
+          intArg = (lint)QueryBook.LoadSnapshot(textArgs[0]);
+          textArgs.clear();
+        }
+        break;
+
+      case bookFunctionGetSnapshots:
+        // return snapshots with descriptions, range based on the int value
+        textArgs.clear();
+        QueryBook.GetSnapshots(FunctionArgs);
+        break;
+      case bookFunctionGetBookmarks:
+        // return snapshots with bookmarks only
+        textArgs.clear();
+        QueryBook.GetBookmarks(FunctionArgs);
+        break;
+      case bookFunctionGetSnapshotIndex:
+        // return current snapshot index
+        intArg = QueryBook.GetCurrentSnapshot();
+        textArgs.clear();
+        break;
+      case bookFunctionDialog:
+        // create a dialog
+        intArg = 1;
+        for (const string& arg : textArgs) {
+          Dialog dialog;
+          if (CreateDialog(arg, dialog)) {
+            QueryBook.AddDialog(dialog);
+          } else {
+            intArg = 0;
+          }
+        }
+        textArgs.clear();
+        break;
+      case bookFunctionInput:
+        // create an input dialog that saves user response in the noun
+        intArg = 1;
+        for (const string& arg : textArgs) {
+          Dialog dialog;
+          dialog.InputBox = true;
+          if (CreateDialog(arg, dialog)) {
+            QueryBook.AddDialog(dialog);
+          } else {
+            intArg = 0;
+          }
+        }
+        textArgs.clear();
+        break;
+      default:
+        LOG(func + " - function doesn't exist!");
+        textArgs.clear();
+        return false;
     }
   }
   return true;
