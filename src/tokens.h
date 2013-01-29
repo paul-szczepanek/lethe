@@ -22,14 +22,6 @@ const string EXITS_CONTENTS = CONTENTS_START + "EXITS" + CONTENTS_END;
 const string CALLS_CONTENTS = CONTENTS_START + "CALLS" + CONTENTS_END;
 const string QUICK_CONTENTS = CONTENTS_START + "QUICK" + CONTENTS_END;
 
-enum textStyle {
-  styleMain,
-  styleTitle,
-  styleQuote,
-  styleMono,
-  TEXT_STYLE_MAX
-};
-
 enum systemNoun {
   systemQueue,
   systemNouns,

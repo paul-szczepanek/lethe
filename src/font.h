@@ -2,9 +2,17 @@
 #define FONT_H
 
 #include "main.h"
-#include <SDL.h>
+#include "tokens.h"
 
 typedef struct _TTF_Font TTF_Font;
+
+enum textStyle {
+  styleMain,
+  styleTitle,
+  styleQuote,
+  styleMono,
+  TEXT_STYLE_MAX
+};
 
 class Font
 {
@@ -22,6 +30,7 @@ public:
 
 
 public:
+  textStyle Style;
   TTF_Font* SDLFont = NULL;
 };
 

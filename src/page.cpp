@@ -60,7 +60,7 @@ Page::Page(const string& SourceText)
           if (verb.Names.empty()) {
             isVerbCondition = true;
           } else {
-            // we keep looking for a verb difinition until we find it
+            // we keep looking for a verb definition until we find it
             // or we hit something illegal
             // this is not ideal but allows for implied scope
             const size_t verbPos = FindTokenStart(Text, token::verbBlock,
@@ -177,7 +177,7 @@ void Page::PrintBlock(string& Text,
 /** \brief Add a new block containing plain text
  *
  *  It will append a new block with the text as its expression.
- *  It will also deal with closing } scope fo any conditions.
+ *  It will also deal with closing } scope for any conditions.
  */
 void Page::NewPlainText(size_t_pair& TokenPos,
                         vector<Block*>& Blocks,
@@ -187,6 +187,12 @@ void Page::NewPlainText(size_t_pair& TokenPos,
 
   if (Verb.Names.empty()) {
     LOG("illegal text outside of a verb");
+  } else if (Text[TokenPos.X] == token::Start[token::block]) {
+    // handle } { else clause
+    TokenPos.Y = TokenPos.X;
+    Blocks.back()->Blocks.push_back(Block());
+    Blocks.back()->Blocks.back().Else = true;
+    Blocks.push_back(&(Blocks.back()->Blocks.back()));
   } else {
     // look for block ending }
     size_t pos = TokenPos.X;
@@ -233,7 +239,7 @@ const VerbBlock& Page::GetVerb(const string& Verb) const
 
 /** \brief Add the verb definition to the page
  *
- *  The key and block get claered
+ *  The key and block get cleared
  */
 void Page::AddVerb(VerbBlock& VerbBlock)
 {

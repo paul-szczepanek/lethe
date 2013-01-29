@@ -5,16 +5,10 @@
 #include "book.h"
 #include "page.h"
 
-/** \brief fills in the Text param with the story to display
- * Will recursively evalute the Expression and fill in Text resulting from the
- * evaluation
- *
- * \param current page we're on, we may visit other pages whilst recursing
- * \param the block containing the expression or text
- * \param all values that are different than the story ones i.e. savedata
- * \param the resulting text of the story
- * \return how many parents up do we break with [!<<]
- */
+/** \brief Will recursively evaluate the Expression in each child block
+  * starting with current block and fill in Text resulting from the evaluation
+  * \return how many parents up do we break with [!<<]
+  */
 size_t StoryQuery::ExecuteBlock(const string& Noun,
                                 const Block& CurBlock)
 {
@@ -38,7 +32,7 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
     if (c == token::Start[token::instruction]) {
       // this is a [!<<] (this will work for for [!anything<<])
       if (FindTokenStart(expression, token::stop) != string::npos) {
-        const size_t breakUp = tokenPos.Y - tokenPos.X - 2;
+        const size_t breakUp = tokenPos.Y - tokenPos.X - 1;
         return breakUp; // this breaks out of n loops above
       } else {
         ExecuteExpression(Noun, expression);
@@ -51,14 +45,23 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
   } else { // we have children so this must be a [?condition]
     if (length == 0 || ExecuteExpression(Noun, expression)) {
       // if the condition is true, execute all the child blocks
+      bool executeElse = false;
       for (size_t i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
         // if [!<<] used to escape parent break from loop
-        size_t backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
+        size_t backUp = 0;
+        if (executeElse || !CurBlock.Blocks[i].Else) {
+          backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
+        }
         if (backUp > 0) {
-          // so the parent remains unaffected
-          return --backUp;
+          if (backUp == 1) {
+            executeElse = true;
+          } else {
+            return --backUp; // decrement so the parent remains unaffected
+          }
         }
       }
+    } else {
+      return 1;
     }
   }
 
@@ -66,6 +69,8 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
   return 0;
 }
 
+/** @brief Get verbs that don't fail their verb expression
+  */
 Properties StoryQuery::GetVerbs(const string& Noun)
 {
   Properties Result;
@@ -83,9 +88,7 @@ Properties StoryQuery::GetVerbs(const string& Noun)
   return Result;
 }
 
-/** @brief Execute Expression
-  *
-  * Parses the instruction or condition, checks for user values
+/** @brief Parses the instruction or condition, checks for user values
   * and modifies them if needed
   */
 bool StoryQuery::ExecuteExpression(const string& Noun,
@@ -349,14 +352,7 @@ struct OperationNode {
   bool Nested = true; // nested doesn't have operand, copy from result of next
 };
 
-/** @brief Evaluate Expression
-  *
-  * Evaluates keywords to their contents and does arithmetic
-  * \param context
-  * \param expresion to be evaluated
-  * \param returns true if there is a number in the expression
-  * \param returns true if there is a string in the expression
-  * \return Values that the expression results in
+/** @brief Evaluates keywords to their contents and does arithmetic
   */
 bool StoryQuery::EvaluateExpression(Properties& Result,
                                     const string& Expression,
@@ -558,6 +554,8 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   return !opStack.empty();
 }
 
+/** @brief Fills in the dialog with text based on the verb found in the Noun
+  */
 bool StoryQuery::CreateDialog(const string& Noun, Dialog& NewDialog)
 {
   NewDialog.Noun = Noun;
@@ -629,7 +627,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           const string& noun = CutString(arg, 0, scopePos);
           const string& verb = CutString(arg, scopePos + 1);
           const Properties& values = GetValues(noun);
-          Text += values.PrintValueSelectList(noun, verb, "\n ");
+          Text += values.PrintValueSelectList(noun, verb, "\n");
         }
       }
       textArgs.clear();
@@ -806,7 +804,7 @@ const Properties& StoryQuery::GetValues(const string& Noun)
   }
 }
 
-/** @brief add user values of the noun to the passed in Properites
+/** @brief add user values of the noun to the passed in Properties
   * \return true if value was found in the user values
   */
 bool StoryQuery::GetUserTextValues(const string& Noun,
@@ -820,7 +818,7 @@ bool StoryQuery::GetUserTextValues(const string& Noun,
   return false;
 }
 
-/** @brief add user integer value of the noun to the passed in Properites
+/** @brief add user integer value of the noun to the passed in Properties
   * \return true if value was found in the user values
   */
 bool StoryQuery::GetUserInteger(const string& Noun,
@@ -830,6 +828,6 @@ bool StoryQuery::GetUserInteger(const string& Noun,
     return true;
   }
   // fall back to values as defined in the story
-  Result.IntValue = QueryStory.FindPage(Noun).PageValues.IntValue;
+  Result.IntValue += QueryStory.FindPage(Noun).PageValues.IntValue;
   return false;
 }

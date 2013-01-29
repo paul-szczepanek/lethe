@@ -83,8 +83,7 @@ bool Session::LoadSnapshot(const size_t Index)
   return true;
 }
 
-/** @brief parse the save file and fill histories
-  * Doesn't load the last snapshot.
+/** @brief parses the save file and fills histories (does't load any snapshot)
   */
 bool Session::Load()
 {
@@ -92,7 +91,7 @@ bool Session::Load()
   const string& savePath = STORY_DIR + SLASH + BookName + SLASH
                            + Filename + SESSION_EXT;
   if (!Disk::Exists(savePath) || !Save.Read(savePath)) {
-    LOG(savePath + " - savefile missing");
+    LOG(savePath + " - save file missing");
     return false;
   }
 
@@ -165,7 +164,6 @@ bool Session::Load()
   // bookmarks
   while (Save.GetLine(buffer)) {
     const size_t index = IntoSizeT(buffer);
-    Save.GetLine(Bookmarks[index].Action);
     string bookmarkDescription;
     while (Save.GetLine(buffer)) {
       bookmarkDescription += buffer;
@@ -243,8 +241,6 @@ const string Session::GetSessionText() const
   // bookmarks, queueindex and description
   for (const auto& value : Bookmarks) {
     text += IntoString(value.first);
-    text += '\n';
-    text += value.second.Action;
     text += '\n';
     text += value.second.Description;
     text += "\n\n";
@@ -454,17 +450,17 @@ Bookmark& Session::CreateBookmark()
 {
   const size_t queueI = CurrentSnapshot > 1? CurrentSnapshot - 2 : 0;
   Bookmark& mark = Bookmarks[queueI];
-  if (mark.Action.empty()) {
+  if (mark.Description.empty()) {
     if (queueI < QueueHistory.size()) {
       const string& queueString = QueueHistory[queueI];
       string noun, verb;
       if (ExtractNounVerb(queueString, noun, verb)) {
-        mark.Action += verb;
-        mark.Action += ' ';
-        mark.Action += noun;
+        mark.Description += verb;
+        mark.Description += ' ';
+        mark.Description += noun;
       }
     } else {
-      mark.Action = "open book";
+      mark.Description = "open book";
     }
   }
   return mark;

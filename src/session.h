@@ -19,7 +19,6 @@ struct Snapshot {
 
 struct Bookmark {
   Bookmark() { };
-  string Action;
   string Description;
 };
 

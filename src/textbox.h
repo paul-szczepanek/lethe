@@ -65,7 +65,7 @@ private:
 public:
   bool HighlightsDirty = true;
   bool PageDirty = true;
-  bool Centered = false;
+  bool CentreMain = false;
   lint PageHeight = 0;
   lint PageWidth = 0;
 

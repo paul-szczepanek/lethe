@@ -55,7 +55,7 @@ void Reader::LoadSettings()
   Settings.GetValue(SKEY_CURRENT_LAYOUT, CurrentLayout);
 
   // font defaults
-  FontNames = { "sans.ttf", "king.ttf", "serif.ttf", "mono.ttf" };
+  FontNames = { "main.ttf", "title.ttf", "quote.ttf", "mono.ttf" };
   FontNames.resize(TEXT_STYLE_MAX);
   // replaced defaults with saved ones if present
   Settings.GetValue(SKEY_FONT_NAMES, FontNames);
@@ -85,11 +85,13 @@ void Reader::SaveSettings()
 
 bool Reader::InitFonts()
 {
-  size_t fonstSizes[TEXT_STYLE_MAX] = { 20, 46, 16, 16 };
+  size_t fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
   Fonts.resize(TEXT_STYLE_MAX);
   const real scale = (real)FontScale / 100.f;
   for (size_t i = 0; i < TEXT_STYLE_MAX; ++i) {
-    if (!Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
+    if (Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
+      Fonts[i].Style = textStyle(i);
+    } else {
       return false;
     }
   }
@@ -108,7 +110,7 @@ void Reader::InitWindows()
   // popups
   VerbMenu.Init(Fonts, FRAME_SOLID, BPP);
   GameDialog.Init(Fonts, FRAME_SOLID, BPP);
-  GameDialog.Centered = true;
+  GameDialog.CentreMain = true;
   GameDialog.SetSize(mainWindowSize);
   // noun menu with minimum width
   QuickMenu.Init(Fonts, FRAME_MENU, BPP);
@@ -118,7 +120,7 @@ void Reader::InitWindows()
   MainText.AspectW = 4;
   // the game menu with centred text
   MainMenu.Init(Fonts, FRAME_SOLID, BPP);
-  MainMenu.Centered = true;
+  MainMenu.CentreMain = true;
   MainMenu.Visible = true;
   MainMenu.SetSize(mainWindowSize);
   // the image window with a fixed aspect ration

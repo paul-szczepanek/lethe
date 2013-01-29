@@ -345,23 +345,31 @@ Currently available functions:
                      values print a comma separated list: `<v1>, <v2>`.
 - `SelectValue(noun:verb)` - print all noun values as value selections.
                              `<noun=v1:verb>, <noun=v2:verb>`.
-- `Bookmark(value)` - silently create a bookmark at current place. The value
-                      will be evaluated to provide the description. If a
-                      bookmark is already present it will not be overwritten.
+- `Bookmark(value)` - silently create a bookmark at current time. A
+                      noun:verb value is expected so it can be used to print
+                      the description. If a bookmark is already present it
+                      will not be overwritten.
 - `Input(noun)` - will show an input box that will set the value of the noun.
                   The buttons on the input box will be the verbs of the noun.
                   If a number is entered, the integer value will be set in
                   addition to the text value. If the noun had a previous
                   value it will be shown in the input box.
 
-Also available but mostly useful in the menu:
+Also available but mostly useful internally in the menu:
 
 - `GetBooks()` - return book names of books in the book folder.
 - `OpenBook(value)` - try and open a book of given name, return true if
                       successful.
 - `CloseBook()` - close the book, save and return to the menu.
 - `IsInGame()` - return true if a book is opened and a session started.
-- `GetSnapshots(#number)` - return a list of snapshots up until #number
+- `GetSnapshots(#number)` - return a list of snapshots up until #number as
+                            text values and the end of range as the integer.
+                            If no number or 0 passed in, it will return the
+                            tail end of values. The number of values is
+                            internally limited.
+- `GetBookmarks(#number)` - Just like GetSnapshots, except with bookmarks.
+- `GetSnapshotIndex()` - return the currently loaded snapshot index as the
+                         integer value.
 - `GetSessionName()` - return the session name currently loaded.
 - `GetSessions(value)` - return user set names of sessions  for the given
                          book title or if no value given for the currently

@@ -687,7 +687,7 @@ void Book::GetBookmarks(Properties& SnapshotItems)
       break;
     }
     const size_t index = mark.first;
-    string entry = IntoString(index) + ". " + mark.second.Description;
+    string entry = IntoString(index+1) + ". " + mark.second.Description;
     if (index == BookSession.CurrentSnapshot - 1) {
       entry += " - present -";
     }

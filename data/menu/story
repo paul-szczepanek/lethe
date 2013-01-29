@@ -17,9 +17,11 @@
   [?IsInGame()] {
    <Continue Playing[menu:close]>
    \n<Manage Session[main:session]>
-   \n\n
+   \n
+  } {
+   Open a book to start:
   }
-  <Open Book[main:books]>
+  \n<Browse Books[main:books]>
   \n<Options[main:options]>
   \n
   \n<Quit[menu:quit]>
@@ -34,10 +36,9 @@
   \n<Back to Main Menu[main:menu]>
 
  [:books]
-  **Choose a Book:**
+  **Choose a Book**
   [!book = GetBooks()]
-  Available books:\n
-  [!SelectValue(book:open)]
+  Available books:\n[!SelectValue(book:open)]
   \n
   \n<Back to Main Menu[main:menu]>
 
@@ -106,7 +107,7 @@
  [:load]
   [!SaveSession()]
   [!session = GetSessions()]
-  **Available sessions:**
+  **Choose Session**
   [!SelectValue(session:open)]
   \n
   \n<Back to Session Menu[game:session]>

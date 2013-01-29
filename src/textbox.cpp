@@ -2,7 +2,6 @@
 #include "reader.h"
 #include "tokens.h"
 
-const Uint16 RIGHT_MARGIN = BLOCK_SIZE;
 const real DRAG_TIMEOUT = 0.1;
 const size_t MAX_TEXT_SIZE = 65536 / 2;
 
@@ -429,7 +428,12 @@ bool TextBox::BreakText()
       Rect lineSize;
       lineSize.W = currentFont->GetWidth(line);
       lineSize.H = currentFont->GetHeight();
-      lineSize.X = Centered ? (PageSize.W - lineSize.W) / 2 : 0;
+      if (currentFont->Style == styleTitle
+          || (currentFont->Style == styleMain && CentreMain)) {
+        lineSize.X = (PageSize.W - lineSize.W) / 2;
+      } else {
+        lineSize.X = 0;
+      }
       lineSize.Y = PageHeight;
       PageWidth = max(PageWidth, lineSize.W);
       // ready for the next line

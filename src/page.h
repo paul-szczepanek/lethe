@@ -10,6 +10,7 @@ struct Block {
   ~Block() { };
   string Expression;
   vector<Block> Blocks;
+  bool Else = false;
 };
 
 struct VerbBlock {
