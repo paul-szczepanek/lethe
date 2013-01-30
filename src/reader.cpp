@@ -2,7 +2,7 @@
 #include "audio.h"
 #include "input.h"
 
-#ifdef LOGGER
+#ifdef DEVBUILD
 #include "disk.h"
 #endif
 
@@ -29,11 +29,8 @@ Reader::Reader(lint ReaderWidth, lint ReaderHeight, int ReaderBPP, bool Sound)
 Reader::~Reader()
 {
   SaveSettings();
-#ifdef LOGGER
-  if (Logger) {
-    delete Logger;
-    Disk::Write("log", GLog);
-  }
+#ifdef DEVBUILD
+  Disk::Write("log", GLog);
 #endif
 }
 
@@ -140,12 +137,14 @@ void Reader::InitWindows()
   // set buttons to reflect game variables
   ReaderButtons.SetButtonState(buttonLayout, CurrentLayout);
 
-#ifdef LOGGER
+#ifdef DEVBUILD
   GLog = "Log";
-  Logger = new TextBox();
-  Logger->Visible = true;
-  Logger->Init(FontSys, "", BPP);
-  Logger->SetText("LOG");
+  Logger.Visible = true;
+  Logger.Init(FontSys, "", BPP);
+  Logger.SetText("LOG");
+  VarView.Visible = false;
+  VarView.Init(FontSys, FRAME_SOLID, BPP);
+  VarView.SetText("variables");
 #endif
 }
 
@@ -252,7 +251,9 @@ bool Reader::ReadBook()
   MainText.ValidateKeywords = PageSource.size();
   // fill the text from the book
   PageSource = MyBook.ProcessStoryQueue();
-  //PageSource += '\n';
+#ifdef DEVBUILD
+  VarViewSource = MyBook.ShowVariables() + GTrace;
+#endif
   QuickMenuSource = MyBook.GetQuickMenu();
   // clear out old keywords
   MainText.ValidKeywords.Reset();
@@ -260,6 +261,7 @@ bool Reader::ReadBook()
   // actually set the received text to be shown
   MainText.AddText(PageSource);
   QuickMenu.SetText(QuickMenuSource);
+
   return true;
 }
 
@@ -305,7 +307,17 @@ bool Reader::ProcessInput(real DeltaTime)
       MainText.Scroll(100);
     } else if (Keys.PgUp) {
       MainText.Scroll(-100);
-    } else if (Keys.Menu || Keys.Escape) {
+#ifdef DEVBUILD
+    } else if (Keys.Console) {
+      VarView.Visible = !VarView.Visible;
+#endif
+    } else if (Keys.Escape) {
+      if (MyBook.MenuOpen) {
+        MyBook.HideMenu();
+      } else {
+        MyBook.ShowMenu();
+      }
+    } else if (Keys.Menu) {
       if (MyBook.MenuOpen) {
         MyBook.HideMenu();
       } else {
@@ -442,6 +454,8 @@ bool Reader::ProcessInput(real DeltaTime)
   return true;
 }
 
+
+
 bool Reader::ShowVerbMenu(const string& VerbsText)
 {
   if (VerbsText.empty()) {
@@ -470,14 +484,21 @@ void Reader::RedrawScreen(real DeltaTime)
   MyBook.DrawImage();
   DrawWindows();
   PrintFPS(DeltaTime);
-#ifdef LOGGER
-  const size_t maxlog = 10240;
+#ifdef DEVBUILD
+  const size_t maxlog = 102400;
   if (GLog.size() > maxlog) {
     GLog = CutString(GLog, GLog.size() - maxlog);
   }
-  Logger->SetText(GLog);
-  Logger->Scroll(10000);
-  Logger->Draw();
+  Logger.SetText(GLog);
+  Logger.Scroll(10000);
+  Logger.Draw();
+  if (VarView.Visible) {
+    VarView.SetSize(Rect(Width, Height));
+    VarView.SetText(VarViewSource);
+    Rect fitSize = VarView.GetTextSize();
+    VarView.SetSize(fitSize);
+    VarView.Draw();
+  }
 #endif
   Surface::SystemDraw();
 }
@@ -686,10 +707,8 @@ size_t Reader::SetLayout(size_t LayoutIndex)
     MyBook.HideImage();
   }
 
-#ifdef LOGGER
-  if (Logger) {
-    Logger->SetSize(MainImage.Size);
-  }
+#ifdef DEVBUILD
+  Logger.SetSize(MainImage.Size);
 #endif
 
   return CurrentLayout;

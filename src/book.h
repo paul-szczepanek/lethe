@@ -75,6 +75,10 @@ public:
   inline bool GetAssetState(const string& AssetName);
   inline void SetAssetState(const string& AssetName, const bool Playing);
 
+#ifdef DEVBUILD
+  const string ShowVariables();
+#endif
+
 private:
   bool AddAssetDefinition(const string& StoryText);
   bool OpenMenu();

@@ -2,8 +2,9 @@
 #include "reader.h"
 #include "input.h"
 
-#ifdef LOGGER
+#ifdef DEVBUILD
 string GLog = "";
+string GTrace = "";
 #endif
 
 int main (int Count, char* Switches[])

@@ -38,10 +38,11 @@ typedef long int lint;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
-#define LOGGER
+#define DEVBUILD
 
-#ifdef LOGGER
+#ifdef DEVBUILD
 extern string GLog;
+extern string GTrace;
 #define LOG(t) { string log = (t); \
   if (log.size() > 0) { GLog = GLog + "\n" + log; } };
 #else

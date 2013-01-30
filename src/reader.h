@@ -106,8 +106,10 @@ private:
   real Timeout = 0;
   real TimeoutTimer = 0;
 
-#ifdef LOGGER
-  TextBox* Logger = NULL;
+#ifdef DEVBUILD
+  TextBox Logger;
+  TextBox VarView;
+  string VarViewSource;
 #endif
 };
 

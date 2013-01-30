@@ -386,6 +386,9 @@ string Book::ProcessMenuQueue()
 const string Book::ProcessQueue(Story& MyStory,
                                 Session& MySession)
 {
+#ifdef DEVBUILD
+  GTrace.clear();
+#endif
   Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
@@ -404,6 +407,9 @@ const string Book::ProcessQueue(Story& MyStory,
     actions.Reset();
     const string& expression = pool.TextValues[i];
     actions.AddValue(expression);
+#ifdef DEVBUILD
+    GTrace += "\n[!" + expression + "] -------- trace:";
+#endif
     // call the actions scheduled for every turn
     query.ExecuteExpression(CALLS, CALLS_CONTENTS);
     // only one value present in QUEUE during this execution,
@@ -629,6 +635,20 @@ const string Book::GetSessionName()
 {
   return BookSession.Name;
 }
+
+#ifdef DEVBUILD
+const string Book::ShowVariables()
+{
+  string variables;
+  for (const auto& value : BookSession.UserValues) {
+    variables += value.first;
+    variables +=  ": ";
+    variables += value.second.PrintValues();
+    variables +=  '\n';
+  }
+  return variables;
+}
+#endif
 
 const string Book::GetFreeSessionFilename(const string& Path)
 {

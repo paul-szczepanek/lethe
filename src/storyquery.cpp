@@ -24,6 +24,9 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
 
   // if there are no child blocks it must be an [!instruction]
   if (length && CurBlock.Blocks.empty()) {
+#ifdef DEVBUILD
+    GTrace +=  " " + expression;
+#endif
     const size_t_pair tokenPos = FindToken(expression, token::expression);
     const char c = expression[tokenPos.X+1];
 
@@ -44,6 +47,9 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
     }
   } else { // we have children so this must be a [?condition]
     if (length == 0 || ExecuteExpression(Noun, expression)) {
+#ifdef DEVBUILD
+      GTrace += "\n" + expression;
+#endif
       // if the condition is true, execute all the child blocks
       bool executeElse = false;
       for (size_t i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
@@ -367,7 +373,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   size_t valuePos = 0;
   size_t valueEnd = 0; // needed because function names vary in length
   vector<OperationNode> opStack;
-  opStack.reserve(16); // too avoid constant allocs
+  opStack.reserve(16); // too avoid constant allocations
 
   // parse expressions like a+@b-func(arg)-#1
   // into an array of pairs like this
@@ -795,7 +801,6 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           textArgs.clear();
         }
         break;
-
       case bookFunctionGetSnapshots:
         // return snapshots with descriptions, range based on the int value
         textArgs.clear();

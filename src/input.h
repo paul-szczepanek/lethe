@@ -31,6 +31,9 @@ struct KeysState {
     Undo = false;
     Redo = false;
     Quit = false;
+#ifdef DEVBUILD
+    Console = false;
+#endif
   }
   char Letter = '?';
   bool InputMode = false;
@@ -47,6 +50,9 @@ struct KeysState {
   bool Undo = false;
   bool Redo = false;
   bool Quit = false;
+#ifdef DEVBUILD
+  bool Console = false;
+#endif
 };
 
 class Input

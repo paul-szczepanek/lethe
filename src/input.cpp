@@ -82,6 +82,10 @@ bool Input::Tick(MouseState& Mouse,
             Keys.PgUp = true;
           } else if (key == SDLK_u) {
             Keys.Undo = true;
+#ifdef DEVBUILD
+          } else if (key == SDLK_BACKQUOTE) {
+            Keys.Console = true;
+#endif
           } else if (key == SDLK_r) {
             Keys.Redo = true;
           }
