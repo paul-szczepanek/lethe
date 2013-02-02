@@ -22,11 +22,11 @@ public:
 
   static bool SystemInit();
 
-  bool Init(const string& Filename, const size_t Size);
+  bool Init(const string& Filename, csz Size);
   lint GetHeight() const;
   lint GetLineSkip() const;
   lint GetWidth(const string& Text) const;
-  size_t_pair GetSize(const string& Text) const;
+  sz_pair GetSize(const string& Text) const;
 
 
 public:

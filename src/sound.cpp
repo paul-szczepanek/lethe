@@ -8,7 +8,7 @@ Sound::Sound(MediaManager& Manager,
   : Asset(Manager, AssetName)
 {
   const string& params = GetCleanWhitespace(Params);
-  size_t volPos = FindCharacter(params, ',');
+  sz volPos = FindCharacter(params, ',');
   Filename = Media.AssetDir + CutString(params, 0, volPos);
   if (volPos != string::npos) {
     const string& vol = CutString(params, volPos);

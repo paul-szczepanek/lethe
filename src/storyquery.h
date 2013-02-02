@@ -20,8 +20,9 @@ public:
       QuerySession(Progress) { };
   ~StoryQuery() { };
 
-  bool ExecuteExpression(const string& Noun, const string& Expression);
-  size_t ExecuteBlock(const string& Noun, const Block& CurBlock);
+  sz ExecuteBlock(const string& Noun, const Block& CurBlock);
+  bool ExecuteExpression(const string& Noun, const string& Expression,
+                         bool Condition = false);
 
   Properties GetVerbs(const string& Noun);
 

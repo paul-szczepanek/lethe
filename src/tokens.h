@@ -10,17 +10,14 @@ const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
 
-const string CONTENTS_START = "[!@";
-const string CONTENTS_END = "]";
-const string INSTRUCTION_START = "[!";
-const string INSTRUCTION_END = "]";
+const string CONTENTS_START = "@";
 
-const string QUEUE_CONTENTS = CONTENTS_START + "QUEUE" + CONTENTS_END;
-const string NOUNS_CONTENTS = CONTENTS_START + "NOUNS" + CONTENTS_END;
-const string PLACE_CONTENTS = CONTENTS_START + "PLACE" + CONTENTS_END;
-const string EXITS_CONTENTS = CONTENTS_START + "EXITS" + CONTENTS_END;
-const string CALLS_CONTENTS = CONTENTS_START + "CALLS" + CONTENTS_END;
-const string QUICK_CONTENTS = CONTENTS_START + "QUICK" + CONTENTS_END;
+const string QUEUE_CONTENTS = CONTENTS_START + QUEUE;
+const string NOUNS_CONTENTS = CONTENTS_START + NOUNS;
+const string PLACE_CONTENTS = CONTENTS_START + PLACE;
+const string EXITS_CONTENTS = CONTENTS_START + EXITS;
+const string CALLS_CONTENTS = CONTENTS_START + CALLS;
+const string QUICK_CONTENTS = CONTENTS_START + QUICK;
 
 enum bookFunction {
   bookFunctionSize,
@@ -91,13 +88,12 @@ const string ButtonTypeNames[BUTTON_TYPE_MAX] = {
 
 namespace token
 {
-const size_t NUM_TOKENS_INSTRUCTION = 4;
-const size_t NUM_TOKENS_CONDITION = 8;
-const size_t NUM_SPACE_REMOVERS = 4;
-const size_t NUM_EXPRESSION_SPACE_REMOVERS = 18;
+csz NUM_TOKENS_INSTRUCTION = 4;
+csz NUM_TOKENS_CONDITION = 8;
+csz NUM_SPACE_REMOVERS = 20;
 
-const size_t isPaired = 0x0001;
-const size_t isWide   = 0x0002;
+csz isPaired = 0x0001;
+csz isWide   = 0x0002;
 
 enum operationName {
   plus,
@@ -123,8 +119,10 @@ const char Operations[OPERATION_NAME_MAX] = {
 enum tokenName {
   comment,
 
+  asset,
+  noun,
   keyword,
-  expression,
+  textBlock,
 
   condition,
   instruction,
@@ -155,10 +153,6 @@ enum tokenName {
   block,
   stop,
 
-  keywordBlock,// not a real token, marks start and end of keyword defs
-  verbBlock,   // not a real token, marks start of a verb block
-  assetBlock,  // not a real token, marks start of a verb block
-
   styleTitle,
   styleMono,
   styleQuote,
@@ -169,8 +163,10 @@ enum tokenName {
 const char Start[TOKEN_NAME_MAX] = {
   '/',    //comment,
 
+  '$',    //asset
+  '[',    //noun,
   '<',    //keyword,
-  '[',    //expression,
+  '"',    //textBlock,
 
   '?',    //condition, cannot be wide
   '!',    //instruction, cannot be wide
@@ -201,10 +197,6 @@ const char Start[TOKEN_NAME_MAX] = {
   '{',    //block,
   '<',    //stop
 
-  '[',    //keywordBlock,
-  '[',    //verbBlock,
-  '[',    //assetBlock,
-
   '*',    //styleTitle,
   '=',    //styleMono,
   '_'     //styleQuote,
@@ -213,8 +205,10 @@ const char Start[TOKEN_NAME_MAX] = {
 const char End[TOKEN_NAME_MAX] = {
   '/',    //comment,
 
+  ' ',    //asset,
+  ']',    //noun,
   '>',    //keyword,
-  ']',    //expression,
+  '"',    //textBlock,
 
   ' ',    //condition,
   ' ',    //instruction,
@@ -245,20 +239,18 @@ const char End[TOKEN_NAME_MAX] = {
   '}',    //block,
   '<',    //stop,
 
-  '<',    //keywordBlock,
-  ':',    //verbBlock,
-  '$',    //assetBlock,
-
   '*',    //styleTitle,
   '=',    //styleMono,
   '_'     //styleQuote,
 };
 
-const size_t Type[TOKEN_NAME_MAX] = {
+csz Type[TOKEN_NAME_MAX] = {
   isWide,       //comment,
 
+  0,            //asset,
+  isPaired,     //noun,
   isPaired,     //keyword,
-  isPaired,     //expression,
+  isPaired,     //textBlock,
 
   0,            //condition,
   0,            //instruction,
@@ -289,10 +281,6 @@ const size_t Type[TOKEN_NAME_MAX] = {
   isPaired,     //block,
   isWide,       //stop,
 
-  isWide,       //keywordBlock,
-  isWide,       //verbBlock,
-  isWide,       //assetBlock,
-
   isWide|isPaired, //styleTitle,
   isWide|isPaired, //styleMono,
   isWide|isPaired  //styleQuote,
@@ -317,43 +305,38 @@ const tokenName Instructions[NUM_TOKENS_INSTRUCTION] = {
 };
 
 const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
-  '{',
-  '}',
-  '&',
-  '|',
-};
-
-const char ExpressionWhitespaceRemovers[NUM_EXPRESSION_SPACE_REMOVERS] = {
-  '{',
-  '}',
-  '<',
-  '>',
-  '&',
-  '|',
-  '+',
-  '=',
+  ':',
   '?',
   '!',
   '#',
   '@',
   '-',
-  ':',
+  '+',
+  '=',
   ',',
-  '$',
+  '<',
+  '>',
+  '{',
+  '}',
   '(',
-  ')'
+  ')',
+  '[',
+  ']',
+  '&',
+  '|',
+  '$'
 };
 
 } // namespace token
 
-size_t_pair FindToken(const string& Text, token::tokenName TokenName,
-                      size_t Start = 0, size_t End = 0);
-size_t FindTokenStart(const string& Text, token::tokenName TokenName,
-                      size_t Start = 0, size_t End = 0);
-size_t FindTokenEnd(const string& Text, token::tokenName TokenName,
-                    size_t Start = 0, size_t End = 0);
-size_t FindCharacter(const string& Text, char Char,
-                     size_t Start = 0, size_t End = 0);
+sz_pair FindToken(const string& Text, token::tokenName TokenName,
+                      sz Start = 0, sz End = 0);
+sz FindTokenStart(const string& Text, token::tokenName TokenName,
+                      sz Start = 0, sz End = 0);
+sz FindTokenEnd(const string& Text, token::tokenName TokenName,
+                    sz Start = 0, sz End = 0);
+sz FindCharacter(const string& Text, char Char,
+                     sz Start = 0, sz End = 0);
 void CleanWhitespace(string& Text);
 string CleanEscapeCharacters(const string& Text);
 void StripComments(string& Text);
@@ -368,7 +351,7 @@ inline string GetCleanWhitespace(const string& Text)
 inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
 {
   if (!Text.empty()) {
-    const size_t scopePos = FindTokenStart(Text, token::scope);
+    csz scopePos = FindTokenStart(Text, token::scope);
     if (scopePos != string::npos) { // recurse with the new block
       if (scopePos) {
         Noun = CutString(Text, 0, scopePos);
@@ -383,7 +366,7 @@ inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
 }
 
 // handy text parsing function for escaping special chars
-inline bool IsEscaped(const string& Text, size_t Pos)
+inline bool IsEscaped(const string& Text, sz Pos)
 {
   if (Pos > 0) {
     return (Text[Pos-1] == '\\');
@@ -392,7 +375,7 @@ inline bool IsEscaped(const string& Text, size_t Pos)
   }
 }
 
-inline bool IsSpecial(const string& Text, size_t Pos, char token)
+inline bool IsSpecial(const string& Text, sz Pos, char token)
 {
   if ((Pos > 0) && (Text[Pos-1] == '\\')) {
     return false;

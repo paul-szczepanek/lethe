@@ -75,6 +75,8 @@
 		<Unit filename="mediamanager.h" />
 		<Unit filename="page.cpp" />
 		<Unit filename="page.h" />
+		<Unit filename="pageparser.cpp" />
+		<Unit filename="pageparser.h" />
 		<Unit filename="properties.cpp" />
 		<Unit filename="properties.h" />
 		<Unit filename="reader.cpp" />

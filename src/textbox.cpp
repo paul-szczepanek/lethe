@@ -3,14 +3,14 @@
 #include "tokens.h"
 
 const real DRAG_TIMEOUT = 0.1;
-const size_t MAX_TEXT_SIZE = 65536 / 2;
+csz MAX_TEXT_SIZE = 65536 / 2;
 
 void TextBox::Init(vector<Font>& TextBoxFonts,
                    const string& Frame,
                    const int Bpp)
 {
   WindowBox::Init(Frame, Bpp);
-  for (size_t i = 0, fSz = TEXT_STYLE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = TEXT_STYLE_MAX; i < fSz; ++i) {
     Font& font = TextBoxFonts[min(i, TextBoxFonts.size())];
     Fonts.push_back(&font);
   }
@@ -54,8 +54,8 @@ void TextBox::ResetText()
   // trim text far off the screen
   if (Text.size() > MAX_TEXT_SIZE) {
     // to avoid constant resets
-    const size_t limit = Text.size() - (MAX_TEXT_SIZE / 2);
-    const size_t cut = FindCharacter(Text, '\n', limit);
+    csz limit = Text.size() - (MAX_TEXT_SIZE / 2);
+    csz cut = FindCharacter(Text, '\n', limit);
     Text = CutString(Text, cut+1);
   }
 
@@ -121,7 +121,7 @@ bool TextBox::HandleInput(MouseState& Mouse,
                           const real DeltaTime)
 {
   bool inside = (Mouse.Left || Mouse.LeftUp) && Visible;
-  size_t newSelected = Keywords.size();
+  sz newSelected = Keywords.size();
   // no click has the same effect as being outside
   if (inside) {
     if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
@@ -133,7 +133,7 @@ bool TextBox::HandleInput(MouseState& Mouse,
       const lint X = Mouse.X - PageSize.X;
       const lint Y = Mouse.Y - (PageSize.Y - Pane.Y );
       // find selected keyword
-      for (size_t i = 0, fSz = Keywords.size(); i < fSz; ++i) {
+      for (sz i = 0, fSz = Keywords.size(); i < fSz; ++i) {
         if ((Keywords[i].Size.X < X)
             && (Keywords[i].Size.Y < Y)
             && (X < Keywords[i].Size.X + Keywords[i].Size.W)
@@ -195,35 +195,36 @@ void TextBox::Scroll(lint PaneScroll)
 }
 
 struct FontChange {
-  FontChange(Font* _LineFont, size_t _Position)
-    : LineFont(_LineFont), Position(_Position) {}
+  FontChange(Font* _LineFont, sz _Position)
+    : LineFont(_LineFont), Position(_Position) { };
   Font* LineFont;
-  size_t Position;
+  sz Position;
 };
 
 /** @brief Word wrap and find keywords, fills in Lines and Keywords
   */
 bool TextBox::BreakText()
 {
-  size_t pos = 0;
-  size_t length = Text.size();
-  vector<size_t_pair> keywordPos;
+  sz pos = 0;
+  sz length = Text.size();
+  vector<sz_pair> keywordPos;
   vector<string> keywordNames;
+  vector<bool> activeKeywords;
   string cleaned;
   string realName;
-  size_t skip = 0; // characters skipped
   // record keywords and their positions and remove syntax symbols
   while(pos < length) {
     // keywordPos store the positions in the cleaned string and need fixing
-    size_t_pair namePos = FindToken(Text, token::keyword, pos);
+    sz_pair namePos = FindToken(Text, token::keyword, pos);
     // quit if no more keywords
     if (namePos.X == string::npos) {
       break;
     }
-    const size_t_pair realNamePos = FindToken(Text, token::expression,
-                                    pos, namePos.Y);
+
+    csz_pair realNamePos = FindToken(Text, token::noun, pos, namePos.Y);
     // copy up to the keyword
     cleaned += CutString(Text, pos, namePos.X);
+
     pos = namePos.Y + 1;
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
@@ -238,22 +239,15 @@ bool TextBox::BreakText()
     const bool validKeyword = pos < ValidateKeywords ?
                               ValidKeywords.ContainsValue(realName)
                               : true;
-    if (validKeyword) {
-      keywordNames.push_back(realName);
-    }
+    keywordNames.push_back(realName);
+    activeKeywords.push_back(validKeyword);
 
-    // copy the keyword
+    sz_pair keyPos;
+    // copy the keyword and record its starting and ending position in cleaned
+    keyPos.X = cleaned.size();
     cleaned += CutString(Text, namePos.X+1, namePos.Y);
-    // fix up the position for after removing the tokens and real name
-    namePos.X -= skip;
-    namePos.Y -= ++skip; // +1 for opening <
-    if (realNamePos.X != string::npos) {
-      skip += realNamePos.Y - realNamePos.X + 1;
-    }
-    ++skip; // +1 for closing >
-    if (validKeyword) {
-      keywordPos.push_back(namePos);
-    }
+    keyPos.Y = cleaned.size();
+    keywordPos.push_back(keyPos);
   }
 
   // add remaining characters after the last keyword
@@ -267,10 +261,10 @@ bool TextBox::BreakText()
   pos = 0;
   // record font changes and strip the formatting
   while(pos < length) {
-    const size_t_pair& titlePos = FindToken(cleaned, token::styleTitle, pos);
-    const size_t_pair& quotePos = FindToken(cleaned, token::styleQuote, pos);
-    const size_t_pair& monoPos = FindToken(cleaned, token::styleMono, pos);
-    size_t_pair changePos;
+    csz_pair& titlePos = FindToken(cleaned, token::styleTitle, pos);
+    csz_pair& quotePos = FindToken(cleaned, token::styleQuote, pos);
+    csz_pair& monoPos = FindToken(cleaned, token::styleMono, pos);
+    sz_pair changePos;
     Font* lineFont;
 
     // find which formatting is closest
@@ -300,13 +294,15 @@ bool TextBox::BreakText()
     } else if (changePos.X != changePos.Y - 3) {
       plain += CutString(cleaned, pos, changePos.X);
       // insert a newline in front to make sure it breaks
-      if (!plain.empty()) {
-        if (plain[plain.size()-1] == ' ') {
-          plain[plain.size()-1] = '\n';
-        } else if (plain[plain.size()-1] != '\n') {
-          ShiftPositions(keywordPos, plain.size(), 1);
-          plain += '\n';
-        }
+      csz plainLength = plain.size();
+      if (plainLength && plain[plainLength-1] == ' ') {
+        plain[plainLength-1] = '\n';
+        ShiftPositions(keywordPos, plainLength, -2);
+      } else if (plainLength && plain[plainLength-1] != '\n') {
+        ShiftPositions(keywordPos, plainLength, -1);
+        plain += '\n';
+      } else {
+        ShiftPositions(keywordPos, plainLength, -2);
       }
       // move beyond the formatting
       pos = changePos.Y + 1;
@@ -318,17 +314,20 @@ bool TextBox::BreakText()
         fontChanges.push_back(FontChange(lineFont, plain.size()));
       }
       // remove the formatting from text
-      ShiftPositions(keywordPos, plain.size(), -2);
+      //ShiftPositions(keywordPos, plain.size(), -2);
       plain += CutString(cleaned, changePos.X + 2, changePos.Y - 1);
-      ShiftPositions(keywordPos, plain.size(), -2);
+      //ShiftPositions(keywordPos, plain.size(), -2);
       // and another newline at the end of formatting
       if (cleaned.size() > changePos.Y + 1) {
         if (cleaned[changePos.Y + 1] == ' ') {
+          ShiftPositions(keywordPos, plain.size(), -2);
           plain += '\n';
           ++pos; // newline overwrites the space
         } else if (cleaned[changePos.Y + 1] != '\n') {
-          ShiftPositions(keywordPos, plain.size(), -2);
+          ShiftPositions(keywordPos, plain.size(), -1);
           plain += '\n';
+        } else {
+          ShiftPositions(keywordPos, plain.size(), -2);
         }
       }
       fontChanges.push_back(FontChange(Fonts[styleMain], plain.size()));
@@ -336,7 +335,8 @@ bool TextBox::BreakText()
   }
 
   length = plain.size();
-  skip = pos = 0;
+  sz skip = 0;
+  pos = 0;
   // remove escape characters
   while(pos < length) {
     const char c = plain[pos];
@@ -346,7 +346,7 @@ bool TextBox::BreakText()
         plain[pos - skip] = plain[pos];
       }
       // fix the  keyword positions that are beyond this position
-      for (size_t i = 0, fSz = keywordPos.size(); i < fSz; ++i) {
+      for (sz i = 0, fSz = keywordPos.size(); i < fSz; ++i) {
         if (keywordPos[i].X > pos) {
           --keywordPos[i].X;
         }
@@ -365,11 +365,11 @@ bool TextBox::BreakText()
   }
 
   bool firstWord = true;
-  size_t fontChangeI = 0;
-  size_t lastLineEnd = 0;
-  size_t lastPos = 0;
+  sz fontChangeI = 0;
+  sz lastLineEnd = 0;
+  sz lastPos = 0;
   Font* currentFont = Fonts[styleMain];
-  size_t oldLineSkip = currentFont->GetLineSkip();
+  sz oldLineSkip = currentFont->GetLineSkip();
   pos = 0;
   length = plain.size();
 
@@ -384,14 +384,14 @@ bool TextBox::BreakText()
     }
     bool flush = false;
     //find space
-    size_t space = plain.find(' ', pos);
+    sz space = plain.find(' ', pos);
     // if end of text
     if (space == string::npos) {
       space = length;
       flush = true;
     }
     // find newline
-    size_t newline = plain.find('\n', pos);
+    sz newline = plain.find('\n', pos);
     if (newline == string::npos) {
       newline = length;
     }
@@ -421,7 +421,7 @@ bool TextBox::BreakText()
     firstWord = false;
     if (flush || !(pos < length)) { // || in case there's a space at the end
       // use the larger line skip
-      const size_t lineSkip = currentFont->GetLineSkip();
+      csz lineSkip = currentFont->GetLineSkip();
       PageHeight += max(oldLineSkip, lineSkip);
       oldLineSkip = lineSkip;
       // size up the line
@@ -447,15 +447,15 @@ bool TextBox::BreakText()
 
   lastLineEnd = 0;
   // record visual keyword positions
-  for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
+  for (sz i = 0, fSz = Lines.size(); i < fSz; ++i) {
     const string& lineText = Lines[i].Text;
     const Font& lineFont = *(Lines[i].LineFont);
     const Rect& lineSize = Lines[i].Size;
-    const size_t lineLength = lineText.size() + 1;
-    const size_t lineEnd = lastLineEnd + lineLength;
+    csz lineLength = lineText.size() + 1;
+    csz lineEnd = lastLineEnd + lineLength;
 
-    for (size_t j = 0, fSz = keywordPos.size(); j < fSz; ++j) {
-      const size_t_pair& keyPos = keywordPos[j];
+    for (sz j = 0, fSz = keywordPos.size(); j < fSz; ++j) {
+      csz_pair& keyPos = keywordPos[j];
       // check if this keyword is on this line
       if (keyPos.X >= lineEnd) {
         // since this keyword begins after the current line we can stop looking
@@ -466,8 +466,8 @@ bool TextBox::BreakText()
         // they can also be split across multiple lines
         KeywordMap newKey(keywordNames[j]);
         // get positions relative to line start
-        const size_t beg = keyPos.X < lastLineEnd? 0 : keyPos.X - lastLineEnd;
-        const size_t end = keyPos.Y > lineEnd?
+        csz beg = keyPos.X < lastLineEnd? 0 : keyPos.X - lastLineEnd;
+        csz end = keyPos.Y > lineEnd?
                            lineLength : keyPos.Y - lastLineEnd;
         // find where the keyword starts
         newKey.Size.X = lineSize.X;
@@ -480,6 +480,7 @@ bool TextBox::BreakText()
         const string& keywordEnd = CutString(lineText, beg, end);
         newKey.Size.W = lineFont.GetWidth(keywordEnd);
         newKey.Size.H = lineSize.H;
+        newKey.Active = activeKeywords[j];
         Keywords.push_back(newKey);
       }
     }
@@ -503,7 +504,7 @@ void TextBox::RefreshPage()
     PageDirty = false;
     if (PageHeight) {
       PageSurface.Init(PageSize.W, PageSize.H);
-      for (size_t i = 0, fSz = Lines.size(); i < fSz; ++i) {
+      for (sz i = 0, fSz = Lines.size(); i < fSz; ++i) {
         TextLine& line =  Lines[i];
         Rect offsetLocation = line.Size;
         offsetLocation.Y -= Pane.Y;
@@ -527,7 +528,7 @@ void TextBox::RefreshHighlights()
     if (PageHeight) {
       Highlights.Init(PageSize.W, PageSize.H);
       // paint a rectangle behind each keyword
-      for (size_t i = 0, forSize = Keywords.size(); i < forSize; ++i) {
+      for (sz i = 0, forSize = Keywords.size(); i < forSize; ++i) {
         // change colour for the selected keyword
         usint highlightColour = (i == SelectedKeyword) ? 150 : 50;
         Rect offsetLocation = Keywords[i].Size;

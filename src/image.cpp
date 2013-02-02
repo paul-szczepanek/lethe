@@ -8,19 +8,19 @@ Image::Image(MediaManager& Manager,
   : Asset(Manager, AssetName)
 {
   string params = GetCleanWhitespace(Params);
-  size_t xPos = FindCharacter(params, ',');
+  sz xPos = FindCharacter(params, ',');
   Filename = Media.AssetDir + CutString(params, 0, xPos);
   if (xPos != string::npos) {
     Priority = 1;
-    size_t yPos = FindCharacter(params, ',', ++xPos);
+    sz yPos = FindCharacter(params, ',', ++xPos);
     const string& x = CutString(params, xPos, yPos);
     X = IntoReal(x);
     if (yPos != string::npos) {
-      size_t zoomPos = FindCharacter(params, ',', ++yPos);
+      sz zoomPos = FindCharacter(params, ',', ++yPos);
       const string& y = CutString(params, yPos, zoomPos);
       Y = IntoReal(y);
       if (zoomPos != string::npos) {
-        size_t orderPos = FindCharacter(params, ',', ++zoomPos);
+        sz orderPos = FindCharacter(params, ',', ++zoomPos);
         const string& zoom = CutString(params, zoomPos, orderPos);
         Zoom = IntoReal(zoom);
         if (orderPos != string::npos) {

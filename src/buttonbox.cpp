@@ -8,7 +8,7 @@ Button::Button(const buttonType _Function) : Function(_Function)
   vector<string> surfaceNames = Disk::GetFileSeries(BUTTONS_DIR, stem);
 
   ButtonSurfaces.resize(surfaceNames.size());
-  for (size_t i = 0, fSz = surfaceNames.size(); i < fSz; ++i) {
+  for (sz i = 0, fSz = surfaceNames.size(); i < fSz; ++i) {
     const string& name = surfaceNames[i];
     Surface& newSurface = ButtonSurfaces[i];
     newSurface.LoadImage(BUTTONS_DIR + SLASH + name);
@@ -23,14 +23,14 @@ Button::Button(const buttonType _Function) : Function(_Function)
 bool ButtonBox::HandleInput(MouseState& Mouse)
 {
   bool inside = (Mouse.Left || Mouse.LeftUp) && Visible;
-  size_t newSelectedButton = Buttons.size();
+  sz newSelectedButton = Buttons.size();
   if (inside) {
     if ((Mouse.X < Size.X) || (Mouse.X > Size.X + Size.W)
         || (Mouse.Y < Size.Y) || (Mouse.Y > Size.Y + Size.H)) {
       inside = false;
     } else {
       // find the clicked button
-      for (size_t i = 0, fSz = Buttons.size(); i < fSz; ++i) {
+      for (sz i = 0, fSz = Buttons.size(); i < fSz; ++i) {
         const Button& button = Buttons[i];
         if (button.Visible && (button.Size.X < Mouse.X)
             && (button.Size.Y < Mouse.Y)
@@ -60,7 +60,7 @@ bool ButtonBox::HandleInput(MouseState& Mouse)
 }
 
 bool ButtonBox::SetButtonState(const buttonType Selected,
-                               const size_t State)
+                               csz State)
 {
   for (Button& button : Buttons) {
     if (button.Function == Selected) {
@@ -74,7 +74,7 @@ bool ButtonBox::SetButtonState(const buttonType Selected,
 /** @brief Return the currently selected button and make the state change hold
   */
 bool ButtonBox::GetSelectedButton(buttonType& Selected,
-                                  size_t& State)
+                                  sz& State)
 {
   if (SelectedButton < Buttons.size()) {
     Selected = Buttons[SelectedButton].Function;
@@ -97,7 +97,7 @@ void ButtonBox::Draw()
 {
   if (Visible) {
     DrawFrame();
-    for (size_t i = 0, fSz = Buttons.size(); i < fSz; ++i) {
+    for (sz i = 0, fSz = Buttons.size(); i < fSz; ++i) {
       Button& button = Buttons[i];
       if (button.Visible) {
         button.ButtonSurfaces[button.State].Draw(button.Size);
@@ -115,7 +115,7 @@ void ButtonBox::Reset()
   lint allH = 0;
   lint maxW = 0;
   lint maxH = 0;
-  for (size_t i = 0, fSz = Buttons.size(); i < fSz; ++i) {
+  for (sz i = 0, fSz = Buttons.size(); i < fSz; ++i) {
     Button& button = Buttons[i];
     // hide the ones we can't fit
     if ((vertical && allH + button.Size.H > Size.H)
@@ -138,7 +138,7 @@ void ButtonBox::Reset()
   const real scaleH = vertical?
                       (real)Size.H / (real)allH
                       : (real)Size.H / (real)maxH;
-  for (size_t i = 0, fSz = Buttons.size(); i < fSz; ++i) {
+  for (sz i = 0, fSz = Buttons.size(); i < fSz; ++i) {
     Button& button = Buttons[i];
     button.Size.X = X;
     button.Size.Y = Y;

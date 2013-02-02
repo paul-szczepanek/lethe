@@ -37,6 +37,8 @@ typedef unsigned long int ulint;
 typedef long int lint;
 typedef unsigned int uint;
 typedef unsigned char uchar;
+typedef const size_t csz;
+typedef size_t sz;
 
 #define DEVBUILD
 
@@ -67,7 +69,7 @@ const char BACKSPACE_CHAR = (char)8;
 
 const lint BLOCK_SIZE = 32;
 
-typedef struct Colour {
+struct Colour {
   Colour() { };
   Colour(usint _R, usint _G, usint _B, usint _A)
     : R(_R), G(_G), B(_B), A(_A) { };
@@ -75,9 +77,9 @@ typedef struct Colour {
   usint G = 255;
   usint B = 255;
   usint A = 255;
-} Colour;
+};
 
-typedef struct string_pair {
+struct string_pair {
   string_pair(string _X, string _Y) : X(_X), Y(_Y) { };
   string_pair() { };
   void clear() {
@@ -90,26 +92,29 @@ typedef struct string_pair {
   bool full() {
     return (!X.empty() && !Y.empty());
   };
-  size_t size();
+  sz size();
   const char* c_str();
   string X;
   string Y;
-} string_pair;
+};
 
-typedef struct size_t_pair {
+struct size_t_pair {
   size_t_pair() { };
-  size_t_pair(size_t _X, size_t _Y) : X(_X), Y(_Y) { };
-  size_t X = 0;
-  size_t Y = 0;
-} size_t_pair;
-typedef struct real_pair {
+  size_t_pair(sz _X, sz _Y) : X(_X), Y(_Y) { };
+  sz X = 0;
+  sz Y = 0;
+};
+typedef size_t_pair sz_pair;
+typedef const size_t_pair csz_pair;
+
+struct real_pair {
   real_pair() { };
   real_pair(real _X, real _Y) : X(_X), Y(_Y) { };
   real X = 0;
   real Y = 0;
-} real_pair;
+};
 
-typedef struct Rect {
+struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
   Rect(lint _W, lint _H, lint _X = 0, lint _Y = 0)
     : W(_W), H(_H), X(_X), Y(_Y) { };
@@ -134,7 +139,7 @@ typedef struct Rect {
   lint H;
   lint X;
   lint Y;
-} Rect;
+};
 
 template <typename T> inline string IntoString(const T& Thing)
 {
@@ -161,10 +166,10 @@ template <typename T> inline int IntoInt(const T& Thing)
   return integer;
 }
 
-template <typename T> inline size_t IntoSizeT(const T& Thing)
+template <typename T> inline sz IntoSizeT(const T& Thing)
 {
   stringstream stream;
-  size_t integer;
+  sz integer;
   stream << Thing;
   stream >> integer;
   return integer;
@@ -180,8 +185,8 @@ inline string RealIntoString(const real a_real,
 
 // cutString("01234", 2, 4) returns "23"
 inline string CutString(const string Text,
-                        const size_t Start,
-                        const size_t End = string::npos)
+                        csz Start,
+                        csz End = string::npos)
 {
   return Text.substr(Start, End - Start);
 }

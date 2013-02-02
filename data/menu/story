@@ -1,234 +1,237 @@
-[<QUEUE>]
 
 //**********************************
 
-[<menu>]
+[ menu  = value, #3 ] 
  [:close]
-  [!CloseMenu()]
+  !CloseMenu()
  [:quit]
-  [!Quit()]
-  Settings and sessions saved, goodbye.
+  !Quit()
+  "Settings and sessions saved, goodbye."
 
 //**********************************
 
-[<main>]
+[main]
  [:menu]
-  **Game Menu**
-  [?IsInGame()] {
-   <Continue Playing[menu:close]>
+  "**Game Menu**"
+  "this is a breakline
+   space test"
+  ?IsInGame() {
+   "<Continue Playing[menu:close]>
    \n<Manage Session[main:session]>
-   \n
+   \n"
   } {
-   Open a book to start:
+   "Open a book to start:"
   }
-  \n<Browse Books[main:books]>
+  "\n<Browse Books[main:books]>
   \n<Options[main:options]>
   \n
-  \n<Quit[menu:quit]>
+  \n<Quit[menu:quit]>"
 
- [:options] 
-  **Options**
+ [:text]
+  "some text"
+
+ [:options]
+  "**Options**
   font size
   \nfont colour
   \nUI size
   \ntext only mode
   \n
-  \n<Back to Main Menu[main:menu]>
+  \n<Back to Main Menu[main:menu]>"
 
  [:books]
-  **Choose a Book**
-  [!book = GetBooks()]
-  Available books:\n[!SelectValue(book:open)]
-  \n
-  \n<Back to Main Menu[main:menu]>
+  "**Choose a Book**"
+  !book = GetBooks()
+  "Available books:\n"
+  !SelectValue(book:open)
+  "\n\n<Back to Main Menu[main:menu]>"
 
  [:session]
-  **Session**
+  "**Session**
   <Branch this session[session:branch]>
   \n<Change session name[session:change name]>
   \n<Load old session[main:load]>
   \n<Session History[main:history]>
   \n
-  \n<Back to Main Menu[main:menu]>
+  \n<Back to Main Menu[main:menu]>"
 
  [:history]
-  [!history=#99999999]
-  [!:browse history]
+  !history=#99999999
+  !:browse history
 
  [:browse history]
-  **History**
-  <Older History[main:history prev]>\n
-  [!history:menu]
-  \n<More Recent History[main:history next]>
-  [?#bookmarks only=#1] {
-   \n\n<Show All Steps[main:bookmarks off]>
+  "**History**
+  <Older History[main:history prev]>\n"
+  !history:menu
+  "\n<More Recent History[main:history next]>"
+  ?#bookmarks only=#1 {
+   "\n\n<Show All Steps[main:bookmarks off]>"
   }
-  [?#bookmarks only=#0] {
-   \n\n<Show Only Bookmarks[main:bookmarks on]>
+  ?#bookmarks only=#0 {
+   "\n\n<Show Only Bookmarks[main:bookmarks on]>"
   }
-  \n
-  \n<Back to Session Menu[main:session]>
+  "\n
+  \n<Back to Session Menu[main:session]>"
 
  [:bookmarks on]
-  [!bookmarks only=#1]
-  [!:browse history]
+  !bookmarks only=#1
+  !:browse history
 
  [:bookmarks off]
-  [!bookmarks only=#0]
-  [!:browse history]
+  !bookmarks only=#0
+  !:browse history
 
  [:history next]
-  [!history+=#4]
-  [!:browse history]
+  !history+=#4
+  !:browse history
 
  [:history prev]
-  [!history-=#4]
-  [!:browse history]
+  !history-=#4
+  !:browse history
 
  [:load]
-  [!SaveSession()]
-  [!session = GetSessions()]
-  **Available sessions:**
-  [!SelectValue(session:open)]
-  \n
-  \n<Back to Main Menu[main:menu]>
+  !SaveSession()
+  !session = GetSessions()
+  "**Available sessions:**"
+  !SelectValue(session:open)
+  "\n\n<Back to Main Menu[main:menu]>"
 
 
 //**********************************
 
-[<game>]
+[game]
  [:session]
-  <Branch this session[session:branch]>
+  "<Branch this session[session:branch]>
   \n<Change session name[session:change name]>
   \n<Load old session[game:load]>
   \n
-  \n<Continue Playing[menu:close]>
+  \n<Continue Playing[menu:close]>"
 
  [:load]
-  [!SaveSession()]
-  [!session = GetSessions()]
-  **Choose Session**
-  [!SelectValue(session:open)]
-  \n
-  \n<Back to Session Menu[game:session]>
+  !SaveSession()
+  !session = GetSessions()
+  "**Choose Session**"
+  !SelectValue(session:open)
+  "\n
+  \n<Back to Session Menu[game:session]>"
 
  [:history]
-  [!history=#99999999]
-  [!:browse history]
+  !history=#99999999
+  !:browse history
 
  [:browse history]
-  **History**
-  <Older History[game:history prev]>\n
-  [!history:menu]
-  \n<More Recent History[game:history next]>
-  [?#bookmarks only=#1] {
-   \n\n<Show All Steps[game:bookmarks off]>
+  "**History**
+  <Older History[game:history prev]>\n"
+  !history:menu
+  "\n<More Recent History[game:history next]>"
+  ?#bookmarks only=#1 {
+   "\n\n<Show All Steps[game:bookmarks off]>"
   }
-  [?#bookmarks only=#0] {
-   \n\n<Show Only Bookmarks[game:bookmarks on]>
+  ?#bookmarks only=#0 {
+   "\n\n<Show Only Bookmarks[game:bookmarks on]>"
   }
-  \n
-  \n<Continue Playing[menu:close]>
+  "\n
+  \n<Continue Playing[menu:close]>"
 
  [:bookmarks on]
-  [!bookmarks only=#1]
-  [!:browse history]
+  !bookmarks only=#1
+  !:browse history
 
  [:bookmarks off]
-  [!bookmarks only=#0]
-  [!:browse history]
+  !bookmarks only=#0
+  !:browse history
 
  [:history next]
-  [!history+=#4]
-  [!:browse history]
+  !history+=#4
+  !:browse history
 
  [:history prev]
-  [!history-=#4]
-  [!:browse history]
+  !history-=#4
+  !:browse history
 
  [:bookmark]
-  [!bookmark name=]
-  [!Input(bookmark name)]
+  !bookmark name=
+  !Input(bookmark name)
 
 //**********************************
 
-[<book>]
+[book]
  [:open]
-  **[!Print(@book)]**
+  "**"!Print(@book)"**
   <New Game[book:new]>
   \n<Continue Game[book:continue]>
   \n<Load Session[book:load]>
   \n
-  \n<Back to Book List[main:books]>
+  \n<Back to Book List[main:books]>"
 
  [:new]
-  [!OpenBook(@book)]
-  [!session:new]
+  !OpenBook(@book)
+  !session:new
 
  [:continue]
-  [!OpenBook(@book)]
-  [!session=]
-  [!session:open]
+  !OpenBook(@book)
+  !session=
+  !session:open
 
  [:load]
-  [!OpenBook(@book)]
-  [!main:load]
+  !OpenBook(@book)
+  !main:load
 
 //**********************************
 
-[<session>]
+[session]
  [:bookmark]
-  [!bookmark name=]
-  [!Input(bookmark name)]
+  !bookmark name=
+  !Input(bookmark name)
 
  [:new]
-  [!NewSession()]
-  [!menu:close]
+  !NewSession()
+  !menu:close
 
  [:branch]
-  [!branch name=GetSessionName()]
-  [!Input(branch name)]
+  !branch name=GetSessionName()
+  !Input(branch name)
 
  [:change name]
-  [!session name=GetSessionName()]
-  [!Input(session name)]
+  !session name=GetSessionName()
+  !Input(session name)
 
  [:open]
-  [!LoadSession(@session)]
-  [!menu:close]
+  !LoadSession(@session)
+  !menu:close
 
 //**********************************
 
-[<bookmarks only>=#1]
+[bookmarks only=#1]
 
-[<history>]
+[history]
  [:menu]
-  [?#bookmarks only=#1] {
-   [!history = GetBookmarks(#history)]
-   __[!SelectValue(history:open)]__
+  ?#bookmarks only=#1 {
+   !history = GetBookmarks(#history)
+   "__"!SelectValue(history:open)"__"
   }
-  [?#bookmarks only=#0] {
-   [!history = GetSnapshots(#history)]
-   __[!SelectValue(history:open)]__
+  ?#bookmarks only=#0 {
+   !history = GetSnapshots(#history)
+   "__"!SelectValue(history:open)"__"
   }
 
  [:open]
-  [!LoadSnapshot(@history)]
-  [!menu:close]
+  !LoadSnapshot(@history)
+  !menu:close
 
 //*********** dialogs ************* 
 
-[<session name>]
+[session name]
  [:change name]
-  [!SaveSession(@session name)]
-  [!menu:close]
+  !SaveSession(@session name)
+  !menu:close
 
-[<branch name>]
+[branch name]
  [:branch session]
-  [!BranchSession(@session name)]
-  [!menu:close]
+  !BranchSession(@session name)
+  !menu:close
 
-[<bookmark name>]
+[bookmark name]
  [:add bookmark]
-  [!UserBookmark(@bookmark name)]
-  [!menu:close]
+  !UserBookmark(@bookmark name)
+  !menu:close

@@ -5,7 +5,7 @@
 #include "disk.h"
 
 const string FIRST_PLAY = "First Playthrough";
-const size_t HISTORY_PAGE = 200;
+csz HISTORY_PAGE = 200;
 
 Book::Book()
 {
@@ -20,7 +20,7 @@ void Book::SetBookmark(const Properties& Description)
   if (mark.Description.empty()) {
     StoryQuery query(*this, BookStory, BookSession, mark.Description);
     for (const string& text : Description.TextValues) {
-      query.ExecuteExpression(QUEUE, INSTRUCTION_START+text+INSTRUCTION_END);
+      query.ExecuteExpression(QUEUE, text);
     }
     CleanWhitespace(mark.Description);
   }
@@ -65,7 +65,7 @@ bool Book::RedoSnapshot()
 {
   // by loading the current move we can move forward if the current move
   // already exists in the snapshots
-  const size_t next = BookSession.CurrentSnapshot;
+  csz next = BookSession.CurrentSnapshot;
   // be careful not to overshoot because that will reset the story
   if (next < BookSession.Snapshots.size()) {
     return LoadSnapshot(next);
@@ -76,7 +76,7 @@ bool Book::RedoSnapshot()
 bool Book::UndoSnapshot()
 {
   // the current snapshot is the future one, so we need to go back 2 snapshots
-  const size_t prev = BookSession.CurrentSnapshot - 2;
+  csz prev = BookSession.CurrentSnapshot - 2;
   // only load the snapshot if it's not the 0th step, which is the start
   // of the book before values existed to be loaded
   if (prev > 0) {
@@ -85,7 +85,7 @@ bool Book::UndoSnapshot()
   return false;
 }
 
-bool Book::LoadSnapshot(const size_t SnapshotIndex)
+bool Book::LoadSnapshot(csz SnapshotIndex)
 {
   // before loading, revert to book values
   InitSession(BookStory, BookSession);
@@ -179,7 +179,7 @@ bool Book::OpenStory(const string& Path,
   filenames.push_back(STORY_FILE);
 
   // go through all *.story files but read story first
-  size_t i = filenames.size();
+  sz i = filenames.size();
   while (i) { // reverse for loop
     const string& filename = filenames[--i];
     string storyText;
@@ -193,22 +193,26 @@ bool Book::OpenStory(const string& Path,
       if (buffer.empty()) {
         continue;
       }
-      // look for a keyword definition of asset definition
-      if (FindTokenStart(buffer, token::keywordBlock) != string::npos) {
+      // look for a keyword definition or asset definition
+      // but make sure it's not a [:verb] definition
+      if (buffer.size() > 1
+          && buffer[0] == token::Start[token::noun]
+          && buffer[1] != token::Start[token::scope]) {
         // if it's the second keyword we hit on this run
-        if (storyText.empty()) {
-          // this is the first keyword we have found
-          storyText = buffer;
-        } else {
+        if (!storyText.empty()) {
           // parse the text and start a new run
           MyStory.ParseKeywordDefinition(storyText);
-          storyText = buffer;
         }
-      } else if (FindTokenStart(buffer, token::assetBlock) != string::npos) {
+        if (string::npos != FindTokenEnd(buffer, token::noun)) { // [noun]
+          storyText = buffer;
+        } else {
+          LOG(buffer + " - malformed noun definition")
+        }
+      } else if (buffer[0] == token::Start[token::asset]) {
         AddAssetDefinition(buffer);
       } else if (!storyText.empty()) {
         // we didn't find a keyword, keep adding lines if we already hit one
-        storyText += '\n';
+        storyText += " "; // replace new lines with spaces
         storyText += buffer;
       }
     }
@@ -230,7 +234,7 @@ void Book::InitSession(Story& MyStory,
   MySession.UserValues.clear();
   MySession.AssetStates.clear();
   // initialise reserved keywords
-  for (size_t i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+  for (sz i = 0; i < SYSTEM_NOUN_MAX; ++i) {
     const string& name = SystemNounNames[i];
     const Properties& systemValues = MyStory.FindPage(name).PageValues;
     Properties& sysNoun = MySession.UserValues[SystemNounNames[i]];
@@ -253,18 +257,15 @@ void Book::InitSession(Story& MyStory,
 bool Book::AddAssetDefinition(const string& StoryText)
 {
   string text = GetCleanWhitespace(StoryText);
-  const size_t_pair namePos = FindToken(text, token::expression); // []
-  const size_t defPos = FindTokenEnd(text, token::assign, namePos.X+1, // =
-                                     namePos.Y);
-
-  if (namePos.Y != string::npos && defPos != string::npos) {
-    // get the strings [$name=def]
-    const string& assetName = CutString(text, namePos.X+2, defPos);
-    const string& assetDefinition = CutString(text, defPos+1, namePos.Y);
-    if (!assetName.empty() && !assetDefinition.empty()) {
-      Assets.push_back(string_pair(assetName, assetDefinition));
-      return true;
-    }
+  // get the strings [$name=def]
+  // name can't be empty so we can start looking for = from position 2
+  csz defPos = FindTokenEnd(text, token::assign, 2);
+  // definition can't be empty either
+  if (defPos + 1 < text.size()) {
+    const string& assetName = CutString(text, 1, defPos);
+    const string& assetDefinition = CutString(text, defPos+1);
+    Assets.push_back(string_pair(assetName, assetDefinition));
+    return true;
   }
   return false;
 }
@@ -315,7 +316,7 @@ const string Book::GetMenuVerbs(const string& Noun)
 bool Book::GetChoice(string_pair& Choice) const
 {
   // is the first part of the pair a noun:verb?
-  size_t scopePos = FindTokenEnd(Choice.X, token::scope);
+  sz scopePos = FindTokenEnd(Choice.X, token::scope);
   if (scopePos != string::npos) {
     const string& verb = CutString(Choice.X, scopePos+1, Choice.X.size());
     const string& noun = CutString(Choice.X, 0, scopePos);
@@ -343,7 +344,7 @@ void Book::SetAction(const string_pair& Choice,
                      Session& MySession)
 {
   //check for value assignment first
-  const size_t assignPos = FindTokenEnd(Choice.X, token::assign);
+  csz assignPos = FindTokenEnd(Choice.X, token::assign);
   string action;
   if (assignPos != string::npos) {
     // parse [noun=value:verb] which is in pair(noun=value, verb) form
@@ -392,8 +393,8 @@ const string Book::ProcessQueue(Story& MyStory,
   Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
-  const size_t safety = 1000; // to stop user generated infinite loops
-  size_t i = 0;
+  csz safety = 1000; // to stop user generated infinite loops
+  sz i = 0;
   // collect all the queue values here to look for system calls
   Properties pool;
   pool.AddValues(actions);
@@ -408,7 +409,7 @@ const string Book::ProcessQueue(Story& MyStory,
     const string& expression = pool.TextValues[i];
     actions.AddValue(expression);
 #ifdef DEVBUILD
-    GTrace += "\n[!" + expression + "] -------- trace:";
+    GTrace += "\n[" + expression + "] trace:";
 #endif
     // call the actions scheduled for every turn
     query.ExecuteExpression(CALLS, CALLS_CONTENTS);
@@ -556,7 +557,7 @@ bool Book::MakeSessionNameUnique(string& Name,
 {
   bool dupeName = true;
   const string originalName = Name;
-  size_t i = 0;
+  sz i = 0;
   // get a unique session name
   while (dupeName) {
     if (i) {
@@ -652,7 +653,7 @@ const string Book::ShowVariables()
 
 const string Book::GetFreeSessionFilename(const string& Path)
 {
-  size_t i = 1;
+  sz i = 1;
   while (Disk::Exists(Path + SLASH + IntoString(i) + SESSION_EXT)) {
     ++i;
   }
@@ -662,15 +663,15 @@ const string Book::GetFreeSessionFilename(const string& Path)
 void Book::GetSnapshots(Properties& SnapshotItems)
 {
   // find the range ending with the desired location
-  const size_t desiredEnd = max((size_t)SnapshotItems.IntValue, HISTORY_PAGE);
-  const size_t last = min(desiredEnd, BookSession.Snapshots.size());
-  const size_t first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  csz desiredEnd = max((sz)SnapshotItems.IntValue, HISTORY_PAGE);
+  csz last = min(desiredEnd, BookSession.Snapshots.size());
+  csz first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
   // print all the snapshots in range
-  for (size_t i = first; i < last; ++i) {
+  for (sz i = first; i < last; ++i) {
     // find the "noun:verb" or bookmark
     const Snapshot& snap = BookSession.Snapshots[i];
-    const size_t index = snap.QueueIndex;
+    csz index = snap.QueueIndex;
     const auto it = BookSession.Bookmarks.find(index - 1);
     string entry = IntoString(index) + ". ";
     if (it != BookSession.Bookmarks.end()) {
@@ -693,11 +694,11 @@ void Book::GetSnapshots(Properties& SnapshotItems)
 
 void Book::GetBookmarks(Properties& SnapshotItems)
 {
-  const size_t desiredEnd = max((size_t)SnapshotItems.IntValue, HISTORY_PAGE);
-  const size_t last = min(desiredEnd, BookSession.Bookmarks.size());
-  const size_t first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  csz desiredEnd = max((sz)SnapshotItems.IntValue, HISTORY_PAGE);
+  csz last = min(desiredEnd, BookSession.Bookmarks.size());
+  csz first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
-  size_t i = 0;
+  sz i = 0;
   // the bookmarks are sorted but not contiguous so we iterate
   // until we pass over the range we want
   for (const auto& mark : BookSession.Bookmarks) {
@@ -706,7 +707,7 @@ void Book::GetBookmarks(Properties& SnapshotItems)
     } else if (i > last) {
       break;
     }
-    const size_t index = mark.first;
+    csz index = mark.first;
     string entry = IntoString(index+1) + ". " + mark.second.Description;
     if (index == BookSession.CurrentSnapshot - 1) {
       entry += " - present -";
@@ -718,17 +719,17 @@ void Book::GetBookmarks(Properties& SnapshotItems)
 bool Book::LoadSnapshot(const string& Description)
 {
   // extract the index from the snapshot description
-  const size_t indexPos = FindCharacter(Description, '.');
+  csz indexPos = FindCharacter(Description, '.');
   if (indexPos && indexPos != string::npos) {
     const string& indexName = CutString(Description, 0, indexPos);
-    const size_t index = IntoInt(indexName);
+    csz index = IntoInt(indexName);
     LoadSnapshot(index);
     return true;
   }
   return false;
 }
 
-size_t Book::GetCurrentSnapshot()
+sz Book::GetCurrentSnapshot()
 {
   return BookSession.CurrentSnapshot;
 }

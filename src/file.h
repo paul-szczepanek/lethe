@@ -12,6 +12,7 @@ public:
   bool Read(const string& Filename);
   bool Empty();
   bool GetLine(string& Buffer);
+  bool GetRawLine(string& Buffer);
 
 
 private:

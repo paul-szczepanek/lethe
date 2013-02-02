@@ -13,7 +13,7 @@
 #include "input.h"
 #include "valuestore.h"
 
-const size_t NUM_LAYOUTS = 2;
+csz NUM_LAYOUTS = 2;
 
 class Book;
 
@@ -48,8 +48,8 @@ private:
 
   bool ShowVerbMenu(const string& VerbsText);
 
-  size_t SetLayout(size_t LayoutIndex = NUM_LAYOUTS);
-  size_t FixLayout();
+  sz SetLayout(sz LayoutIndex = NUM_LAYOUTS);
+  sz FixLayout();
   Layout& GetCurrentLayout();
 
   void LoadSettings();
@@ -76,7 +76,7 @@ private:
   Font FontSys;
   vector<Font> Fonts;
   vector<string> FontNames;
-  size_t FontScale = 100;
+  sz FontScale = 100;
 
   // logic
   Book MyBook;
@@ -84,11 +84,11 @@ private:
   MouseState Mouse; // we want to remember mouse position between clicks
   KeysState Keys;
   buttonType ButtonAction = BUTTON_TYPE_MAX;
-  size_t ButtonState = 0;
+  sz ButtonState = 0;
 
   // layout
   orientation CurrentOrientation = landscape;
-  size_t CurrentLayout = 0;
+  sz CurrentLayout = 0;
   Layout Layouts[ORIENTATION_MAX][NUM_LAYOUTS];
 
   // main windows
@@ -101,7 +101,7 @@ private:
   TextBox MainMenu;
   TextBox VerbMenu;
   DialogBox GameDialog;
-  size_t DialogIndex = 0;
+  sz DialogIndex = 0;
 
   real Timeout = 0;
   real TimeoutTimer = 0;

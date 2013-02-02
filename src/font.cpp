@@ -26,7 +26,7 @@ Font::~Font()
 /** @brief Build the font
   */
 bool Font::Init(const string& Filename,
-                const size_t Size)
+                csz Size)
 {
   const string& path = FONTS_DIR + SLASH + Filename;
   TTF_Font* newFont = TTF_OpenFont(path.c_str(), Size);
@@ -69,12 +69,12 @@ lint Font::GetWidth(const string& Text) const
 
 /** @brief Return the size of the surface the text would need
   */
-size_t_pair Font::GetSize(const string& Text) const
+sz_pair Font::GetSize(const string& Text) const
 {
   int width = 0;
   int height = 0;
   if (SDLFont) {
     TTF_SizeText(SDLFont, Text.c_str(), &width ,&height);
   }
-  return size_t_pair(width, height);
+  return sz_pair(width, height);
 }

@@ -7,8 +7,8 @@
 class Disk
 {
 public:
-  Disk() {};
-  ~Disk() {};
+  Disk() { };
+  ~Disk() { };
 
   static bool Write(const string& Filename, const string& Text);
   static bool Delete(const string& Filename);

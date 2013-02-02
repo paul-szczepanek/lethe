@@ -33,7 +33,7 @@ public:
   boxType Order[BOX_TYPE_MAX] = { boxMain, boxBG, boxMenu, boxQuick };
   side Side[BOX_TYPE_MAX] = { left, right, right, right };
   bool Active[BOX_TYPE_MAX] = { true, true, true, true };
-  size_t SizeSpan = 0;
+  sz SizeSpan = 0;
   int Split = 0;
 };
 

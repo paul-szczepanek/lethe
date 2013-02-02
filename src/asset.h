@@ -20,7 +20,7 @@ public:
 public:
   const string Name;
   string Filename;
-  size_t Priority = 0;
+  sz Priority = 0;
   bool Playing = false;
 
 protected:

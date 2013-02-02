@@ -13,13 +13,13 @@ public:
   inline const string& GetValue(const string& Key);
 
   inline void SetValue(const string& Key, const string& Value);
-  inline void SetValue(const string& Key, const size_t& Value);
+  inline void SetValue(const string& Key, csz& Value);
   inline void SetValue(const string& Key, const real& Value);
   inline void SetValue(const string& Key, const vector<string>& Values);
 
   inline bool GetValue(const string& Key, vector<string>& Values);
 
-  inline bool GetValue(const string& Key, size_t& Value);
+  inline bool GetValue(const string& Key, sz& Value);
   inline bool GetValue(const string& Key, real& Value);
   inline bool GetValue(const string& Key, string& Value);
 
@@ -38,8 +38,8 @@ inline vector<string> ValueStore::GetValues(const string& Key)
 {
   vector<string> values;
   const string& valuesText = StoredValues[Key];
-  size_t lastPos = 0;
-  size_t pos = FindCharacter(valuesText, '\n', lastPos);
+  sz lastPos = 0;
+  sz pos = FindCharacter(valuesText, '\n', lastPos);
   while (pos != string::npos && pos > lastPos) {
     const string& value = CutString(valuesText, lastPos, pos);
     values.push_back(value);
@@ -62,7 +62,7 @@ inline bool ValueStore::GetValue(const string& Key,
   const vector<string>& stored = GetValues(Key);
   if (!stored.empty()) {
     // Overwrite the defalts with new values but only if they're present
-    for (size_t i = 0, fSz = min(Values.size(), stored.size()); i < fSz; ++i) {
+    for (sz i = 0, fSz = min(Values.size(), stored.size()); i < fSz; ++i) {
       Values[i] = stored[i];
     }
     return true;
@@ -76,7 +76,7 @@ inline const string& ValueStore::GetValue(const string& Key)
 }
 
 inline bool ValueStore::GetValue(const string& Key,
-                                 size_t& Value)
+                                 sz& Value)
 {
   const string& value = StoredValues[Key];
   if (value.empty()) {
@@ -117,7 +117,7 @@ inline void ValueStore::SetValue(const string& Key,
   string value;
   if (!Values.empty()) {
     value += Values[0];
-    for (size_t i = 1, fSz = Values.size(); i < fSz; ++i) {
+    for (sz i = 1, fSz = Values.size(); i < fSz; ++i) {
       value += '\n';
       value += Values[i];
     }
@@ -138,7 +138,7 @@ inline void ValueStore::SetValue(const string& Key,
 }
 
 inline void ValueStore::SetValue(const string& Key,
-                                 const size_t& Value)
+                                 csz& Value)
 {
   StoredValues[Key] = IntoString(Value);
 }

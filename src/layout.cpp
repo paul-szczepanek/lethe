@@ -10,22 +10,22 @@ bool Layout::Init(const string& Text)
   }
   // read this: 0132 3111 1111 0 +000
   //            ----
-  size_t offset = 0;
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  sz offset = 0;
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     Order[i] = (boxType)IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
   // read this: 0132 3111 1111 0 +000
   //                 ----
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     Side[i] = (side)IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
   // read this: 0132 3111 1111 0 +000
   //                      ----
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     Active[i] = IntoInt(Text[offset+i]);
   }
   offset += BOX_TYPE_MAX;
@@ -54,15 +54,15 @@ const string Layout::GetDefinition() const
 {
   string result;
   // write this: 0132 3111 1111 0 +000
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     result += IntoString(Order[i]);
   }
   result += ' ';
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     result += IntoString(Side[i]);
   }
   result += ' ';
-  for (size_t i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
+  for (sz i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
     result += IntoString(Active[i]);
   }
   result += ' ';

@@ -11,7 +11,7 @@ class Image;
 class MediaManager
 {
 public:
-  MediaManager() {};
+  MediaManager() { };
   ~MediaManager();
 
   void Reset();

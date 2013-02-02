@@ -27,7 +27,7 @@ bool MediaManager::CreateAssets(const vector<string_pair>& AssetDefs,
   Reset();
   AssetDir = STORY_DIR + SLASH + BookTitle + SLASH;
   for (string_pair assetDef : AssetDefs) {
-    const size_t_pair& funcPos = FindToken(assetDef.Y, token::function); // ()
+    csz_pair& funcPos = FindToken(assetDef.Y, token::function); // ()
     const string& type = CutString(assetDef.Y, 0, funcPos.X);
     const string& arguments = CutString(assetDef.Y, funcPos.X + 1, funcPos.Y);
     if (type == "BG" || type == "Image") {

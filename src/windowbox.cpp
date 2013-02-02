@@ -90,9 +90,9 @@ bool WindowBox::BuildFrame()
   Rect dst(BLOCK_SIZE, BLOCK_SIZE);
 
   // create the base frame
-  for (size_t i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
-    for (size_t j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
-      size_t index;
+  for (sz i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
+    for (sz j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
+      sz index;
       if (j == 0) {
         if (i == 0) {
           index = 0;

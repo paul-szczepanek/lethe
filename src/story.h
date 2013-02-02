@@ -2,8 +2,8 @@
 #define STORY_H
 
 #include "main.h"
+#include "page.h"
 
-class Page;
 class Session;
 
 class Story
@@ -25,7 +25,7 @@ private:
 
 
 private:
-  map<string, Page*> Pages;
+  map<string, Page> Pages;
   map<string, string> Patterns;
 
   static Page MissingPage;
@@ -36,13 +36,10 @@ private:
 Page& Story::FindPage(const string& Noun)
 {
   const auto it = Pages.find(Noun);
-
   if (it != Pages.end()) {
-    return *(it->second);
+    return it->second;
   }
-
   LOG(Noun + " - not defined in the story");
-
   return MissingPage;
 }
 

@@ -9,52 +9,47 @@
   * starting with current block and fill in Text resulting from the evaluation
   * \return how many parents up do we break with [!<<]
   */
-size_t StoryQuery::ExecuteBlock(const string& Noun,
-                                const Block& CurBlock)
+sz StoryQuery::ExecuteBlock(const string& Noun,
+                            const Block& CurBlock)
 {
   const string& expression = CurBlock.Expression;
-  const size_t length = expression.size();
+  csz length = expression.size();
 
-  // handle plain text Expression by copying to the display page
-  if (length && expression[0] != token::Start[token::expression]) {
-    //Text += " ";
-    Text += expression;
-    return 0;
-  }
-
-  // if there are no child blocks it must be an [!instruction]
-  if (length && CurBlock.Blocks.empty()) {
+  if (CurBlock.Blocks.empty()) {
+    if (length) {
+      if (CurBlock.Execute) {
+        // if there are no child blocks it must be an !instruction
 #ifdef DEVBUILD
-    GTrace +=  " " + expression;
+        GTrace +=  " " + expression;
 #endif
-    const size_t_pair tokenPos = FindToken(expression, token::expression);
-    const char c = expression[tokenPos.X+1];
-
-    assert(tokenPos.Y != string::npos);
-
-    if (c == token::Start[token::instruction]) {
-      // this is a [!<<] (this will work for for [!anything<<])
-      if (FindTokenStart(expression, token::stop) != string::npos) {
-        const size_t breakUp = tokenPos.Y - tokenPos.X - 1;
-        return breakUp; // this breaks out of n loops above
+        // this is a !<<
+        if (FindTokenStart(expression, token::stop) != string::npos) {
+          // we know that at least two < exist already
+          sz breakUp = 2;
+          while (breakUp < length
+                 && expression[breakUp] == token::Start[token::stop]) {
+            ++breakUp;
+          }
+          return breakUp; // this breaks out of n loops above
+        } else {
+          ExecuteExpression(Noun, expression);
+        }
       } else {
-        ExecuteExpression(Noun, expression);
+        // handle plain text Expression by copying to the display page
+        Text += " ";
+        Text += expression;
       }
-    } else if (c == token::Start[token::condition]) { // [?condition]
-      LOG(expression + " - childless condition");
-    } else { // illegal
-      LOG(expression + " - illegal character: " + c +", use ? or ! after [");
     }
-  } else { // we have children so this must be a [?condition]
-    if (length == 0 || ExecuteExpression(Noun, expression)) {
+  } else { // we have children so this must be a ?condition
+    if (length == 0 || ExecuteExpression(Noun, expression, true)) {
 #ifdef DEVBUILD
       GTrace += "\n" + expression;
 #endif
       // if the condition is true, execute all the child blocks
       bool executeElse = false;
-      for (size_t i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
+      for (sz i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
         // if [!<<] used to escape parent break from loop
-        size_t backUp = 0;
+        sz backUp = 0;
         if (executeElse || !CurBlock.Blocks[i].Else) {
           backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
         }
@@ -80,17 +75,15 @@ size_t StoryQuery::ExecuteBlock(const string& Noun,
 Properties StoryQuery::GetVerbs(const string& Noun)
 {
   Properties Result;
-
   const Page& page = QueryStory.FindPage(Noun);
-  for (size_t i = 0, fSz = page.Verbs.size(); i < fSz; ++i) {
+  for (sz i = 0, fSz = page.Verbs.size(); i < fSz; ++i) {
     const VerbBlock& verb = page.Verbs[i];
     if (!verb.VisualName.empty()) {
-      if (ExecuteExpression(Noun, verb.BlockTree.Expression)) {
+      if (ExecuteExpression(Noun, verb.BlockTree.Expression, true)) {
         Result.AddValue(verb.VisualName);
       }
     }
   }
-
   return Result;
 }
 
@@ -98,10 +91,11 @@ Properties StoryQuery::GetVerbs(const string& Noun)
   * and modifies them if needed
   */
 bool StoryQuery::ExecuteExpression(const string& Noun,
-                                   const string& Expression)
+                                   const string& Expression,
+                                   bool Condition)
 {
-  size_t length = Expression.size();
-  size_t pos = 0;
+  sz length = Expression.size();
+  sz pos = 0;
   bool shortAnd = false;
   bool shortOr = false;
   bool result = true;
@@ -109,110 +103,38 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
   // might contain a chain of expressions so loop through them
   while (pos < length) {
     result = true;
-    const size_t_pair tokenPos = FindToken(Expression, token::expression, pos);
-    if (tokenPos.Y == string::npos) {
-      LOG(Expression + " - expression ended unexpectedly");
-      return false;
-    }
-
-    const char c = Expression[tokenPos.X+1];
     token::tokenName op = token::add;
+    csz aPos = FindCharacter(Expression, token::Start[token::logicalAnd], pos);
+    csz oPos = FindCharacter(Expression, token::Start[token::logicalOr], pos);
+    csz endPos = min(length, min(aPos, oPos));
 
-    if (c == token::Start[token::instruction]) { // [!var=value]
-      // check which assignment operation it is
-      size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
-      if (opPos.X == string::npos) {
-        op = token::remove;
-        opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
-        if (opPos.X == string::npos) {
-          op = token::assign;
-          opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
-          if (opPos.X == string::npos) {
-            op = token::instruction; // [!value]
-            // no assignment, just a bare instruction
-          }
-        }
-      } // TODO: do this in one scan
-
-      // bare instructions have different syntax because no assignment
-      if (op != token::instruction) {
-        bool isNum = false, isText = false;
-        Properties leftValues;
-        Properties rightValues;
-
-        const string& left = CutString(Expression, tokenPos.X+2, opPos.X);
-        const string& right = CutString(Expression, opPos.Y+1, tokenPos.Y);
-
-        // default to current page noun
-        if (left.empty()) {
-          leftValues.AddValue(Noun);
-        } else {
-          EvaluateExpression(leftValues, left, isNum, isText);
-        }
-
-        EvaluateExpression(rightValues, right, isNum, isText);
-
-        // assign right values to all nouns whose name is in left values
-        for (const string& text : leftValues.TextValues) {
-          Properties& userValues = GetUserValues(text);
-
-          switch (op) {
-            case token::assign:
-              if (isText || right.empty()) {
-                userValues.SetValues(rightValues);
-              }
-              if (isNum) {
-                userValues.IntValue = rightValues.IntValue;
-              }
-              break;
-            case token::add:
-              if (isText) {
-                userValues.AddValues(rightValues);
-              }
-              if (isNum) {
-                userValues.IntValue += rightValues.IntValue;
-              }
-              break;
-            case token::remove:
-              if (isText) {
-                userValues.RemoveValues(rightValues);
-              }
-              if (isNum) {
-                userValues.IntValue -= rightValues.IntValue;
-              }
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    } else if (c == token::Start[token::condition]) { // [?var=value]
+    if (Condition) {
       // check which condition it is
       // TODO: do this in one scan
       // Keep calm, this is just an unrolled loop
       op = token::contains;
-      size_t_pair opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+      sz_pair opPos = FindToken(Expression, op, pos, endPos);
       if (opPos.X == string::npos) {
         op = token::notContains;
-        opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+        opPos = FindToken(Expression, op, pos, endPos);
         if (opPos.X == string::npos) {
           op = token::notEquals;
-          opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+          opPos = FindToken(Expression, op, pos, endPos);
           if (opPos.X == string::npos) {
             op = token::equalsOrLess;
-            opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+            opPos = FindToken(Expression, op, pos, endPos);
             if (opPos.X == string::npos) {
               op = token::equalsOrMore;
-              opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+              opPos = FindToken(Expression, op, pos, endPos);
               if (opPos.X == string::npos) {
                 op = token::equals;
-                opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+                opPos = FindToken(Expression, op, pos, endPos);
                 if (opPos.X == string::npos) {
                   op = token::isMore;
-                  opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+                  opPos = FindToken(Expression, op, pos, endPos);
                   if (opPos.X == string::npos) {
                     op = token::isLess;
-                    opPos = FindToken(Expression, op, tokenPos.X+2, tokenPos.Y);
+                    opPos = FindToken(Expression, op, pos, endPos);
                     if (opPos.X == string::npos) {
                       op = token::condition; // [?value]
                       // no comparison, just a bare condition
@@ -228,8 +150,8 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       // bare conditions have different syntax because no comparison
       if (op != token::condition) {
         bool isNum = false, isText = false;
-        const string& left = CutString(Expression, tokenPos.X+2, opPos.X);
-        const string& right = CutString(Expression, opPos.Y+1, tokenPos.Y);
+        const string& left = CutString(Expression, pos, opPos.X);
+        const string& right = CutString(Expression, opPos.Y+1, endPos);
 
         Properties rightValues;
         Properties leftEvalValues;
@@ -291,17 +213,83 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
             break;
         }
       }
-    } else { // illegal
-      LOG(Expression + " - illegal character: " + c +", use ? or ! after [");
+    } else { // instruction
+      // check which assignment operation it is
+      sz_pair opPos = FindToken(Expression, op, pos, endPos);
+      if (opPos.X == string::npos) {
+        op = token::remove;
+        opPos = FindToken(Expression, op, pos, endPos);
+        if (opPos.X == string::npos) {
+          op = token::assign;
+          opPos = FindToken(Expression, op, pos, endPos);
+          if (opPos.X == string::npos) {
+            op = token::instruction; // [!value]
+            // no assignment, just a bare instruction
+          }
+        }
+      } // TODO: do this in one scan
+
+      // bare instructions have different syntax because no assignment
+      if (op != token::instruction) {
+        bool isNum = false, isText = false;
+        Properties leftValues;
+        Properties rightValues;
+
+        const string& left = CutString(Expression, pos, opPos.X);
+        const string& right = CutString(Expression, opPos.Y+1, endPos);
+
+        // default to current page noun
+        if (left.empty()) {
+          leftValues.AddValue(Noun);
+        } else {
+          EvaluateExpression(leftValues, left, isNum, isText);
+        }
+
+        EvaluateExpression(rightValues, right, isNum, isText);
+
+        // assign right values to all nouns whose name is in left values
+        for (const string& text : leftValues.TextValues) {
+          Properties& userValues = GetUserValues(text);
+
+          switch (op) {
+            case token::assign:
+              if (isText || right.empty()) {
+                userValues.SetValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue = rightValues.IntValue;
+              }
+              break;
+            case token::add:
+              if (isText) {
+                userValues.AddValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue += rightValues.IntValue;
+              }
+              break;
+            case token::remove:
+              if (isText) {
+                userValues.RemoveValues(rightValues);
+              }
+              if (isNum) {
+                userValues.IntValue -= rightValues.IntValue;
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      }
     }
 
     if (op == token::condition || op == token::instruction) {
-      const string& evaluate = CutString(Expression, tokenPos.X+2, tokenPos.Y);
+      const string& evaluate = CutString(Expression, pos, endPos);
       bool isNum, isText;
       Properties values;
       EvaluateExpression(values, evaluate, isNum, isText);
 
-      // execute [!noun:verb] commands and [!noun=value] assignments
+      // execute !noun:verb commands and !noun=value assignments
       for (const string& text : values.TextValues) {
         string noun, verb;
         if (ExtractNounVerb(text, noun, verb)) {
@@ -314,9 +302,9 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
           result &= ExecuteBlock(noun, block);
         }
 
-        const size_t assignPos = FindTokenStart(text, token::assign);
+        csz assignPos = FindTokenStart(text, token::assign);
         if (assignPos != string::npos) {
-          result &= ExecuteExpression(Noun, "[!" + text + "]");
+          result &= ExecuteExpression(Noun, text);
         }
       }
 
@@ -324,7 +312,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       result = values.IntValue + values.TextValues.size();
     }
 
-    pos = tokenPos.Y;
+    pos = endPos;
     ++pos;
 
     // short circuit logical & and |
@@ -368,10 +356,10 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
   // important hints to determine type of assignment
   IsNum = false;
   IsText = false;
-  size_t length = Expression.size();
-  size_t pos = 0;
-  size_t valuePos = 0;
-  size_t valueEnd = 0; // needed because function names vary in length
+  sz length = Expression.size();
+  sz pos = 0;
+  sz valuePos = 0;
+  sz valueEnd = 0; // needed because function names vary in length
   vector<OperationNode> opStack;
   opStack.reserve(16); // too avoid constant allocations
 
@@ -398,7 +386,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
       }
     } else {
       // look for operators that delimate values
-      for (size_t i = 0; i < token::OPERATION_NAME_MAX; ++i) {
+      for (sz i = 0; i < token::OPERATION_NAME_MAX; ++i) {
         if (token::Operations[i] == c) {
           opFound = true;
           valueEnd = pos;
@@ -414,7 +402,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
 
           // grouping and function calls recurse with the (contents)
           if (i == token::parens) {
-            const size_t funcEnd = FindTokenEnd(Expression, token::function,
+            csz funcEnd = FindTokenEnd(Expression, token::function,
                                                 pos);
             if (funcEnd == string::npos) {
               LOG(Expression + " - unmatched \"(\" in expression");
@@ -454,9 +442,9 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
     }
   }
 
-  size_t opI = 0; // current operation
-  size_t nextOp = 0; // next operation after nesting is finished
-  const size_t stackSize = opStack.size();
+  sz opI = 0; // current operation
+  sz nextOp = 0; // next operation after nesting is finished
+  csz stackSize = opStack.size();
   // traverse the tree, do math operations and accumulate the result
   while (opI < stackSize) {
     bool nested = false;
@@ -581,7 +569,7 @@ bool StoryQuery::CreateDialog(const string& Noun, Dialog& NewDialog)
   return true;
 }
 
-const map<const string, const size_t> FunctionNameMap = {
+const map<const string, csz> FunctionNameMap = {
   { "Size", bookFunctionSize },
   { "Play", bookFunctionPlay },
   { "Stop", bookFunctionStop },
@@ -620,7 +608,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
   vector<string>& textArgs = FunctionArgs.TextValues;
   for (const string& func : FunctionName.TextValues) {
     // translate string into an enum
-    size_t functionIndex = BOOK_FUNCTION_MAX;
+    sz functionIndex = BOOK_FUNCTION_MAX;
     const auto it = FunctionNameMap.find(func);
     if (it != FunctionNameMap.end()) {
       functionIndex = it->second;
@@ -666,7 +654,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       case bookFunctionSelectValue:
         // print a list of <value[noun=value:verb]>
         for (const string& arg : textArgs) {
-          const size_t scopePos = FindTokenEnd(arg, token::scope);
+          csz scopePos = FindTokenEnd(arg, token::scope);
           if (scopePos != string::npos) {
             // rearrange the noun:verb into proper places
             const string& noun = CutString(arg, 0, scopePos);

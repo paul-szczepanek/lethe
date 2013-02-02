@@ -37,7 +37,7 @@ Reader::~Reader()
 void Reader::LoadSettings()
 {
   // load reader layouts
-  for (size_t i = 0; i < ORIENTATION_MAX; ++i) {
+  for (sz i = 0; i < ORIENTATION_MAX; ++i) {
     // default layouts
     vector<string> layoutStrings;
     layoutStrings.resize(NUM_LAYOUTS, "0132 3111 1111 0 +000");
@@ -45,7 +45,7 @@ void Reader::LoadSettings()
     const string& key = SKEY_LAYOUTS + IntoString(i);
     Settings.GetValue(key, layoutStrings);
     // initialise the layouts with default or stored layouts strings
-    for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
+    for (sz j = 0; j < NUM_LAYOUTS; ++j) {
       Layouts[i][j].Init(layoutStrings[j]);
     }
   }
@@ -65,9 +65,9 @@ void Reader::LoadSettings()
 void Reader::SaveSettings()
 {
   // save reader layouts
-  for (size_t i = 0; i < ORIENTATION_MAX; ++i) {
+  for (sz i = 0; i < ORIENTATION_MAX; ++i) {
     vector<string> layoutStrings;
-    for (size_t j = 0; j < NUM_LAYOUTS; ++j) {
+    for (sz j = 0; j < NUM_LAYOUTS; ++j) {
       layoutStrings.push_back(Layouts[i][j].GetDefinition());
     }
     const string& key = SKEY_LAYOUTS + IntoString(i);
@@ -82,10 +82,10 @@ void Reader::SaveSettings()
 
 bool Reader::InitFonts()
 {
-  size_t fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
+  sz fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
   Fonts.resize(TEXT_STYLE_MAX);
   const real scale = (real)FontScale / 100.f;
-  for (size_t i = 0; i < TEXT_STYLE_MAX; ++i) {
+  for (sz i = 0; i < TEXT_STYLE_MAX; ++i) {
     if (Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
       Fonts[i].Style = textStyle(i);
     } else {
@@ -485,7 +485,7 @@ void Reader::RedrawScreen(real DeltaTime)
   DrawWindows();
   PrintFPS(DeltaTime);
 #ifdef DEVBUILD
-  const size_t maxlog = 102400;
+  csz maxlog = 102400;
   if (GLog.size() > maxlog) {
     GLog = CutString(GLog, GLog.size() - maxlog);
   }
@@ -552,7 +552,7 @@ void Reader::PrintFPS(real DeltaTime)
 
 /** @brief Try to fix the layout that failed to fit by evening out the split
   */
-size_t Reader::FixLayout()
+sz Reader::FixLayout()
 {
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   // can't fit, abort and try a smaller split
@@ -569,7 +569,7 @@ size_t Reader::FixLayout()
   }
 }
 
-size_t Reader::SetLayout(size_t LayoutIndex)
+sz Reader::SetLayout(sz LayoutIndex)
 {
   CurrentOrientation = Width > Height? landscape : portrait;
   if (LayoutIndex < NUM_LAYOUTS) {
@@ -578,7 +578,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   WindowBox* boxes[BOX_TYPE_MAX];
 
-  for (size_t i = 0; i < BOX_TYPE_MAX; ++i) {
+  for (sz i = 0; i < BOX_TYPE_MAX; ++i) {
     switch (layout.Order[i]) {
       case boxMain:
         boxes[i] = &MainText;
@@ -601,7 +601,7 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
   lint splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
-  for (size_t i = 0; i < BOX_TYPE_MAX; ++i) {
+  for (sz i = 0; i < BOX_TYPE_MAX; ++i) {
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
     bool first = (i == 0) || (pos != layout.Side[i-1]);
@@ -634,9 +634,9 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
       if (layout.SizeSpan == i && pos == top && first) {
         // this element determines the size of the split
-        size_t halfH = Height / 2;
+        sz halfH = Height / 2;
         // make sure the requested split is viable
-        if ((size_t)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
+        if ((sz)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
           return FixLayout();
         }
         boxSize.H = halfH - (halfH % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
@@ -666,9 +666,9 @@ size_t Reader::SetLayout(size_t LayoutIndex)
 
       if (layout.SizeSpan == i && pos == left && first) {
         // this element determines the size of the split
-        size_t halfW = Width / 2;
+        sz halfW = Width / 2;
         // make sure the requested split is viable
-        if ((size_t)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
+        if ((sz)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
           return FixLayout();
         }
         boxSize.W = halfW - (halfW % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;

@@ -6,8 +6,8 @@
 
 struct PaneState {
   PaneState () { };
-  size_t PaneDragY = 0;
-  size_t Y = 0;
+  sz PaneDragY = 0;
+  sz Y = 0;
   real DragTimeout = 0.25;
   bool PaneDown = false;
   bool PaneUp = false;
@@ -18,6 +18,7 @@ struct KeywordMap {
     : Keyword(keyName) { };
   const string Keyword;
   Rect Size;
+  bool Active;
 };
 
 struct TextLine {
@@ -69,7 +70,7 @@ public:
   lint PageHeight = 0;
   lint PageWidth = 0;
 
-  size_t ValidateKeywords = 0; // how far to check the text keywords
+  sz ValidateKeywords = 0; // how far to check the text keywords
   Properties ValidKeywords;
 
   Rect PageSize;
@@ -83,7 +84,7 @@ private:
   Surface Highlights;
   Surface PageSurface;
 
-  size_t SelectedKeyword = 0;
+  sz SelectedKeyword = 0;
 
   vector<TextLine> Lines;
   vector<KeywordMap> Keywords;
@@ -91,11 +92,11 @@ private:
   Colour TextColour;
 };
 
-inline void ShiftPositions(vector<size_t_pair>& Positions,
-                           const size_t Beyond,
-                           const size_t Offset)
+inline void ShiftPositions(vector<sz_pair>& Positions,
+                           csz Beyond,
+                           csz Offset)
 {
-  for (size_t_pair& pos : Positions) {
+  for (sz_pair& pos : Positions) {
     if (pos.X > Beyond) {
       pos.X += Offset;
     }
