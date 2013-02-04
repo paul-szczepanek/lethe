@@ -80,17 +80,19 @@ bool MediaManager::Tick(real DeltaTime,
     }
   }
 
-  for (Sound* asset : Sounds) {
-    if (MyBook.GetAssetState(asset->Name)) {
-      if (asset->Playing) {
-        if (!asset->Tick(DeltaTime)) {
-          MyBook.SetAssetState(asset->Name, false);
+  if (Audio::Active) {
+    for (Sound* asset : Sounds) {
+      if (MyBook.GetAssetState(asset->Name)) {
+        if (asset->Playing) {
+          if (!asset->Tick(DeltaTime)) {
+            MyBook.SetAssetState(asset->Name, false);
+          }
+        } else {
+          asset->Play();
         }
-      } else {
-        asset->Play();
+      } else if (asset->Playing) {
+        asset->Stop();
       }
-    } else if (asset->Playing) {
-      asset->Stop();
     }
   }
 

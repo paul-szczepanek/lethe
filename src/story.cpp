@@ -33,9 +33,9 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   // break up the expected [noun[pattern]=value]
   sz_pair nounPos = FindToken(text, token::noun); // [] outer
   sz_pair patPos = FindToken(text, token::noun, nounPos.X+1, // []
-                                 nounPos.Y);
+                             nounPos.Y);
   sz assignPos = FindTokenStart(text, token::assign, nounPos.X+1, // =
-                                    nounPos.Y);
+                                nounPos.Y);
   // cut the noun name
   csz nounEnd = min(min(nounPos.Y, patPos.X), assignPos);
   const string& noun = CutString(text, nounPos.X+1, nounEnd);

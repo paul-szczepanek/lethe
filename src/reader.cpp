@@ -142,9 +142,11 @@ void Reader::InitWindows()
   Logger.Visible = true;
   Logger.Init(FontSys, "", BPP);
   Logger.SetText("LOG");
+  Logger.RawMode = true;
   VarView.Visible = false;
   VarView.Init(FontSys, FRAME_SOLID, BPP);
   VarView.SetText("variables");
+  VarView.RawMode = true;
 #endif
 }
 
@@ -153,8 +155,8 @@ bool Reader::Init()
   // initialise all the critical systems and assets
   if (!Surface::SystemInit()
       || !Font::SystemInit()
+      || !Audio::SystemInit(Silent)
       || !Screen.InitScreen(Width, Height, BPP)
-      || (!Silent && !Audio::SystemInit())
       || !InitFonts()) {
     return false;
   }

@@ -23,6 +23,8 @@ private:
   void AddInstruction();
   void AddVerb();
 
+  void PopOldVerbConditions();
+
   void PrintBlock(string& Text, const Block& Block);
 
 
@@ -33,6 +35,7 @@ private:
   sz Pos = 0;
   sz Length;
   bool PopScopePending = false;
+  bool VerbScopePending = false;
 
   // passed in by the page that created the parser
   const string& Text;

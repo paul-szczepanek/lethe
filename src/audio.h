@@ -12,7 +12,7 @@ public:
   Audio(const string& Filename);
   ~Audio() { };
 
-  static bool SystemInit();
+  static bool SystemInit(bool Silent = false);
 
   bool Load(const string& Filename);
   bool Unload();
@@ -21,6 +21,9 @@ public:
   bool IsPlaying();
   static void SoundVolume(const real Volume = 1.0);
 
+
+public:
+  static bool Active;
 
 private:
   Mix_Chunk* SDLAudio = NULL;

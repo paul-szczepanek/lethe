@@ -212,6 +212,10 @@ bool TextBox::BreakText()
   vector<bool> activeKeywords;
   string cleaned;
   string realName;
+  if (RawMode) {
+    cleaned = Text;
+    length = 0;
+  }
   // record keywords and their positions and remove syntax symbols
   while(pos < length) {
     // keywordPos store the positions in the cleaned string and need fixing
@@ -259,6 +263,10 @@ bool TextBox::BreakText()
   string plain;
   length = cleaned.size();
   pos = 0;
+  if (RawMode) {
+    plain = Text;
+    length = 0;
+  }
   // record font changes and strip the formatting
   while(pos < length) {
     csz_pair& titlePos = FindToken(cleaned, token::styleTitle, pos);
@@ -468,7 +476,7 @@ bool TextBox::BreakText()
         // get positions relative to line start
         csz beg = keyPos.X < lastLineEnd? 0 : keyPos.X - lastLineEnd;
         csz end = keyPos.Y > lineEnd?
-                           lineLength : keyPos.Y - lastLineEnd;
+                  lineLength : keyPos.Y - lastLineEnd;
         // find where the keyword starts
         newKey.Size.X = lineSize.X;
         if (beg) {

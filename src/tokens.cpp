@@ -1,8 +1,6 @@
 #include "tokens.h"
 
-/** @brief CleanWhitespace
-  *
-  * removes all whitespace around tokens and collapses multiple newlines
+/** @brief removes all whitespace around tokens and collapses multiple newlines
   */
 void CleanWhitespace(string& Text)
 {
@@ -138,9 +136,9 @@ string CleanEscapeCharacters(const string& Text)
   * \return a pair of begin and end positions of the token
   */
 sz_pair FindToken(const string& Text,
-                      token::tokenName TokenName,
-                      sz Start,
-                      sz End)
+                  token::tokenName TokenName,
+                  sz Start,
+                  sz End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
@@ -210,9 +208,9 @@ sz_pair FindToken(const string& Text,
   * \return this version only returns the start of the token
   */
 sz FindTokenStart(const string& Text,
-                      token::tokenName TokenName,
-                      sz Start,
-                      sz End)
+                  token::tokenName TokenName,
+                  sz Start,
+                  sz End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
@@ -260,9 +258,9 @@ sz FindTokenStart(const string& Text,
   * \return the end position of a token
   */
 sz FindTokenEnd(const string& Text,
-                    token::tokenName TokenName,
-                    sz Start,
-                    sz End)
+                token::tokenName TokenName,
+                sz Start,
+                sz End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
@@ -302,33 +300,7 @@ sz FindTokenEnd(const string& Text,
   return string::npos;
 }
 
-/** @brief Find first unescaped passed in character
-  *
-  * \return npos if not found
-  */
-sz FindCharacter(const string& Text,
-                     char Char,
-                     sz Start,
-                     sz End)
-{
-  if (End == 0 || End > Text.size()) {
-    End = Text.size();
-  }
-  sz pos = Start;
-
-  while (pos < End) {
-    if (IsSpecial(Text, pos, Char)) {
-      return pos;
-    }
-    ++pos;
-  }
-
-  return string::npos;
-}
-
-/** @brief Strips Comments in a passed in string
-  *
-  * removes // and everything after that from the passed in string
+/** @brief Removes // and everything after that from the passed in string
   */
 void StripComments(string& Text)
 {

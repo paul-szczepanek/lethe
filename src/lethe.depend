@@ -302,7 +302,7 @@
 	"properties.h"
 	"tokens.h"
 
-1359827730 source:/home/paul/lethe/lethe/src/book.cpp
+1360012947 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"page.h"
 	"tokens.h"
@@ -315,7 +315,7 @@
 	"session.h"
 	"mediamanager.h"
 
-1359668427 /home/paul/lethe/lethe/src/main.h
+1359990458 /home/paul/lethe/lethe/src/main.h
 	<iostream>
 	<fstream>
 	<sstream>
@@ -327,7 +327,7 @@
 	<map>
 	<cassert>
 
-1359825958 /home/paul/lethe/lethe/src/tokens.h
+1360000991 /home/paul/lethe/lethe/src/tokens.h
 	"main.h"
 
 1359651587 /home/paul/lethe/lethe/src/story.h
@@ -347,7 +347,7 @@
 
 1357240707 /home/paul/lethe/lethe/src/keywordsmap.h
 
-1359668427 source:/home/paul/lethe/lethe/src/main.cpp
+1359990457 source:/home/paul/lethe/lethe/src/main.cpp
 	"main.h"
 	"reader.h"
 	"input.h"
@@ -365,16 +365,16 @@
 	"input.h"
 	"valuestore.h"
 
-1359809282 /home/paul/lethe/lethe/src/textbox.h
+1359992001 /home/paul/lethe/lethe/src/textbox.h
 	"windowbox.h"
 	"properties.h"
 
-1359679444 source:/home/paul/lethe/lethe/src/page.cpp
+1359935945 source:/home/paul/lethe/lethe/src/page.cpp
 	"page.h"
 	"tokens.h"
 	"pageparser.h"
 
-1359824705 /home/paul/lethe/lethe/src/page.h
+1359936012 /home/paul/lethe/lethe/src/page.h
 	"main.h"
 	"properties.h"
 
@@ -382,7 +382,7 @@
 	"properties.h"
 	"tokens.h"
 
-1359668426 source:/home/paul/lethe/lethe/src/reader.cpp
+1360016703 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"audio.h"
 	"input.h"
@@ -392,7 +392,7 @@
 	"session.h"
 	"disk.h"
 
-1359825074 source:/home/paul/lethe/lethe/src/story.cpp
+1359835009 source:/home/paul/lethe/lethe/src/story.cpp
 	"story.h"
 	"page.h"
 	"tokens.h"
@@ -400,19 +400,19 @@
 	"storyquery.h"
 	"properties.h"
 
-1359820696 source:/home/paul/lethe/lethe/src/textbox.cpp
+1359992099 source:/home/paul/lethe/lethe/src/textbox.cpp
 	"textbox.h"
 	"reader.h"
 	"tokens.h"
 
-1359834281 source:/home/paul/lethe/lethe/src/tokens.cpp
+1360001126 source:/home/paul/lethe/lethe/src/tokens.cpp
 	"tokens.h"
 
-1359765513 /home/paul/lethe/lethe/src/storyquery.h
+1359989719 /home/paul/lethe/lethe/src/storyquery.h
 	"main.h"
 	"properties.h"
 
-1359827087 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1360013781 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"story.h"
@@ -461,7 +461,7 @@
 	"main.h"
 	"surface.h"
 
-1359667935 source:/home/paul/lethe/lethe/src/mediamanager.cpp
+1360016652 source:/home/paul/lethe/lethe/src/mediamanager.cpp
 	"mediamanager.h"
 	"tokens.h"
 	"image.h"
@@ -497,12 +497,12 @@
 	<SDL_rotozoom.h>
 	<SDL_ttf.h>
 
-1358520677 source:/home/paul/lethe/lethe/src/audio.cpp
+1360016732 source:/home/paul/lethe/lethe/src/audio.cpp
 	"audio.h"
 	<SDL.h>
 	<SDL_mixer.h>
 
-1358520597 /home/paul/lethe/lethe/src/audio.h
+1360016675 /home/paul/lethe/lethe/src/audio.h
 	"main.h"
 
 1348410805 /usr/include/SDL/SDL_mixer.h
@@ -564,11 +564,11 @@
 	"properties.h"
 	"tokens.h"
 
-1359834307 /home/paul/lethe/lethe/src/pageparser.h
+1360001980 /home/paul/lethe/lethe/src/pageparser.h
 	"main.h"
 	"page.h"
 
-1359834309 source:/home/paul/lethe/lethe/src/pageparser.cpp
+1360001980 source:/home/paul/lethe/lethe/src/pageparser.cpp
 	"pageparser.h"
 	"tokens.h"
 

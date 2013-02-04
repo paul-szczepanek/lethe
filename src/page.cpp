@@ -2,7 +2,7 @@
 #include "tokens.h"
 #include "pageparser.h"
 
-VerbBlock Page::MissingVerb = { "", Block("You can't do that."), { } };
+VerbBlock Page::MissingVerb = { "", Block("You can't do that.", false), { } };
 
 void Page::Parse(const string& SourceText)
 {
@@ -22,6 +22,7 @@ const VerbBlock& Page::GetVerb(const string& Verb) const
       }
     }
   }
+  LOG("Verb: " + Verb + " missing.")
   MissingVerb.BlockTree.Expression = "You can't " + Verb + " that.";
   return MissingVerb;
 }

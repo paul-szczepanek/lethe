@@ -3,6 +3,7 @@
 #include <SDL_mixer.h>
 
 const int NUM_CHANNELS = 16;
+bool Audio::Active = true;
 
 Audio::Audio(const string& Filename)
 {
@@ -11,11 +12,13 @@ Audio::Audio(const string& Filename)
 
 bool Audio::Load(const string& Filename)
 {
-  Unload();
-  SDLAudio = Mix_LoadWAV(Filename.c_str());
-  if (!SDLAudio) {
-    LOG(Filename + " - sound missing");
-    return false;
+  if (Active) {
+    Unload();
+    SDLAudio = Mix_LoadWAV(Filename.c_str());
+    if (!SDLAudio) {
+      LOG(Filename + " - sound missing");
+      return false;
+    }
   }
   return true;
 }
@@ -33,12 +36,14 @@ bool Audio::Play(const real Volume)
 
 bool Audio::IsPlaying()
 {
-  return Mix_Playing(ChannelUsed);
+  return Active && Mix_Playing(ChannelUsed);
 }
 
 void Audio::SoundVolume(const real Volume)
 {
-  Mix_Volume(-1, Volume * MIX_MAX_VOLUME);
+  if (Active) {
+    Mix_Volume(-1, Volume * MIX_MAX_VOLUME);
+  }
 }
 
 /** @brief Releases the memory
@@ -53,8 +58,13 @@ bool Audio::Unload()
   return false;
 }
 
-bool Audio::SystemInit()
+bool Audio::SystemInit(bool Silent)
 {
+  if (Silent) {
+    // don't initialise the sound and ignore all sound calls
+    Active = false;
+    return true;
+  }
   if(SDL_Init(SDL_INIT_AUDIO) < 0) {
     cout << "Unable to init SDL: " << SDL_GetError() << endl;
     return false;

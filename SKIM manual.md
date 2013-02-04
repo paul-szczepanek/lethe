@@ -35,7 +35,7 @@ are useful only in particular story styles or within the menu system.
 ### `Noun Definition _______________________________________________ [] [[]]`
 
 `[noun]` - begin definition of the noun. This delimits noun definitions and
-             needs to start on a new line.
+           needs to start on a new line.
 
 Nouns can't start with numbers (`1noun` would be an illegal name) but may
 contain numbers and spaces. Leading and trailing spaces will be ignored. Use

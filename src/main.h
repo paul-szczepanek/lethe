@@ -45,6 +45,7 @@ typedef size_t sz;
 #ifdef DEVBUILD
 extern string GLog;
 extern string GTrace;
+extern sz GTraceIndent;
 #define LOG(t) { string log = (t); \
   if (log.size() > 0) { GLog = GLog + "\n" + log; } };
 #else
@@ -188,7 +189,7 @@ inline string CutString(const string Text,
                         csz Start,
                         csz End = string::npos)
 {
-  return Text.substr(Start, End - Start);
+  return Start < End? Text.substr(Start, End - Start) : string();
 }
 
 template <typename T> inline void Clamp(T& Value,

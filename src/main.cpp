@@ -5,6 +5,7 @@
 #ifdef DEVBUILD
 string GLog = "";
 string GTrace = "";
+sz GTraceIndent = 0;
 #endif
 
 int main (int Count, char* Switches[])

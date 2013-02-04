@@ -10,14 +10,13 @@ const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
 
-const string CONTENTS_START = "@";
-
-const string QUEUE_CONTENTS = CONTENTS_START + QUEUE;
-const string NOUNS_CONTENTS = CONTENTS_START + NOUNS;
-const string PLACE_CONTENTS = CONTENTS_START + PLACE;
-const string EXITS_CONTENTS = CONTENTS_START + EXITS;
-const string CALLS_CONTENTS = CONTENTS_START + CALLS;
-const string QUICK_CONTENTS = CONTENTS_START + QUICK;
+const string CONTENTS = "@";
+const string QUEUE_CONTENTS = CONTENTS + QUEUE;
+const string NOUNS_CONTENTS = CONTENTS + NOUNS;
+const string PLACE_CONTENTS = CONTENTS + PLACE;
+const string EXITS_CONTENTS = CONTENTS + EXITS;
+const string CALLS_CONTENTS = CONTENTS + CALLS;
+const string QUICK_CONTENTS = CONTENTS + QUICK;
 
 enum bookFunction {
   bookFunctionSize,
@@ -330,16 +329,56 @@ const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
 } // namespace token
 
 sz_pair FindToken(const string& Text, token::tokenName TokenName,
-                      sz Start = 0, sz End = 0);
+                  sz Start = 0, sz End = 0);
 sz FindTokenStart(const string& Text, token::tokenName TokenName,
-                      sz Start = 0, sz End = 0);
+                  sz Start = 0, sz End = 0);
 sz FindTokenEnd(const string& Text, token::tokenName TokenName,
-                    sz Start = 0, sz End = 0);
-sz FindCharacter(const string& Text, char Char,
-                     sz Start = 0, sz End = 0);
+                sz Start = 0, sz End = 0);
 void CleanWhitespace(string& Text);
 string CleanEscapeCharacters(const string& Text);
 void StripComments(string& Text);
+
+// handy text parsing function for escaping special chars
+inline bool IsEscaped(const string& Text, sz Pos)
+{
+  if (Pos > 0) {
+    return (Text[Pos-1] == '\\');
+  } else {
+    return false;
+  }
+}
+
+inline bool IsSpecial(const string& Text, sz Pos, char token)
+{
+  if ((Pos > 0) && (Text[Pos-1] == '\\')) {
+    return false;
+  } else {
+    return (Text[Pos] == token);
+  }
+}
+
+/** @brief Find first unescaped passed in character
+  * \return npos if not found
+  */
+inline sz FindCharacter(const string& Text,
+                        char Char,
+                        sz Start = 0,
+                        sz End = 0)
+{
+  if (End == 0 || End > Text.size()) {
+    End = Text.size();
+  }
+  sz pos = Start;
+
+  while (pos < End) {
+    if (IsSpecial(Text, pos, Char)) {
+      return pos;
+    }
+    ++pos;
+  }
+
+  return string::npos;
+}
 
 inline string GetCleanWhitespace(const string& Text)
 {
@@ -363,25 +402,6 @@ inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
     }
   }
   return false;
-}
-
-// handy text parsing function for escaping special chars
-inline bool IsEscaped(const string& Text, sz Pos)
-{
-  if (Pos > 0) {
-    return (Text[Pos-1] == '\\');
-  } else {
-    return false;
-  }
-}
-
-inline bool IsSpecial(const string& Text, sz Pos, char token)
-{
-  if ((Pos > 0) && (Text[Pos-1] == '\\')) {
-    return false;
-  } else {
-    return (Text[Pos] == token);
-  }
 }
 
 #endif // TOKEN_H

@@ -28,9 +28,14 @@ void PageParser::AddTextBlock()
   if (Verb.Names.empty()) {
     LOG("illegal text outside of a verb");
   } else if (!plainText.empty()) {
-    Block newBlock(plainText);
-    newBlock.Execute = false;
-    Blocks.back()->Blocks.push_back(newBlock);
+    if (Blocks.empty()) {
+      LOG("No verb to add the text to, maybe you forgot to close a \": "
+          + plainText + " <-is this meant to be plain text?");
+    } else {
+      Block newBlock(plainText);
+      newBlock.Execute = false;
+      Blocks.back()->Blocks.push_back(newBlock);
+    }
   }
 
   // because we end on " which is part of this text block
@@ -70,7 +75,7 @@ void PageParser::AddCondition()
         }
       }
 
-      if (ignore == verbPos) {
+      if (ignore >= verbPos) {
         isVerbCondition = true;
         // we have to add the verb now so we can pop old verb conditions
         // before we add this one to the pool
@@ -87,31 +92,36 @@ void PageParser::AddCondition()
     VerbCondition condition;
     condition.Expression = expression;
     // find the scope of this condition
-    if (Pos < Text.size() &&
+    if (Pos < Length &&
         Text[Pos] == token::Start[token::block]) {
       // if the closing } doesn't exist it's set to be max size_t
-      condition.End = FindTokenEnd(Text, token::block, ++Pos);
-    } else { // if no scope is set default to be until the next condition
-      condition.End = Text.size(); // the next condition will close it
+      condition.End = FindTokenEnd(Text, token::block, Pos);
+      ++Pos;
+    } else {
+      // end at size of text means implied scope of until we hit the next verb
+      condition.End = Length;
     }
 
-    // pop old conditions that no longer apply
-    // or didn't have an explicit { } scope
-    while (!VerbConditions.empty()
-           && (VerbConditions.back().End < Pos
-    || VerbConditions.back().End == Text.size())) {
-      VerbConditions.pop_back();
-    }
-    // and finally put the new verb condition into the pool
+    PopOldVerbConditions();
     VerbConditions.push_back(condition);
   } else {
     // this is a regular condition, below a verb
-    assert(!Blocks.empty()); //Illegal definition, verb not started
-    // end implied scope of the previous condition
     if (PopScopePending) {
-      Blocks.pop_back();
+      if (Blocks.empty()) {
+        //Illegal definition, verb not started
+        LOG("Trying to go back a block because of implied scope: "
+            + expression + " but there is no block to go up to")
+      } else {
+        // end implied scope of the previous condition
+        Blocks.pop_back();
+      }
     }
-    assert(!Blocks.empty()); //Illegal definition, verb not started
+
+    if (Blocks.empty()) {
+      //Illegal definition, verb not started
+      LOG("Regular conditions need to be below a verb: " + expression +
+          " can be a verb condition but needs to be followed by a verb.")
+    }
 
     // put a new block into the current block's array of blocks
     // and set it as the new current block
@@ -120,8 +130,7 @@ void PageParser::AddCondition()
     Blocks.back()->Blocks.push_back(newBlock);
     Blocks.push_back(&(Blocks.back()->Blocks.back()));
 
-    if (Pos < Length &&
-        Text[Pos] == token::Start[token::block]) {
+    if (Pos < Length && Text[Pos] == token::Start[token::block]) {
       ++Pos; // skip { on next iteration
       // scope ends on the next } token hit
       PopScopePending = false;
@@ -145,6 +154,23 @@ void PageParser::AddInstruction()
     Blocks.back()->Blocks.push_back(newBlock);
   }
   Pos = instEnd;
+}
+
+void PageParser::PopOldVerbConditions()
+{
+  if (VerbScopePending) {
+    VerbScopePending = false;
+    // pop old conditions that no longer apply
+    // or didn't have an explicit { } scope
+    while (!VerbConditions.empty()) {
+      csz& verbEnd = VerbConditions.back().End;
+      if (verbEnd < Pos || verbEnd == Length) {
+        VerbConditions.pop_back();
+      } else {
+        break;
+      }
+    }
+  }
 }
 
 /** \brief Start a new verb block
@@ -177,7 +203,7 @@ void PageParser::AddVerb()
     }
 
     // add all chained [:verb1][:verb2] into Names
-    while (verbEnd+3 < Text.size()
+    while (verbEnd+3 < Length
            && Text[verbEnd+1] == token::Start[token::noun]
            && Text[verbEnd+2] == token::Start[token::scope]) {
       // get the next alias of the verb
@@ -186,10 +212,8 @@ void PageParser::AddVerb()
       Pos = verbEnd;
     }
 
-    // pop old conditions that no longer apply
-    while (!VerbConditions.empty() && VerbConditions.back().End < Pos) {
-      VerbConditions.pop_back();
-    }
+    PopOldVerbConditions();
+    VerbScopePending = true;
 
     // and append all conditions that still apply
     string verbExpression;

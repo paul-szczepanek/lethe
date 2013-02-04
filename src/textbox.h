@@ -74,6 +74,7 @@ public:
   Properties ValidKeywords;
 
   Rect PageSize;
+  bool RawMode = false;
 
 protected:
   string Text;

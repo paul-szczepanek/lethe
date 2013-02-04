@@ -29,7 +29,9 @@ void Book::SetBookmark(const Properties& Description)
 void Book::SetBookmark(const string& Description)
 {
   Bookmark& mark = BookSession.CreateBookmark();
-  mark.Description = Description;
+  if (!Description.empty()) {
+    mark.Description = Description;
+  }
   CleanWhitespace(mark.Description);
 }
 
@@ -409,10 +411,21 @@ const string Book::ProcessQueue(Story& MyStory,
     const string& expression = pool.TextValues[i];
     actions.AddValue(expression);
 #ifdef DEVBUILD
-    GTrace += "\n[" + expression + "] trace:";
+    const Properties& calls = MySession.GetSystemValues(systemCalls);
+    if (!calls.TextValues.empty()) {
+      GTrace += "\nCALLS ";
+      for (const string& trace : calls.TextValues) {
+        GTrace += trace;
+        GTrace += ' ';
+      }
+      GTrace += "traces:";
+    }
 #endif
     // call the actions scheduled for every turn
     query.ExecuteExpression(CALLS, CALLS_CONTENTS);
+#ifdef DEVBUILD
+    GTrace += "\n\n[" + expression + "] trace:";
+#endif
     // only one value present in QUEUE during this execution,
     // unless it has been removed by one of the CALLS
     query.ExecuteExpression(QUEUE, QUEUE_CONTENTS);

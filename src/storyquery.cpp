@@ -7,61 +7,106 @@
 
 /** \brief Will recursively evaluate the Expression in each child block
   * starting with current block and fill in Text resulting from the evaluation
-  * \return how many parents up do we break with [!<<]
+  * \return how many parents up do we go up to with !<<
   */
 sz StoryQuery::ExecuteBlock(const string& Noun,
-                            const Block& CurBlock)
+                            const Block& CurBlock,
+                            csz Level)
 {
   const string& expression = CurBlock.Expression;
+  if (Level > 100) {
+    LOG("Excessive call stack " + IntoString(Level) + " levels deep at:"
+        + expression);
+    if (Level > 1000) {
+      LOG("infinite (1000 levels deep) loop at: " + expression + ". Aborting.");
+      return 2000;
+    }
+  }
   csz length = expression.size();
-
+#ifdef DEVBUILD
+  if (GTrace[GTrace.size() - 1] != '\n') {
+    // don't add double breaklines (caused by empty expressions)
+    GTrace += "\n";
+  }
+  for (sz i = 0; i < Level + GTraceIndent; ++i) {
+    GTrace += "  ";
+  }
+#endif
   if (CurBlock.Blocks.empty()) {
     if (length) {
       if (CurBlock.Execute) {
         // if there are no child blocks it must be an !instruction
 #ifdef DEVBUILD
-        GTrace +=  " " + expression;
+        GTrace += "!" + expression;
 #endif
         // this is a !<<
         if (FindTokenStart(expression, token::stop) != string::npos) {
           // we know that at least two < exist already
-          sz breakUp = 2;
+          sz breakUp = 3;
           while (breakUp < length
                  && expression[breakUp] == token::Start[token::stop]) {
             ++breakUp;
           }
           return breakUp; // this breaks out of n loops above
         } else {
+#ifdef DEVBUILD
+        ++GTraceIndent;
+#endif
           ExecuteExpression(Noun, expression);
+#ifdef DEVBUILD
+        --GTraceIndent;
+#endif
         }
       } else {
+#ifdef DEVBUILD
+        csz sampleEnd = min((sz)40, FindCharacter(expression, '\n'));
+        GTrace += "\"" + CutString(expression, 0, sampleEnd);
+        if (expression.size() > sampleEnd) {
+          GTrace += "...\"";
+        } else {
+          GTrace += '\"';
+        }
+#endif
         // handle plain text Expression by copying to the display page
         Text += " ";
         Text += expression;
       }
     }
-  } else { // we have children so this must be a ?condition
-    if (length == 0 || ExecuteExpression(Noun, expression, true)) {
+  } else {
+    // this block has children so this must be a ?condition
 #ifdef DEVBUILD
-      GTrace += "\n" + expression;
+    if (length) {
+      GTrace += " ?" + expression;
+    }
 #endif
+    if (length == 0 || ExecuteExpression(Noun, expression, true)) {
       // if the condition is true, execute all the child blocks
       bool executeElse = false;
       for (sz i = 0, fSz = CurBlock.Blocks.size(); i < fSz; ++i) {
-        // if [!<<] used to escape parent break from loop
-        sz backUp = 0;
-        if (executeElse || !CurBlock.Blocks[i].Else) {
-          backUp = ExecuteBlock(Noun, CurBlock.Blocks[i]);
+        // if !<< used to escape parent break from loop
+        sz backUp = 0; // this will carry the escape up the call stack
+        if (!CurBlock.Blocks[i].Else || executeElse) {
+#ifdef DEVBUILD
+          if (CurBlock.Blocks[i].Else) {
+            GTrace += "else";
+          }
+#endif
+          backUp = ExecuteBlock(Noun, CurBlock.Blocks[i], Level + 1);
         }
+
+        executeElse = false;
         if (backUp > 0) {
           if (backUp == 1) {
             executeElse = true;
           } else {
-            return --backUp; // decrement so the parent remains unaffected
+            return --backUp;
           }
         }
       }
     } else {
+#ifdef DEVBUILD
+      GTrace += " (failed) ";
+#endif
       return 1;
     }
   }
@@ -107,6 +152,16 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
     csz aPos = FindCharacter(Expression, token::Start[token::logicalAnd], pos);
     csz oPos = FindCharacter(Expression, token::Start[token::logicalOr], pos);
     csz endPos = min(length, min(aPos, oPos));
+
+    if (endPos < length) {
+      if (aPos < oPos) {
+        shortAnd = true;
+        shortOr = false;
+      } else {
+        shortAnd = false;
+        shortOr = true;
+      }
+    }
 
     if (Condition) {
       // check which condition it is
@@ -321,20 +376,6 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
     } else if (shortOr && result) {
       return true;
     }
-
-    if (pos < length) {
-      if (Expression[pos] == token::Start[token::logicalAnd]) {
-        if (!result) {
-          return false;
-        }
-        shortAnd = true;
-      } else if (Expression[pos] == token::Start[token::logicalOr]) {
-        if (result) {
-          return true;
-        }
-        shortOr = true;
-      }
-    }
   } // end while
 
   return result;
@@ -403,7 +444,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
           // grouping and function calls recurse with the (contents)
           if (i == token::parens) {
             csz funcEnd = FindTokenEnd(Expression, token::function,
-                                                pos);
+                                       pos);
             if (funcEnd == string::npos) {
               LOG(Expression + " - unmatched \"(\" in expression");
               return false;
@@ -637,7 +678,7 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       case bookFunctionStop:
         // deactivate asset
         for (const string& arg : textArgs) {
-          if (!QueryBook.GetAssetState(arg)) {
+          if (QueryBook.GetAssetState(arg)) {
             QueryBook.SetAssetState(arg, false);
           }
           LOG(arg + " - stop");

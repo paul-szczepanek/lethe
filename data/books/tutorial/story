@@ -1,0 +1,380 @@
+// This is a tutorial story that will show you almost all features of SKIM (the
+// language used by the game). The game doesn't make many assumptions about how
+// you structure a story and it's up to you to decide if want to use rooms, or
+// have an invetory. This example story will use such a setup.
+
+// Use the provided skim.vim highlight rules in your vim or gvim. This will
+// make writing correct code a lot easier as it will catch any unmatched quotes,
+// or misplaced tokens. It will also make this file easy to read so set up your
+// editor now!
+
+//***************************** reserved nouns *********************************
+
+// A noun is defined by placing a word in square brackets on its own line.
+// You may assign initial values to the noun.
+// [Noun Name = values to be assigned to the noun]
+// Nouns must start with a letter and may contain letters, numbers and spaces.
+// Names are case sensitive and must be unique.
+
+// These are the reserved nouns, treated differently by the game. Not all are
+// needed. You only need to define QUEUE so the game knows how to start, others
+// will work fine with their default values.
+
+// these 3 nouns expect values of noun:verb
+
+[QUEUE = chapter 1:open] // This is what gets executed on this turn
+                         // Here we tell the story to go to noun [chapter 1]
+                         // and execute the verb [:open].
+
+// every time the player clicks something, the action gets put on the QUEUE
+// and executed. Each item gets removed after execution..
+
+[QUICK = self:visible nouns, self:inventory] // The values here get executed
+                                             // every turn to produce the text
+                                             // of the quick menu.
+
+// The quick menu text gets replaced every turn. You can use the quick menu
+// to show player status, inventory, list of available keywords.
+
+[CALLS = reminder:tick] // Any value here will get executed every turn
+
+// CALLS get executed before the queue. This means you can have a look at the
+// queue and even clear it, stoping the action from taking place.
+
+// The 3 nouns below expect values that are nouns
+
+[PLACE] // This is where we are. You don't need to use it in your story.
+        // Here we leave it empty because we start nowhere.
+
+[EXITS = tutorial room] // This contains a list of a possible places we can go.
+
+// It's not requried by the game engine, and no logic is enforced. It's up to
+// you to use it if you want to. Here we assign the first place we will go to.
+
+[NOUNS] // These are the nouns that stay highlighted in the text left from the
+        // previous move.
+
+// The user can see old text in the main window from previous actions and can
+// even scroll further back. Keywords in that text are not clickable, unless
+// the nouns the reference are placed as values in NOUNS..
+
+//***************************** user noun **************************************
+
+[chapter 1] // This is a user noun
+
+ [:open] // This is a verb belonging to it, calling chapter 1:open will 
+         // execute this block. The block ends with the next verb or noun
+
+  "Text in quotes is printed to the screen.
+  Indentation and breaklines are ignored.
+  Text surrounded by \*\* will get printed in a"
+
+  "**different font.**
+  __each style will be printed on a seperate line__ from regular text
+  ==Styles **cannot** be nested=="
+
+  // ** for title font
+  // __ for quote font
+  // == for monospaced font
+
+  !tutorial room:go to // Anything past a ! is an instruction, this one will
+                       // find noun [tutorial room] and execute the block under
+                       // the verb [:go to]
+
+  !Play(hello) // this will play the sound
+
+//******************************** assets **************************************
+
+// Asset definition starts with $ and fits on a single line.
+// Assets are like nouns and require unique names
+
+$room = BG(room.png) // this creates an asset of type BG (background)
+
+$pen = Image(pen.png, -0.1, 0.5, 1.2)] // image at given position and zoom
+
+$hello = Sound(hello.wav) // one-off sound
+
+//******************** inventory  and quick menu *******************************
+
+// We provide this becuase we want to have an inventory. We will story items
+// as values of this noun.
+
+[self]
+
+// We provided the game with these two verbs by placing them in the reserved
+// noun QUICK. They will get executed every turn to create the quick menu.
+
+ [:inventory]
+
+  "\nInventory:\n" // \n forces a newline in text
+  !Keyword(@self) // this will print all the values of noun self as keywords
+
+// Name(parameter) is a function call. Keyword(@self) will call the function
+// Keyword and pass @self as the parameter for it.
+
+// @noun evaluates to values of the noun, so @self will expand to all the values
+// that are currently assigned to the noun self. @ can be nested.
+
+ [:visible nouns]
+
+  !Keyword(@PLACE) // show the keyword for the location we are in
+  "\nObjects:\n"
+  !Keyword(@NOUNS) // and all the things that are there
+
+//************************ patterns ********************************************
+
+// Patterns are defined per story and are used by prepending them to nouns.
+// This way you can define the game to work like a regular IF with places and
+// an inventory.
+
+// Patterns are defined like nouns but use two [[ ]] sets of brackets.
+// Any occurance of the name of the pattern will be replaced with the name of
+// the noun that will use this pattern.
+
+[[room]]  // we will use this pattern for nouns that represent places
+
+// ?condition will determine if the execution continues into the block.
+// Top level conditions are the ones placed above the verb definition.
+// They need to succeed for the verb to be visible and accessible
+
+?@EXITS+=room & @PLACE-=room { // & means both conditions need to be met
+
+// += means contains. ?@EXITS+=room will be true if the values on the left
+// contain a value called room. @EXITS will expand to values of that noun.
+
+ [:go to] // verb, this is where the excutions goes upon calling !room:go to
+
+  !EXITS= // this one clears exits
+  !PLACE=room // change location to the room we're entering
+  !NOUNS=@room // active nouns are listed in locations in this story
+  !:look // look at the room we're in now
+
+} // closing brace means the top level condition ends here
+
+?@PLACE+=room { // rest of the actions are available when we are in the room.
+  // the { is a cheat, if there is no closing } it's assumed to be at the end
+  // of the definition rather then at the next top level condition so it affects
+  // all the remaining verbs in the noun this pattern gets prepended to
+
+
+[[item]] // we will use this pattern for things that may be picked up
+
+?@@PLACE+=item { // check if the item is the location we are in
+ [:take]
+  !@PLACE-=item // remove it from the location
+  !NOUNS-=item // remove it from the active nouns
+  !self+=item // add it to the inventory
+  "Taken."
+}
+
+?@@PLACE+=item | @self+=item { // The rest of verbs is available if the item
+                                // is either in the room or in our inventory.
+
+//******************************************************************************
+
+// This noun, pen, uses the pattern item. It will be prepended and the name of
+// the pattern replaced with the name of the noun so this:
+
+[pen[item]]
+ [:look]
+  !Play(pen) // show the image
+  "Black ink pen."
+
+// becomes this:
+// [pen]
+//  ?@@PLACE+=pen {
+//   [:take]
+//    !@PLACE-=pen
+//    !NOUNS-=pen
+//    !self+=pen
+//    "Taken."
+//  ?@@PLACE+=pen | @self+=pen
+//   [:look]
+//    !Play(pen)
+//    "Black ink pen."
+//  }
+
+//******************************************************************************
+
+// This noun, pen, uses the pattern item. It will be prepended and the name of
+// the pattern replaced with the name of the noun so this:
+
+[crowbar[item]]
+ [:look]
+  "A small iron <crowbar>." // Text in < > is a keyword.
+                            // Keywords get highlighted and
+                            // clickin on them show a menu that
+                            // let's you pick a verb for the noun
+                            // that matches the name.
+
+//******************************************************************************
+
+[tutorial room[room] = pen, door, crowbar]
+
+ [:look] // because we appended the room definition this verb is only visible
+         // when we're in the room
+
+  "You are sitting in the <tutorial room>. // These breaklines will be ignored
+                                           // and the text will be reflowed.
+   This text was triggered by
+   <looking[tutorial room:look]>." // Clicking on this keyword will not
+                                   // produce a menu of verbs. Clicking it 
+                                   // will execute the verb [:look] 
+                                   // in the noun [tutorial room].
+
+  "You are <writing a story[story]>." // The name in [ ] is the name of the noun.
+                                      // The keyword in < > will be visible, but
+                                      // the noun being reference is the noun
+                                      // in square brackets [ ].
+
+  ?+=pen { // Only show this text if pen is a value of this noun.
+           // The noun name is implied to be the one being defined.
+   "A <pen> is lying on the desk."
+  }
+
+  ?+=crowbar {
+   "A <crowbar> is hanging on the wall."
+  } {
+    // the block after } { will be executed if the condition above fails
+   "A nail, where the <crowbar> used to be is sticking out of the wall."
+  }
+
+  !tea:look // this will execute the verb [:look] in [tea]
+            // the text will get inlined with the rest of this description
+
+  "The room has only one <door>" // This sentence will finish differently
+                                 // depending on the state of the door.
+                                 // A space will be inserted if needed.
+
+  ?@door+=open { 
+   "leading <outside>."
+   !EXITS+=outside // if the door is open add outside as a possible exit
+  } {
+   ", currently closed."
+  }
+
+  !Play(room) // This will activate the asset called room.
+
+//******************************************************************************
+
+[door]
+
+?-=open
+ [:open] [:use] // only the first verb name is visible, but both will work
+  ?-=locked {
+   "You try the door but it's locked."
+   !door+=locked
+  } { 
+   "You already know it's locked."
+  }
+
+?@self+=crowbar & +=locked & -=open // all conditions need to be met
+                                    // you need a crowbar
+                                    // and to know the door is locked
+                                    // and it can't be already pried open
+ [:pry door]
+  "Using the crowbar, you pry the lock off the door."
+  !+=open
+  !EXITS+=outside
+
+// Remember that verbs reset implied scope of top level conditions.
+// This means that the previous condition which didn't have a {
+// will not affect the verb below.
+
+ [:look]
+  ?-=open {
+   "It's a flimsy wooden door"
+  } {
+   "The damaged door swings freely. It leads <outside>."
+  }
+
+//******************************************************************************
+
+[tea]
+
+?-=empty {
+ [:look]
+
+  ?-=warm // no braces are used so the scope is implied to be until the next
+          // condition or verb
+   "The <cup of tea[tea]> is getting cold."
+
+  // the implied scope of ?-=warm ends here
+
+  ?+=warm
+   "The fresh <cup of tea[tea]> is nice and warm."
+
+ [:drink]
+  ?-=warm
+   "You drink the cold <tea>, it's not very nice."
+   !+=empty
+
+  ?+=warm
+   "Ahh, that hits the spot."
+   !+=empty
+}
+
+?+=empty // If no braces are used this top level condition is only valid
+         // for this verb.
+ [:look]
+  "The <tea cup[tea]> is empty."
+
+ [:make fresh]
+  "You make a fresh <cup[tea]>."
+  !+=warm !-=empty
+
+//******************************************************************************
+
+// A number with a # in front is treated as an integer value and is not part
+// of other text values of the noun. A noun has only one integer value.
+
+[story = #0]
+
+ [:look]
+
+  "It's the tutorial story."
+
+  ?<=#1 {
+   "Still needs a lot of work."
+   !<< // this aborts the execution of the parent block
+       // so the next statement doesn't activate
+  }
+
+  ?<=#3 {
+   "It's getting there."
+   !<<
+  }
+
+  "It's done."
+
+ [:write]
+  "You work for a few minutes."
+  !tea-=warm
+  !+=#1 // Add one to the integer value of the noun.
+  
+//******************************************************************************
+
+[outside[room]]
+ [:look]
+  "You are outside the <tutorial room>."
+  !EXITS+=tutorial room
+  !Stop(room) // this will hide the room image
+
+//******************************************************************************
+
+[reminder = #5] 
+
+ [:tick] // this was placed in CALLS and will get called every turn
+
+  !-=#1 // tick down to zero
+
+  ?<=#0 & @PLACE+=tutorial room // after 5 turns if we're in the room 
+   !CALLS-=reminder:tick // remove itself from the CALLS
+   !QUEUE+=reminder:show // this will queue up that verb to be executed after the
+                         // user action (QUEUE is first come first serve)
+ [:show]
+   "\nMaybe you should do some work."
+
+//******************************************************************************
+
+// For a full list of features of the language see the SKIM manual

@@ -13,8 +13,6 @@
 [main]
  [:menu]
   "**Game Menu**"
-  "this is a breakline
-   space test"
   ?IsInGame() {
    "<Continue Playing[menu:close]>
    \n<Manage Session[main:session]>
@@ -22,10 +20,10 @@
   } {
    "Open a book to start:"
   }
-  "\n<Browse Books[main:books]>
-  \n<Options[main:options]>
-  \n
-  \n<Quit[menu:quit]>"
+  "\n<Browse Books[main:books]>"
+  "<Options[main:options]>"
+  ""
+  "<Quit[menu:quit]>"
 
  [:text]
   "some text"

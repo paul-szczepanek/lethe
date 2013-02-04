@@ -7,12 +7,13 @@
 class PageParser;
 
 struct Block {
-  Block(const string& Text) : Expression(Text) { };
+  Block(const string& Text, bool Executable = true)
+    : Expression(Text), Execute(Executable) { };
   Block() { };
   ~Block() { };
   string Expression;
   vector<Block> Blocks;
-  bool Execute = true;
+  bool Execute;
   bool Else = false;
 };
 
