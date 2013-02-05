@@ -50,11 +50,11 @@ sz StoryQuery::ExecuteBlock(const string& Noun,
           return breakUp; // this breaks out of n loops above
         } else {
 #ifdef DEVBUILD
-        ++GTraceIndent;
+          ++GTraceIndent;
 #endif
           ExecuteExpression(Noun, expression);
 #ifdef DEVBUILD
-        --GTraceIndent;
+          --GTraceIndent;
 #endif
         }
       } else {
@@ -68,7 +68,12 @@ sz StoryQuery::ExecuteBlock(const string& Noun,
         }
 #endif
         // handle plain text Expression by copying to the display page
-        Text += " ";
+        if ((Text.empty() || Text[Text.size() - 1] != ' ')
+            && expression[0] != ',' && expression[0] != ' '
+            && expression[0] != '.') {
+          Text += " ";
+        }
+
         Text += expression;
       }
     }
@@ -214,6 +219,14 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
         // default to current page noun
         if (!left.empty()) {
           EvaluateExpression(leftEvalValues, left, isNum, isText);
+#ifdef DEVBUILD
+          if (FindTokenStart(left, token::number) == string::npos
+              && FindTokenStart(left, token::value) == string::npos
+              && FindTokenStart(left, token::function) == string::npos) {
+            LOG("warning: ?" + Expression
+                + " - did you forget a @ or # on the left?");
+          }
+#endif
         }
         const Properties& leftValues = left.empty()?
                                        GetValues(Noun)
@@ -562,7 +575,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
         // evaluate all text into int values, add them up and reuse the value
         for (string numberText : operand.TextValues) {
           // check for a plain text number (keywords can't start with a digit)
-          if (isdigit(numberText[0])) {
+          if (isdigit(numberText[0]) || numberText[0] == '-') {
             target.IntValue += IntoInt(numberText);
           } else { // this a noun, find its value
             GetUserInteger(numberText, target);

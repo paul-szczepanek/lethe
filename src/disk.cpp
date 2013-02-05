@@ -97,7 +97,7 @@ bool Disk::Write(const string& Filename, const string& Text)
 {
   ofstream writeFile(Filename.c_str());
   if (writeFile.is_open()) {
-    writeFile << Text << std::flush;
+    writeFile << Text << flush;
     writeFile.close();
     return true;
   } else {

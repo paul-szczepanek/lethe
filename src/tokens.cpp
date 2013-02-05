@@ -203,9 +203,7 @@ sz_pair FindToken(const string& Text,
   return sz_pair(string::npos, string::npos);
 }
 
-/** @brief FindToken
-  *
-  * \return this version only returns the start of the token
+/** @brief this version only returns the start of the token, even for paired
   */
 sz FindTokenStart(const string& Text,
                   token::tokenName TokenName,
@@ -253,9 +251,8 @@ sz FindTokenStart(const string& Text,
   return string::npos;
 }
 
-/** @brief FindToken
-  *
-  * \return the end position of a token
+/** @brief return the end position of a token, if a token is paired it
+  * will count up pairs to match so needs to start at pair start
   */
 sz FindTokenEnd(const string& Text,
                 token::tokenName TokenName,

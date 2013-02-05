@@ -2,34 +2,32 @@
 #define MAIN_H_INCLUDED
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <sstream>
-#include <iomanip>
 #include <string>
 #include <iterator>
 #include <vector>
-#include <bitset>
 #include <map>
 #include <cassert>
 
 using std::cout;
-using std::max;
-using std::min;
 using std::endl;
-using std::setiosflags;
-using std::iterator;
-using std::vector;
-using std::string;
-using std::stringstream;
-using std::abs;
+using std::flush;
 using std::setprecision;
-using std::setw;
-using std::setfill;
-using std::bitset;
-using std::map;
+
 using std::ofstream;
 using std::ifstream;
-using std::find;
+using std::stringstream;
+
+using std::string;
+using std::iterator;
+using std::vector;
+using std::map;
+
+using std::min;
+using std::max;
+using std::abs;
 
 typedef float real;
 typedef unsigned short int usint;
@@ -40,8 +38,6 @@ typedef unsigned char uchar;
 typedef const size_t csz;
 typedef size_t sz;
 
-#define DEVBUILD
-
 #ifdef DEVBUILD
 extern string GLog;
 extern string GTrace;
@@ -49,10 +45,9 @@ extern sz GTraceIndent;
 #define LOG(t) { string log = (t); \
   if (log.size() > 0) { GLog = GLog + "\n" + log; } };
 #else
-#define LOG(t);
+#define LOG(t) nop;
 #endif
 
-const char VALUE_SEPARATOR = ',';
 const string SLASH = "/";
 const string DATA_DIR = "data";
 const string STORY_DIR = DATA_DIR + SLASH + "books";

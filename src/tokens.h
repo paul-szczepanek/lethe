@@ -3,6 +3,9 @@
 
 #include "main.h"
 
+const char VALUE_SEPARATOR = ',';
+
+// reserved system nouns
 const string QUEUE = "QUEUE";
 const string NOUNS = "NOUNS";
 const string PLACE = "PLACE";
@@ -17,6 +20,25 @@ const string PLACE_CONTENTS = CONTENTS + PLACE;
 const string EXITS_CONTENTS = CONTENTS + EXITS;
 const string CALLS_CONTENTS = CONTENTS + CALLS;
 const string QUICK_CONTENTS = CONTENTS + QUICK;
+
+enum systemNoun {
+  systemQueue,
+  systemNouns,
+  systemPlace,
+  systemExits,
+  systemCalls,
+  systemQuick,
+  SYSTEM_NOUN_MAX
+};
+
+const string SystemNounNames[SYSTEM_NOUN_MAX] = {
+  QUEUE,
+  NOUNS,
+  PLACE,
+  EXITS,
+  CALLS,
+  QUICK
+};
 
 enum bookFunction {
   bookFunctionSize,
@@ -47,25 +69,6 @@ enum bookFunction {
   bookFunctionDialog,
   bookFunctionInput,
   BOOK_FUNCTION_MAX
-};
-
-enum systemNoun {
-  systemQueue,
-  systemNouns,
-  systemPlace,
-  systemExits,
-  systemCalls,
-  systemQuick,
-  SYSTEM_NOUN_MAX
-};
-
-const string SystemNounNames[SYSTEM_NOUN_MAX] = {
-  QUEUE,
-  NOUNS,
-  PLACE,
-  EXITS,
-  CALLS,
-  QUICK
 };
 
 enum buttonType {
@@ -243,7 +246,7 @@ const char End[TOKEN_NAME_MAX] = {
   '_'     //styleQuote,
 };
 
-csz Type[TOKEN_NAME_MAX] = {
+const usint Type[TOKEN_NAME_MAX] = {
   isWide,       //comment,
 
   0,            //asset,
@@ -376,7 +379,6 @@ inline sz FindCharacter(const string& Text,
     }
     ++pos;
   }
-
   return string::npos;
 }
 
@@ -391,7 +393,7 @@ inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
 {
   if (!Text.empty()) {
     csz scopePos = FindTokenStart(Text, token::scope);
-    if (scopePos != string::npos) { // recurse with the new block
+    if (scopePos != string::npos) {
       if (scopePos) {
         Noun = CutString(Text, 0, scopePos);
       } else {
