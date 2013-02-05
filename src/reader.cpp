@@ -249,8 +249,6 @@ bool Reader::ReadBook()
   }
   TimeoutTimer = Timeout;
 
-  // this is how far into the text the valid keywords get checked
-  MainText.ValidateKeywords = PageSource.size();
   // fill the text from the book
   PageSource = MyBook.ProcessStoryQueue();
 #ifdef DEVBUILD

@@ -257,7 +257,7 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //******************************************************************************
 
-[tutorial room[room] = pen, door, crowbar]
+[tutorial room[room] = pen, door, crowbar, tea]
 
  [:look] // Because we appended the room definition this verb is only visible
          // when we're in the room.

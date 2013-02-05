@@ -73,6 +73,9 @@ void TextBox::AddText(const string& NewText)
   if (!Text.empty() && Text[Text.size() - 1] != '\n') {
     Text += '\n';
   }
+  // this is how far into the text the valid keywords get checked
+  ValidateKeywords = Text.size();
+
   Text += NewText;
   ResetText();
 }
@@ -134,7 +137,7 @@ bool TextBox::HandleInput(MouseState& Mouse,
       const lint Y = Mouse.Y - (PageSize.Y - Pane.Y );
       // find selected keyword
       for (sz i = 0, fSz = Keywords.size(); i < fSz; ++i) {
-        if ((Keywords[i].Size.X < X)
+        if (Keywords[i].Active && (Keywords[i].Size.X < X)
             && (Keywords[i].Size.Y < Y)
             && (X < Keywords[i].Size.X + Keywords[i].Size.W)
             && (Y < Keywords[i].Size.Y + Keywords[i].Size.H)) {
@@ -209,7 +212,7 @@ bool TextBox::BreakText()
   sz length = Text.size();
   vector<sz_pair> keywordPos;
   vector<string> keywordNames;
-  vector<bool> activeKeywords;
+  vector<usint> activeKeywords;
   string cleaned;
   string realName;
   if (RawMode) {
@@ -353,6 +356,7 @@ bool TextBox::BreakText()
       if (++pos < length) {
         plain[pos - skip] = plain[pos];
       }
+
       // fix the  keyword positions that are beyond this position
       for (sz i = 0, fSz = keywordPos.size(); i < fSz; ++i) {
         if (keywordPos[i].X > pos) {
@@ -533,13 +537,17 @@ void TextBox::RefreshHighlights()
 {
   if (HighlightsDirty) {
     HighlightsDirty = false;
-    if (PageHeight) {
-      Highlights.Init(PageSize.W, PageSize.H);
-      // paint a rectangle behind each keyword
-      for (sz i = 0, forSize = Keywords.size(); i < forSize; ++i) {
+    if (!PageHeight) {
+      return;
+    }
+    Highlights.Init(PageSize.W, PageSize.H);
+    // paint a rectangle behind each keyword
+    for (sz i = 0, forSize = Keywords.size(); i < forSize; ++i) {
+      const KeywordMap& keyword = Keywords[i];
+      if (keyword.Active) {
         // change colour for the selected keyword
         usint highlightColour = (i == SelectedKeyword) ? 150 : 50;
-        Rect offsetLocation = Keywords[i].Size;
+        Rect offsetLocation = keyword.Size;
         offsetLocation.Y -= Pane.Y;
         if (offsetLocation.Y > -(lint)offsetLocation.H
             && offsetLocation.Y < (lint)PageSize.H) {
