@@ -302,7 +302,7 @@
 	"properties.h"
 	"tokens.h"
 
-1360012947 source:/home/paul/lethe/lethe/src/book.cpp
+1360104234 source:/home/paul/lethe/lethe/src/book.cpp
 	"book.h"
 	"page.h"
 	"tokens.h"
@@ -381,7 +381,7 @@
 	"properties.h"
 	"tokens.h"
 
-1360016703 source:/home/paul/lethe/lethe/src/reader.cpp
+1360104614 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"audio.h"
 	"input.h"
@@ -399,7 +399,7 @@
 	"storyquery.h"
 	"properties.h"
 
-1360086380 source:/home/paul/lethe/lethe/src/textbox.cpp
+1360087030 source:/home/paul/lethe/lethe/src/textbox.cpp
 	"textbox.h"
 	"reader.h"
 	"tokens.h"
@@ -407,11 +407,11 @@
 1360019528 source:/home/paul/lethe/lethe/src/tokens.cpp
 	"tokens.h"
 
-1359989719 /home/paul/lethe/lethe/src/storyquery.h
+1360105517 /home/paul/lethe/lethe/src/storyquery.h
 	"main.h"
 	"properties.h"
 
-1360022948 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1360105513 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"story.h"
