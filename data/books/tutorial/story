@@ -6,9 +6,50 @@
 // Use the provided skim.vim highlight rules in your Vim or gVim. This will
 // make writing correct text a lot easier as it will catch any unmatched quotes,
 // or misplaced tokens. It will also make this file easy to read so set up your
-// editor now!
+// editor now! Put the skim.vim file in your Vim syntax folder and reopen this
+// file.
 
-//***************************** reserved nouns *********************************
+//************************* crash course sample noun ***************************
+
+// The story is comprised of nouns with verbs that get executed.
+// Here is a sample noun not used in this story, it's solely to provide an
+// overview of many features. We go over individual features later.
+
+[sample noun = value1, value2, #4] // This creates a noun in the story
+                                   // and immediately sets its text values
+                                   // of which the noun may have many (or none)
+                                   // and it's integer value which it has always
+                                   // one and it's 0 by default.
+
+?top level condition // This condition, if false, hides the verb below.
+
+  [:sample verb] // This is a verb that may be executed by the story if the user
+                 // selects it or you call it in the story yourself.
+    "This text gets printed on the screen when the verb is executed."
+
+    ?@sample noun -= value3 // This condition checks if value3 is NOT amongst
+                            // the text values of sample noun.
+    { // These braces set the scope of this condition.
+      "If the condition is met, this text will be printed as well and the
+      instructions below executed."
+
+      !sample noun += value3 // add value3 do the noun
+      !FunctionName(function argument) // this calls a function
+
+    } { // This } { creates an "else" statement
+        // will get executed if the condition above fails.
+
+      !sample noun:sample verb 2 // This will execute the verb below.
+    }
+
+[:sample verb 2]
+
+  "Some more text but **this in big title font**. This is a keyword
+  that will be printed highlighted: <this will be printed[sample noun]>.
+  Clicking on such a keyword will show a menu containing all the verbs 
+  unless they were hidden by failing their top level condition."
+
+//******************************* user noun ************************************
 
 // A noun is defined by placing a word in square brackets on its own line.
 // You may assign initial values to the noun.
@@ -16,18 +57,48 @@
 // Nouns must start with a letter and may contain letters, numbers and spaces.
 // Names are case sensitive and must be unique.
 
+[chapter 1] // This is a user noun.
+
+ [:open] // This is a verb belonging to it, calling chapter 1:open will 
+         // execute this block. The block ends with the next verb or noun.
+
+  "Text in \"quotes\" is printed to the screen.
+  Indentation and break-lines are ignored.
+  Text surrounded by \*\* will be"
+
+  // These two paragraphs will be merged together adding \n between them.
+
+  "printed in a **different font.** __Each style will be printed on a separate
+  line__ from regular text. ==Styles **cannot** be nested.=="
+
+  // ** for title font
+  // __ for quote font
+  // == for mono spaced font
+
+  "\n\nYou can force new lines by using == \\n == in text. Let's start this
+  story by entering the tutorial room by calling ==!tutorial room:go to==
+  outside of quotes. The result will follow: "
+
+  !tutorial room:go to // Anything past a ! is an instruction, this one will
+                       // find noun [tutorial room] and execute the block under
+                       // the verb [:go to].
+
+  !Play(hello) // This will play the sound.
+
+//***************************** reserved nouns *********************************
+
 // These are the reserved nouns, treated differently by the game. Not all are
 // needed. You only need to define QUEUE so the game knows how to start, others
 // will work fine with their default values.
 
-// these 3 nouns expect values of noun:verb
+// These 3 nouns expect values of noun:verb.
 
 [QUEUE = chapter 1:open] // This is what gets executed on this turn
                          // Here we tell the story to go to noun [chapter 1]
                          // and execute the verb [:open].
 
-// every time the player clicks something, the action gets put on the QUEUE
-// and executed. Each item gets removed after execution..
+// Every time the player clicks something, the action gets put on the QUEUE
+// and executed. Each item gets removed after execution.
 
 [QUICK = self:visible nouns, self:inventory] // The values here get executed
                                              // every turn to produce the text
@@ -36,12 +107,12 @@
 // The quick menu text gets replaced every turn. You can use the quick menu
 // to show player status, inventory, list of available keywords.
 
-[CALLS = reminder:tick] // Any value here will get executed every turn
+[CALLS = reminder:tick] // Any value here will get executed every turn.
 
 // CALLS get executed before the queue. This means you can have a look at the
 // queue and even clear it, stopping the action from taking place.
 
-// The 3 nouns below expect values that are nouns
+// The 3 nouns below expect values that are nouns.
 
 [PLACE] // This is where we are. You don't need to use it in your story.
         // Here we leave it empty because we start nowhere.
@@ -58,43 +129,18 @@
 // even scroll further back. Keywords in that text are not clickable, unless
 // the nouns the reference are placed as values in NOUNS..
 
-//***************************** user noun **************************************
-
-[chapter 1] // This is a user noun
-
- [:open] // This is a verb belonging to it, calling chapter 1:open will 
-         // execute this block. The block ends with the next verb or noun
-
-  "Text in quotes is printed to the screen.
-  Indentation and break-lines are ignored.
-  Text surrounded by \*\* will get printed in a"
-
-  "**different font.**
-  __each style will be printed on a separate line__ from regular text
-  ==Styles **cannot** be nested=="
-
-  // ** for title font
-  // __ for quote font
-  // == for mono spaced font
-
-  !tutorial room:go to // Anything past a ! is an instruction, this one will
-                       // find noun [tutorial room] and execute the block under
-                       // the verb [:go to]
-
-  !Play(hello) // this will play the sound
-
 //******************************** assets **************************************
 
 // Asset definition starts with $ and fits on a single line.
-// Assets are like nouns and require unique names
+// Assets are like nouns and require unique names.
 
-$room = BG(room.png) // this creates an asset of type BG (background)
+$room = BG(room.png) // This creates an asset of type BG (background).
 
-$pen = Image(pen.png, -0.1, 0.5, 1.2) // image at given position and zoom
+$pen = Image(pen.png, -0.1, 0.5, 1.2) // Image at given position and zoom.
 
-$hello = Sound(hello.wav) // one-off sound
+$hello = Sound(hello.wav) // One-off sound.
 
-//******************** inventory  and quick menu *******************************
+//****************************** quick menu ************************************
 
 // We provide this because we want to have an inventory. We will story items
 // as values of this noun.
@@ -106,8 +152,8 @@ $hello = Sound(hello.wav) // one-off sound
 
  [:inventory]
 
-  "\nInventory:\n" // \n forces a newline in text
-  !Keyword(@self) // this will print all the values of noun self as keywords
+  "\nInventory:\n" // \n forces a newline in text.
+  !Keyword(@self) // This will print all the values of noun self as keywords.
 
 // Name(parameter) is a function call. Keyword(@self) will call the function
 // Keyword and pass @self as the parameter for it.
@@ -117,9 +163,9 @@ $hello = Sound(hello.wav) // one-off sound
 
  [:visible nouns]
 
-  !Keyword(@PLACE) // show the keyword for the location we are in
+  !Keyword(@PLACE) // Show the keyword for the location we are in
   "\nObjects:\n"
-  !Keyword(@NOUNS) // and all the things that are there
+  !Keyword(@NOUNS) // and all the things that are there.
 
 //************************ patterns ********************************************
 
@@ -131,53 +177,55 @@ $hello = Sound(hello.wav) // one-off sound
 // Any occurrence of the name of the pattern will be replaced with the name of
 // the noun that will use this pattern.
 
-[[room]]  // we will use this pattern for nouns that represent places
+[[room]]  // We will use this pattern for nouns that represent places.
 
 // ?condition will determine if the execution continues into the block.
 // Top level conditions are the ones placed above the verb definition.
-// They need to succeed for the verb to be visible and accessible
+// They need to succeed for the verb to be visible and accessible.
 
-?@EXITS+=room & @PLACE-=room { // & means both conditions need to be met
+?@EXITS+=room & @PLACE-=room { // The & means both conditions need to be met.
 
 // += means contains. ?@EXITS+=room will be true if the values on the left
 // contain a value called room. @EXITS will expand to values of that noun.
 
- [:go to] // verb, this is where the execution goes upon calling !room:go to
+ [:go to] // Verb, this is where the execution goes upon calling !room:go to.
 
-  !EXITS= // this one clears exits
-  !PLACE=room // change location to the room we're entering
-  !NOUNS=@room // active nouns are listed in locations in this story
-  !:look // look at the room we're in now
+  !EXITS= // This one clears exits.
+  !PLACE=room // Change location to the room we're entering by setting the
+              // value of the system noun to the name of the noun of the room
+  !NOUNS=@room // Active nouns are listed in locations in this story so we
+               // set the values of system noun to the values of the location.
+  !:look // Look at the room we're in now.
 
-} // closing brace means the top level condition ends here
+} // Closing brace means the top level condition ends here.
 
-?@PLACE+=room { // rest of the actions are available when we are in the room.
-  // the { is a cheat, if there is no closing } it's assumed to be at the end
+?@PLACE+=room { // Rest of the actions are available when we are in the room.
+  // The { is a cheat, if there is no closing } it's assumed to be at the end
   // of the definition rather then at the next top level condition so it affects
-  // all the remaining verbs in the noun this pattern gets prepended to
+  // all the remaining verbs in the noun this pattern gets prepended to.
 
 
-[[item]] // we will use this pattern for things that may be picked up
+[[item]] // We will use this pattern for things that may be picked up.
 
-?@@PLACE+=item { // check if the item is the location we are in
+?@@PLACE+=item { // Check if the item is the location we are in,
  [:take]
-  !@PLACE-=item // remove it from the location
-  !NOUNS-=item // remove it from the active nouns
-  !self+=item // add it to the inventory
+  !@PLACE-=item // remove it from the location,
+  !NOUNS-=item // remove it from the active nouns,
+  !self+=item // add it to the inventory.
   "Taken."
 }
 
 ?@@PLACE+=item | @self+=item { // The rest of verbs is available if the item
-                                // is either in the room or in our inventory.
+                               // is either in the room or in our inventory.
 
-//******************************************************************************
+//******************************* using a pattern ******************************
 
 // This noun, pen, uses the pattern item. It will be prepended and the name of
 // the pattern replaced with the name of the noun so this:
 
 [pen[item]]
  [:look]
-  !Play(pen) // show the image
+  !Play(pen) // Show the image.
   "Black ink pen."
 
 // becomes this:
@@ -211,8 +259,8 @@ $hello = Sound(hello.wav) // one-off sound
 
 [tutorial room[room] = pen, door, crowbar]
 
- [:look] // because we appended the room definition this verb is only visible
-         // when we're in the room
+ [:look] // Because we appended the room definition this verb is only visible
+         // when we're in the room.
 
   "You are sitting in the <tutorial room>. // These break-lines will be ignored
                                            // and the text will be re-flowed.
@@ -222,10 +270,10 @@ $hello = Sound(hello.wav) // one-off sound
                                    // will execute the verb [:look] 
                                    // in the noun [tutorial room].
 
-  "You are <writing a story[story]>." // The name in [ ] is the name of the noun.
-                                      // The keyword in < > will be visible, but
-                                      // the noun being reference is the noun
-                                      // in square brackets [ ].
+  "You are <writing a story[story]>." // The name in [ ] is the name of the
+                                      // noun. The keyword in < > will be
+                                      // visible, but the noun being reference
+                                      // is the noun in square brackets [ ].
 
   ?+=pen { // Only show this text if pen is a value of this noun.
            // The noun name is implied to be the one being defined.
@@ -235,12 +283,12 @@ $hello = Sound(hello.wav) // one-off sound
   ?+=crowbar {
    "A <crowbar> is hanging on the wall."
   } {
-    // the block after } { will be executed if the condition above fails
+    // The block after } { will be executed if the condition above fails.
    "A nail, where the <crowbar> used to be is sticking out of the wall."
   }
 
-  !tea:look // this will execute the verb [:look] in [tea]
-            // the text will get inlined with the rest of this description
+  !tea:look // This will execute the verb [:look] in [tea].
+            // The text will get inlined with the rest of this description.
 
   "The room has only one <door>" // This sentence will finish differently
                                  // depending on the state of the door.
@@ -248,7 +296,7 @@ $hello = Sound(hello.wav) // one-off sound
 
   ?@door+=open { 
    "leading <outside>."
-   !EXITS+=outside // if the door is open add outside as a possible exit
+   !EXITS+=outside // If the door is open add outside as a possible exit.
   } {
    ", currently closed."
   }
@@ -260,7 +308,8 @@ $hello = Sound(hello.wav) // one-off sound
 [door]
 
 ?-=open
- [:open] [:use] // only the first verb name is visible, but both will work
+ [:open] [:use] // Only the first verb name is visible in the menu the player
+                // can see, but both will work internally.
   ?-=locked {
    "You try the door but it's locked."
    !door+=locked
@@ -268,10 +317,10 @@ $hello = Sound(hello.wav) // one-off sound
    "You already know it's locked."
   }
 
-?@self+=crowbar & +=locked & -=open // all conditions need to be met
-                                    // you need a crowbar
+?@self+=crowbar & +=locked & -=open // All conditions need to be met.
+                                    // You need a crowbar
                                     // and to know the door is locked
-                                    // and it can't be already pried open
+                                    // and it can't be already pried open.
  [:pry door]
   "Using the crowbar, you pry the lock off the door."
   !+=open
@@ -295,11 +344,11 @@ $hello = Sound(hello.wav) // one-off sound
 ?-=empty {
  [:look]
 
-  ?-=warm // no braces are used so the scope is implied to be until the next
-          // condition or verb
+  ?-=warm // No braces are used so the scope is implied to be until the next
+          // condition or verb.
    "The <cup of tea[tea]> is getting cold."
 
-  // the implied scope of ?-=warm ends here
+  // The implied scope of ?-=warm ends here.
 
   ?+=warm
    "The fresh <cup of tea[tea]> is nice and warm."
@@ -336,8 +385,8 @@ $hello = Sound(hello.wav) // one-off sound
 
   ?<=#1 {
    "Still needs a lot of work."
-   !<< // this aborts the execution of the parent block
-       // so the next statement doesn't activate
+   !<< // This aborts the execution of the parent block
+       // so the next statement doesn't activate.
   }
 
   ?<=#3 {
@@ -358,23 +407,24 @@ $hello = Sound(hello.wav) // one-off sound
  [:look]
   "You are outside the <tutorial room>."
   !EXITS+=tutorial room
-  !Stop(room) // this will hide the room image
+  !Stop(room) // This will hide the room image.
 
 //******************************************************************************
 
 [reminder = #5] 
 
- [:tick] // this was placed in CALLS and will get called every turn
+ [:tick] // This was placed in CALLS and will get called every turn.
 
-  !-=#1 // tick down to zero
+  !-=#1 // Tick down to zero.
 
-  ?<=#0 & @PLACE+=tutorial room // after 5 turns if we're in the room 
-   !CALLS-=reminder:tick // remove itself from the CALLS
-   !QUEUE+=reminder:show // this will queue up that verb to be executed after the
-                         // user action (QUEUE is first come first serve)
+  ?<=#0 & @PLACE+=tutorial room // After 5 turns if we're in the room,
+   !CALLS-=reminder:tick        // remove itself from the CALLS.
+   !QUEUE+=reminder:show // This will queue up that verb to be executed after
+                         // the user action (QUEUE is first come first served).
  [:show]
    "\nMaybe you should do some work."
 
 //******************************************************************************
 
-// For a full list of features of the language see the SKIM manual
+// For a full list of features of the language see the SKIM manual.
+
