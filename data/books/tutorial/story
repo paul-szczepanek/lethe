@@ -1,10 +1,10 @@
 // This is a tutorial story that will show you almost all features of SKIM (the
 // language used by the game). The game doesn't make many assumptions about how
 // you structure a story and it's up to you to decide if want to use rooms, or
-// have an invetory. This example story will use such a setup.
+// have an inventory. This example story will use such a setup.
 
-// Use the provided skim.vim highlight rules in your vim or gvim. This will
-// make writing correct code a lot easier as it will catch any unmatched quotes,
+// Use the provided skim.vim highlight rules in your Vim or gVim. This will
+// make writing correct text a lot easier as it will catch any unmatched quotes,
 // or misplaced tokens. It will also make this file easy to read so set up your
 // editor now!
 
@@ -39,7 +39,7 @@
 [CALLS = reminder:tick] // Any value here will get executed every turn
 
 // CALLS get executed before the queue. This means you can have a look at the
-// queue and even clear it, stoping the action from taking place.
+// queue and even clear it, stopping the action from taking place.
 
 // The 3 nouns below expect values that are nouns
 
@@ -48,7 +48,7 @@
 
 [EXITS = tutorial room] // This contains a list of a possible places we can go.
 
-// It's not requried by the game engine, and no logic is enforced. It's up to
+// It's not required by the game engine, and no logic is enforced. It's up to
 // you to use it if you want to. Here we assign the first place we will go to.
 
 [NOUNS] // These are the nouns that stay highlighted in the text left from the
@@ -66,16 +66,16 @@
          // execute this block. The block ends with the next verb or noun
 
   "Text in quotes is printed to the screen.
-  Indentation and breaklines are ignored.
+  Indentation and break-lines are ignored.
   Text surrounded by \*\* will get printed in a"
 
   "**different font.**
-  __each style will be printed on a seperate line__ from regular text
+  __each style will be printed on a separate line__ from regular text
   ==Styles **cannot** be nested=="
 
   // ** for title font
   // __ for quote font
-  // == for monospaced font
+  // == for mono spaced font
 
   !tutorial room:go to // Anything past a ! is an instruction, this one will
                        // find noun [tutorial room] and execute the block under
@@ -90,13 +90,13 @@
 
 $room = BG(room.png) // this creates an asset of type BG (background)
 
-$pen = Image(pen.png, -0.1, 0.5, 1.2)] // image at given position and zoom
+$pen = Image(pen.png, -0.1, 0.5, 1.2) // image at given position and zoom
 
 $hello = Sound(hello.wav) // one-off sound
 
 //******************** inventory  and quick menu *******************************
 
-// We provide this becuase we want to have an inventory. We will story items
+// We provide this because we want to have an inventory. We will story items
 // as values of this noun.
 
 [self]
@@ -128,7 +128,7 @@ $hello = Sound(hello.wav) // one-off sound
 // an inventory.
 
 // Patterns are defined like nouns but use two [[ ]] sets of brackets.
-// Any occurance of the name of the pattern will be replaced with the name of
+// Any occurrence of the name of the pattern will be replaced with the name of
 // the noun that will use this pattern.
 
 [[room]]  // we will use this pattern for nouns that represent places
@@ -142,7 +142,7 @@ $hello = Sound(hello.wav) // one-off sound
 // += means contains. ?@EXITS+=room will be true if the values on the left
 // contain a value called room. @EXITS will expand to values of that noun.
 
- [:go to] // verb, this is where the excutions goes upon calling !room:go to
+ [:go to] // verb, this is where the execution goes upon calling !room:go to
 
   !EXITS= // this one clears exits
   !PLACE=room // change location to the room we're entering
@@ -203,7 +203,7 @@ $hello = Sound(hello.wav) // one-off sound
  [:look]
   "A small iron <crowbar>." // Text in < > is a keyword.
                             // Keywords get highlighted and
-                            // clickin on them show a menu that
+                            // clicking on them show a menu that
                             // let's you pick a verb for the noun
                             // that matches the name.
 
@@ -214,8 +214,8 @@ $hello = Sound(hello.wav) // one-off sound
  [:look] // because we appended the room definition this verb is only visible
          // when we're in the room
 
-  "You are sitting in the <tutorial room>. // These breaklines will be ignored
-                                           // and the text will be reflowed.
+  "You are sitting in the <tutorial room>. // These break-lines will be ignored
+                                           // and the text will be re-flowed.
    This text was triggered by
    <looking[tutorial room:look]>." // Clicking on this keyword will not
                                    // produce a menu of verbs. Clicking it 
@@ -310,7 +310,7 @@ $hello = Sound(hello.wav) // one-off sound
    !+=empty
 
   ?+=warm
-   "Ahh, that hits the spot."
+   "Ah, that hits the spot."
    !+=empty
 }
 

@@ -234,7 +234,7 @@ placing it within a set of '{ }' immediately following the previous pair.
 ?condition {
   statement when condition true
 } {
-  stetement when condition false
+  statement when condition false
 }
 ```
 
@@ -246,7 +246,7 @@ placing it within a set of '{ }' immediately following the previous pair.
 >   statement when condition1 true
 > } { 
 >   ?condition2 {
->     stetement when condition2 true
+>     statement when condition2 true
 >   }
 > }
 > ```
