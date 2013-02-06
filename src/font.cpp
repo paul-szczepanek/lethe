@@ -8,7 +8,7 @@
 bool Font::SystemInit()
 {
   if (TTF_Init() < 0) {
-    cout << "Unable to init TTF: " << SDL_GetError() << endl;
+    LOG("Unable to init TTF: " + IntoString(SDL_GetError()));;
     return false;
   }
   atexit(TTF_Quit);

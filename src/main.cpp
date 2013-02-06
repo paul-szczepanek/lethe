@@ -11,14 +11,24 @@ sz GTraceIndent = 0;
 int main (int Count, char* Switches[])
 {
   bool sound = true;
-  for (int i = 0; i < Count; ++i) {
-    const string swtich(Switches[i]);
-    if (swtich == "-s" || swtich == "-silent" || swtich == "-no-sound") {
+  int width = 800;
+  int height = 600;
+  for (int i = 1; i < Count; ++i) {
+    const string argument(Switches[i]);
+    //screen size
+    if (i == 1 && !argument.empty() && isdigit(argument[0])) {
+      sz xPos = FindCharacter(argument, 'x');
+      if (xPos != string::npos) {
+        width = IntoInt(CutString(argument, 0, xPos));
+        height = IntoInt(CutString(argument, xPos + 1));
+      }
+    }
+    if (argument == "-s" || argument == "-silent" || argument == "-no-sound") {
       sound = false;
     }
   }
 
-  Reader reader(1000, 1200, 32, sound);
+  Reader reader(width, height, 32, sound);
 
   if (reader.Init()) {
     ulint lastTime = 0;
@@ -28,7 +38,7 @@ int main (int Count, char* Switches[])
     }
     return 0;
   } else {
-    cout << "Reader init failed." << endl;
+    LOG("Reader init failed.");
     return 1;
   }
 }

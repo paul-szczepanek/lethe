@@ -43,7 +43,7 @@ extern string GLog;
 extern string GTrace;
 extern sz GTraceIndent;
 #define LOG(t) { string log = (t); \
-  if (log.size() > 0) { GLog = GLog + "\n" + log; } };
+  if (log.size() > 0) { GLog = GLog + "\n" + log; cout << log << endl; } };
 #else
 #define LOG(t) nop;
 #endif
@@ -147,10 +147,10 @@ template <typename T> inline string IntoString(const T& Thing)
 template <typename T> inline real IntoReal(const T& Thing)
 {
   stringstream stream;
-  real real;
+  real result;
   stream << Thing;
-  stream >> real;
-  return real;
+  stream >> result;
+  return result;
 }
 
 template <typename T> inline int IntoInt(const T& Thing)

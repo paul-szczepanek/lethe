@@ -16,7 +16,7 @@ public:
   ~PageParser() { };
 
 private:
-  sz FindNextStatement(csz Pos);
+  sz FindNextStatement(csz From);
 
   void AddTextBlock();
   void AddCondition();
@@ -25,7 +25,7 @@ private:
 
   void PopOldVerbConditions();
 
-  void PrintBlock(string& Text, const Block& Block);
+  void PrintBlock(string& BlockText, const Block& Block);
 
 
 private:

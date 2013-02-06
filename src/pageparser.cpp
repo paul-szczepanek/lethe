@@ -1,16 +1,16 @@
 #include "pageparser.h"
 #include "tokens.h"
 
-void PageParser::PrintBlock(string& Text,
+void PageParser::PrintBlock(string& BlockText,
                             const Block& Block)
 {
-  Text += Block.Expression;
+  BlockText += Block.Expression;
   if (Block.Blocks.size()) {
-    Text += token::Start[token::block];
+    BlockText += token::Start[token::block];
     for (sz j = 0, fSz = Block.Blocks.size(); j < fSz; ++j) {
-      PrintBlock(Text, Block.Blocks[j]);
+      PrintBlock(BlockText, Block.Blocks[j]);
     }
-    Text += token::End[token::block];
+    BlockText += token::End[token::block];
   }
 }
 
@@ -237,14 +237,14 @@ void PageParser::AddVerb()
   PopScopePending = false;
 }
 
-sz PageParser::FindNextStatement(csz Pos)
+sz PageParser::FindNextStatement(csz From)
 {
-  csz textPos = FindCharacter(Text, token::Start[token::textBlock], Pos);
-  csz nounPos = FindCharacter(Text, token::Start[token::noun], Pos);
-  csz condPos = FindCharacter(Text, token::Start[token::condition], Pos);
-  csz instPos = FindCharacter(Text, token::Start[token::instruction], Pos);
-  csz blockPos = FindCharacter(Text, token::Start[token::block], Pos);
-  csz blockEndPos = FindCharacter(Text, token::End[token::block], Pos);
+  csz textPos = FindCharacter(Text, token::Start[token::textBlock], From);
+  csz nounPos = FindCharacter(Text, token::Start[token::noun], From);
+  csz condPos = FindCharacter(Text, token::Start[token::condition], From);
+  csz instPos = FindCharacter(Text, token::Start[token::instruction], From);
+  csz blockPos = FindCharacter(Text, token::Start[token::block], From);
+  csz blockEndPos = FindCharacter(Text, token::End[token::block], From);
   // TODO: take a guess
   return min(textPos,
              min(nounPos,
@@ -293,12 +293,12 @@ PageParser::PageParser(const string& SourceText,
   for (sz i = 0, fSz = MyPage.Verbs.size(); i < fSz; ++i) {
     Block& topBlock = MyPage.Verbs[i].BlockTree;
     ParsedText += topBlock.Expression;
-    for (sz j = 0, fSz = MyPage.Verbs[i].Names.size(); j < fSz; ++j) {
+    for (sz j = 0, fSzj = MyPage.Verbs[i].Names.size(); j < fSzj; ++j) {
       ParsedText = ParsedText + token::Start[token::noun]
                    + token::Start[token::scope]
                    + MyPage.Verbs[i].Names[j] + token::End[token::noun];
     }
-    for (sz j = 0, fSz = topBlock.Blocks.size(); j < fSz; ++j) {
+    for (sz j = 0, fSzj = topBlock.Blocks.size(); j < fSzj; ++j) {
       PrintBlock(ParsedText, topBlock.Blocks[j]);
     }
   }

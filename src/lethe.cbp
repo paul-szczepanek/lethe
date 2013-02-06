@@ -13,8 +13,19 @@
 				<Option object_output="../obj/debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="-s" />
+				<Option parameters="1000x1600 -s" />
 				<Compiler>
+					<Add option="-Wshadow" />
+					<Add option="-Winit-self" />
+					<Add option="-Wredundant-decls" />
+					<Add option="-Wcast-align" />
+					<Add option="-Wundef" />
+					<Add option="-Wfloat-equal" />
+					<Add option="-Winline" />
+					<Add option="-Wunreachable-code" />
+					<Add option="-Wmissing-declarations" />
+					<Add option="-Wmissing-include-dirs" />
+					<Add option="-Wswitch-default" />
 					<Add option="-std=c++11" />
 					<Add option="-Wextra" />
 					<Add option="-Wall" />
@@ -27,10 +38,10 @@
 				<Option object_output="../obj/release" />
 				<Option type="0" />
 				<Option compiler="gcc" />
+				<Option parameters="1000x1600" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-O2" />
-					<Add option="-Weffc++" />
 					<Add option="-std=c++11" />
 					<Add option="-Wextra" />
 					<Add option="-Wall" />

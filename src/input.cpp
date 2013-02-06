@@ -29,7 +29,7 @@ real Input::LimitFPS(ulint& LastTime)
 bool Input::Tick(MouseState& Mouse,
                  KeysState& Keys)
 {
-  bool changed = false;
+  bool changed;
   SDL_Event event;
   const SDLKey& key = event.key.keysym.sym;
   const SDL_MouseButtonEvent& mouse = event.button;
@@ -115,6 +115,10 @@ bool Input::Tick(MouseState& Mouse,
           Mouse.Middle = false;
           Mouse.MiddleUp = true;
         }
+        break;
+
+      default:
+        changed = false;
         break;
     }
 

@@ -12,7 +12,7 @@ class Surface
 public:
   Surface() { };
   Surface(lint Width, lint Height);
-  Surface(const string& Filename);
+  Surface(const string& NewFilename);
   ~Surface();
 
   static bool SystemInit();

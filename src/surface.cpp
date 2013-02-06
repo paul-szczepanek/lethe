@@ -28,11 +28,11 @@ lint Surface::ScreenH = 0;
 bool Surface::SystemInit()
 {
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-    cout << "Unable to init SDL: " << SDL_GetError() << endl;
+    LOG("Unable to init SDL: " + IntoString(SDL_GetError()));
     return false;
   }
   if (IMG_Init(IMG_INIT_PNG) < 0) {
-    cout << "Unable to init IMG: " << SDL_GetError() << endl;
+    LOG("Unable to init IMG: " + IntoString(SDL_GetError()));
     return false;
   }
   atexit(SDL_Quit);
@@ -50,9 +50,9 @@ bool Surface::SystemDraw()
   return false;
 }
 
-Surface::Surface(const string& Filename)
+Surface::Surface(const string& NewFilename)
 {
-  LoadImage(Filename);
+  LoadImage(NewFilename);
 }
 
 Surface::Surface(lint Width,
@@ -82,7 +82,7 @@ bool Surface::InitScreen(lint ScreenWidth,
   if (SDLSurface) {
     Screen = SDLSurface;
   } else {
-    cout << "Unable to set video: " << SDL_GetError() << endl;
+    LOG("Unable to set video: " + IntoString(SDL_GetError()));;
   }
 
   return OnInit();

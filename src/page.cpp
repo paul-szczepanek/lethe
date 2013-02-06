@@ -16,7 +16,7 @@ void Page::Parse(const string& SourceText)
 const VerbBlock& Page::GetVerb(const string& Verb) const
 {
   for (sz i = 0, fSz = Verbs.size(); i < fSz; ++i) {
-    for (sz j = 0, fSz = Verbs[i].Names.size(); j < fSz; ++j) {
+    for (sz j = 0, fSzj = Verbs[i].Names.size(); j < fSzj; ++j) {
       if (Verbs[i].Names[j] == Verb) {
         return Verbs[i];
       }

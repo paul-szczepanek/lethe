@@ -17,8 +17,8 @@ vector<string> Disk::ListFiles(const string& Path,
   }
   struct dirent* content;
   while ((content = readdir(directory)) != NULL) {
-    if (DT_DIR != content->d_type) { // ignore . and ..
-      string filename(content->d_name);
+    string filename(content->d_name);
+    if (filename != "." && filename != "..") {
       files.push_back(filename);
     }
   }

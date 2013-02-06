@@ -6,8 +6,8 @@
 
 struct PaneState {
   PaneState () { };
-  sz PaneDragY = 0;
-  sz Y = 0;
+  lint PaneDragY = 0;
+  lint Y = 0;
   real DragTimeout = 0.25;
   bool PaneDown = false;
   bool PaneUp = false;

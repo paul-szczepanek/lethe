@@ -181,7 +181,7 @@ void TextBox::Scroll(lint PaneScroll)
       if (pagePosition < 0) {
         Pane.Y = 0;
       } else {
-        if ((usint)pagePosition > PageHeight - PageSize.H) {
+        if (pagePosition > PageHeight - PageSize.H) {
           pagePosition = PageHeight - PageSize.H;
         }
         Pane.Y = pagePosition;
@@ -190,7 +190,7 @@ void TextBox::Scroll(lint PaneScroll)
 
     // adjust the surfaces to the new scroll position
     ShowUp = (Pane.Y > 1);
-    ShowDown = ((usint)Pane.Y + 1u + PageSize.H < PageHeight);
+    ShowDown = (Pane.Y + 1 + PageSize.H < PageHeight);
     PaneScroll = 0;
     // page moved so need to refresh surfaces
     HighlightsDirty = PageDirty = true;
@@ -466,7 +466,7 @@ bool TextBox::BreakText()
     csz lineLength = lineText.size() + 1;
     csz lineEnd = lastLineEnd + lineLength;
 
-    for (sz j = 0, fSz = keywordPos.size(); j < fSz; ++j) {
+    for (sz j = 0, fSzj = keywordPos.size(); j < fSzj; ++j) {
       csz_pair& keyPos = keywordPos[j];
       // check if this keyword is on this line
       if (keyPos.X >= lineEnd) {
