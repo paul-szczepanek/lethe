@@ -138,14 +138,12 @@ void Reader::InitWindows()
   ReaderButtons.SetButtonState(buttonLayout, CurrentLayout);
 
 #ifdef DEVBUILD
-  GLog = "Log";
+  GLog="";
   Logger.Visible = true;
   Logger.Init(FontSys, "", BPP);
-  Logger.SetText("LOG");
   Logger.RawMode = true;
   VarView.Visible = false;
   VarView.Init(FontSys, FRAME_SOLID, BPP);
-  VarView.SetText("variables");
   VarView.RawMode = true;
 #endif
 }

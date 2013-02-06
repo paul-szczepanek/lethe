@@ -6,7 +6,7 @@
 			<Cursor1 position="1848" topLine="39" />
 		</Cursor>
 	</File>
-	<File name="book.cpp" open="0" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="book.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="11506" topLine="380" />
 		</Cursor>
@@ -56,7 +56,7 @@
 			<Cursor1 position="684" topLine="11" />
 		</Cursor>
 	</File>
-	<File name="main.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="main.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="907" topLine="24" />
 		</Cursor>
@@ -66,7 +66,7 @@
 			<Cursor1 position="251" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="pageparser.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="pageparser.cpp" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="3123" topLine="75" />
 		</Cursor>
@@ -76,7 +76,7 @@
 			<Cursor1 position="538" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="pageparser.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="pageparser.h" open="1" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="761" topLine="0" />
 		</Cursor>
@@ -86,7 +86,7 @@
 			<Cursor1 position="344" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="storyquery.h" open="1" top="1" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="storyquery.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="412" topLine="0" />
 		</Cursor>
@@ -151,7 +151,7 @@
 			<Cursor1 position="6477" topLine="341" />
 		</Cursor>
 	</File>
-	<File name="reader.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="reader.cpp" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="7734" topLine="100" />
 		</Cursor>
@@ -176,7 +176,7 @@
 			<Cursor1 position="856" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="book.h" open="0" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="book.h" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="3021" topLine="86" />
 		</Cursor>
@@ -236,7 +236,7 @@
 			<Cursor1 position="2331" topLine="45" />
 		</Cursor>
 	</File>
-	<File name="audio.cpp" open="0" top="0" tabpos="29" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="audio.cpp" open="1" top="0" tabpos="29" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="654" topLine="22" />
 		</Cursor>
@@ -246,7 +246,7 @@
 			<Cursor1 position="522" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="windowbox.h" open="0" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="windowbox.h" open="1" top="1" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="279" topLine="0" />
 		</Cursor>

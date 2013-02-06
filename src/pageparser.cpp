@@ -257,9 +257,9 @@ PageParser::PageParser(const string& SourceText,
                        Page& _MyPage)
   : Text(SourceText), MyPage(_MyPage)
 {
-  csz Length = Text.size();
+  Length = Text.size();
   while (Pos < Length) {
-    char c = Text[Pos];
+    const char c = Text[Pos];
     if (c == token::Start[token::textBlock]) { // "
       AddTextBlock();
     } else if (c == token::Start[token::condition]) { // ?
@@ -279,7 +279,7 @@ PageParser::PageParser(const string& SourceText,
         ++Pos;
       }
     } else {
-      LOG("Illegal token "+string(&c)+" near "+CutString(Text, Pos, Pos+20));
+      LOG(string("Illegal token ")+c+" near "+CutString(Text, Pos, Pos+20));
       ++Pos;
       break;
     }

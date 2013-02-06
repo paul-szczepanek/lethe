@@ -683,7 +683,6 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           if (!QueryBook.GetAssetState(arg)) {
             QueryBook.SetAssetState(arg, true);
           }
-          LOG(arg + " - play");
         }
         textArgs.clear();
         intArg = 1;
@@ -694,7 +693,6 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
           if (QueryBook.GetAssetState(arg)) {
             QueryBook.SetAssetState(arg, false);
           }
-          LOG(arg + " - stop");
         }
         textArgs.clear();
         intArg = 1;
