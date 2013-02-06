@@ -21,7 +21,5 @@ windows as well so if anyone can be bothered it should probably compile
 for that as well. And since e-readers nowadays run Android anyway maybe
 I can get it to run there as well.
 
-Code GPLed, everything else CC unless noted otherwise.
-Fonts by Matthew Welch http://www.squaregear.net/fonts/.
-Fonts by DejaVu http://dejavu-fonts.org/wiki/License.
+Code GPLed, for assets see the license file
 
