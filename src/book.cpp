@@ -5,7 +5,7 @@
 #include "disk.h"
 
 const string FIRST_PLAY = "First Playthrough";
-csz HISTORY_PAGE = 200;
+cszt HISTORY_PAGE = 200;
 
 Book::Book()
 {
@@ -67,7 +67,7 @@ bool Book::RedoSnapshot()
 {
   // by loading the current move we can move forward if the current move
   // already exists in the snapshots
-  csz next = BookSession.CurrentSnapshot;
+  cszt next = BookSession.CurrentSnapshot;
   // be careful not to overshoot because that will reset the story
   if (next < BookSession.Snapshots.size()) {
     return LoadSnapshot(next);
@@ -78,7 +78,7 @@ bool Book::RedoSnapshot()
 bool Book::UndoSnapshot()
 {
   // the current snapshot is the future one, so we need to go back 2 snapshots
-  csz prev = BookSession.CurrentSnapshot - 2;
+  cszt prev = BookSession.CurrentSnapshot - 2;
   // only load the snapshot if it's not the 0th step, which is the start
   // of the book before values existed to be loaded
   if (prev > 0) {
@@ -87,7 +87,7 @@ bool Book::UndoSnapshot()
   return false;
 }
 
-bool Book::LoadSnapshot(csz SnapshotIndex)
+bool Book::LoadSnapshot(cszt SnapshotIndex)
 {
   // before loading, revert to book values
   InitSession(BookStory, BookSession);
@@ -181,7 +181,7 @@ bool Book::OpenStory(const string& Path,
   filenames.push_back(STORY_FILE);
 
   // go through all *.story files but read story first
-  sz i = filenames.size();
+  szt i = filenames.size();
   while (i) { // reverse for loop
     const string& filename = filenames[--i];
     string storyText;
@@ -236,7 +236,7 @@ void Book::InitSession(Story& MyStory,
   MySession.UserValues.clear();
   MySession.AssetStates.clear();
   // initialise reserved keywords
-  for (sz i = 0; i < SYSTEM_NOUN_MAX; ++i) {
+  for (szt i = 0; i < SYSTEM_NOUN_MAX; ++i) {
     const string& name = SystemNounNames[i];
     const Properties& systemValues = MyStory.FindPage(name).PageValues;
     Properties& sysNoun = MySession.UserValues[SystemNounNames[i]];
@@ -261,7 +261,7 @@ bool Book::AddAssetDefinition(const string& StoryText)
   string text = GetCleanWhitespace(StoryText);
   // get the strings [$name=def]
   // name can't be empty so we can start looking for = from position 2
-  csz defPos = FindTokenEnd(text, token::assign, 2);
+  cszt defPos = FindTokenEnd(text, token::assign, 2);
   // definition can't be empty either
   if (defPos + 1 < text.size()) {
     const string& assetName = CutString(text, 1, defPos);
@@ -318,7 +318,7 @@ const string Book::GetMenuVerbs(const string& Noun)
 bool Book::GetChoice(string_pair& Choice) const
 {
   // is the first part of the pair a noun:verb?
-  sz scopePos = FindTokenEnd(Choice.X, token::scope);
+  szt scopePos = FindTokenEnd(Choice.X, token::scope);
   if (scopePos != string::npos) {
     const string& verb = CutString(Choice.X, scopePos+1, Choice.X.size());
     const string& noun = CutString(Choice.X, 0, scopePos);
@@ -346,7 +346,7 @@ void Book::SetAction(const string_pair& Choice,
                      Session& MySession)
 {
   //check for value assignment first
-  csz assignPos = FindTokenEnd(Choice.X, token::assign);
+  cszt assignPos = FindTokenEnd(Choice.X, token::assign);
   string action;
   if (assignPos != string::npos) {
     // parse [noun=value:verb] which is in pair(noun=value, verb) form
@@ -395,8 +395,8 @@ const string Book::ProcessQueue(Story& MyStory,
   Properties& actions = *MySession.QueueNoun;
   string pageText;
   StoryQuery query(*this, MyStory, MySession, pageText);
-  csz safety = 1000; // to stop user generated infinite loops
-  sz i = 0;
+  cszt safety = 1000; // to stop user generated infinite loops
+  szt i = 0;
   // collect all the queue values here to look for system calls
   Properties pool;
   pool.AddValues(actions);
@@ -570,7 +570,7 @@ bool Book::MakeSessionNameUnique(string& Name,
 {
   bool dupeName = true;
   const string originalName = Name;
-  sz i = 0;
+  szt i = 0;
   // get a unique session name
   while (dupeName) {
     if (i) {
@@ -666,7 +666,7 @@ const string Book::ShowVariables()
 
 const string Book::GetFreeSessionFilename(const string& Path)
 {
-  sz i = 1;
+  szt i = 1;
   while (Disk::Exists(Path + SLASH + IntoString(i) + SESSION_EXT)) {
     ++i;
   }
@@ -676,15 +676,15 @@ const string Book::GetFreeSessionFilename(const string& Path)
 void Book::GetSnapshots(Properties& SnapshotItems)
 {
   // find the range ending with the desired location
-  csz desiredEnd = max((sz)SnapshotItems.IntValue, HISTORY_PAGE);
-  csz last = min(desiredEnd, BookSession.Snapshots.size());
-  csz first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  cszt desiredEnd = max((szt)SnapshotItems.IntValue, HISTORY_PAGE);
+  cszt last = min(desiredEnd, BookSession.Snapshots.size());
+  cszt first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
   // print all the snapshots in range
-  for (sz i = first; i < last; ++i) {
+  for (szt i = first; i < last; ++i) {
     // find the "noun:verb" or bookmark
     const Snapshot& snap = BookSession.Snapshots[i];
-    csz index = snap.QueueIndex;
+    cszt index = snap.QueueIndex;
     const auto it = BookSession.Bookmarks.find(index - 1);
     string entry = IntoString(index) + ". ";
     if (it != BookSession.Bookmarks.end()) {
@@ -707,11 +707,11 @@ void Book::GetSnapshots(Properties& SnapshotItems)
 
 void Book::GetBookmarks(Properties& SnapshotItems)
 {
-  csz desiredEnd = max((sz)SnapshotItems.IntValue, HISTORY_PAGE);
-  csz last = min(desiredEnd, BookSession.Bookmarks.size());
-  csz first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  cszt desiredEnd = max((szt)SnapshotItems.IntValue, HISTORY_PAGE);
+  cszt last = min(desiredEnd, BookSession.Bookmarks.size());
+  cszt first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
-  sz i = 0;
+  szt i = 0;
   // the bookmarks are sorted but not contiguous so we iterate
   // until we pass over the range we want
   for (const auto& mark : BookSession.Bookmarks) {
@@ -720,7 +720,7 @@ void Book::GetBookmarks(Properties& SnapshotItems)
     } else if (i > last) {
       break;
     }
-    csz index = mark.first;
+    cszt index = mark.first;
     string entry = IntoString(index+1) + ". " + mark.second.Description;
     if (index == BookSession.CurrentSnapshot - 1) {
       entry += " - present -";
@@ -732,17 +732,17 @@ void Book::GetBookmarks(Properties& SnapshotItems)
 bool Book::LoadSnapshot(const string& Description)
 {
   // extract the index from the snapshot description
-  csz indexPos = FindCharacter(Description, '.');
+  cszt indexPos = FindCharacter(Description, '.');
   if (indexPos && indexPos != string::npos) {
     const string& indexName = CutString(Description, 0, indexPos);
-    csz index = IntoInt(indexName);
+    cszt index = IntoInt(indexName);
     LoadSnapshot(index);
     return true;
   }
   return false;
 }
 
-sz Book::GetCurrentSnapshot()
+szt Book::GetCurrentSnapshot()
 {
   return BookSession.CurrentSnapshot;
 }

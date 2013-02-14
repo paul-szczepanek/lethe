@@ -1,5 +1,5 @@
 #include "input.h"
-#include <SDL.h>
+#include "SDL.h"
 
 real Input::LimitFPS(ulint& LastTime)
 {
@@ -27,12 +27,13 @@ real Input::LimitFPS(ulint& LastTime)
 /** @brief Translate SDL input into internal structs
   */
 bool Input::Tick(MouseState& Mouse,
-                 KeysState& Keys)
+                 KeysState& Keys,
+                 SystemState& System)
 {
   bool changed;
   SDL_Event event;
-  const SDLKey& key = event.key.keysym.sym;
   const SDL_MouseButtonEvent& mouse = event.button;
+  const SDLKey& key = event.key.keysym.sym;
 
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
@@ -116,6 +117,12 @@ bool Input::Tick(MouseState& Mouse,
           Mouse.MiddleUp = true;
         }
         break;
+
+      case SDL_VIDEORESIZE:
+        changed = true;
+        System.W = event.resize.w;
+        System.H = event.resize.h;
+        System.Resized = true;
 
       default:
         changed = false;

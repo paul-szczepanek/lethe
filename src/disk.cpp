@@ -29,7 +29,7 @@ vector<string> Disk::ListFiles(const string& Path,
   }
   vector<string> result;
   for (const string& file : files) {
-    csz length = file.size();
+    cszt length = file.size();
     if (length > Extension.size()) {
       const string& ext = CutString(file, length - Extension.size());
       if (ext == Extension) {
@@ -70,7 +70,7 @@ vector<string> Disk::GetFileSeries(const string& Path,
     return files;
   }
   vector<string> result;
-  sz series = 0;
+  szt series = 0;
   bool found = true;
   while (found) {
     found = false;

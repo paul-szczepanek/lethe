@@ -1,10 +1,10 @@
 #include "surface.h"
 #include "font.h"
 
-#include <SDL.h>
-#include <SDL_image.h>
-#include <SDL_rotozoom.h>
-#include <SDL_ttf.h>
+#include "SDL.h"
+#include "SDL_image.h"
+#include "SDL_rotozoom.h"
+#include "SDL_ttf.h"
 
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
 const uint32_t MASK_R = 0xFF000000;
@@ -20,8 +20,6 @@ const uint32_t MASK_A = 0xFF000000;
 
 SDL_Surface* Surface::Screen = NULL;
 int Surface::BPP = 32;
-lint Surface::ScreenW = 0;
-lint Surface::ScreenH = 0;
 
 /** @brief Initialise the SDL
   */
@@ -55,8 +53,8 @@ Surface::Surface(const string& NewFilename)
   LoadImage(NewFilename);
 }
 
-Surface::Surface(lint Width,
-                 lint Height)
+Surface::Surface(const lint Width,
+                 const lint Height)
 {
   Init(Width, Height);
 }
@@ -68,19 +66,32 @@ Surface::~Surface()
 
 /** @brief Prepare the screen for drawing, needs to be called first
   */
-bool Surface::InitScreen(lint ScreenWidth,
-                         lint ScreenHeight,
-                         int ScreenBPP)
+bool Surface::InitScreen(lint& ScreenWidth,
+                         lint& ScreenHeight,
+                         const int ScreenBPP)
 {
   Unload();
-  ScreenW = W = ScreenWidth;
-  ScreenH = H = ScreenHeight;
-  BPP = ScreenBPP;
-  SDLSurface = SDL_SetVideoMode(ScreenWidth, ScreenHeight, BPP,
-                                SDL_HWSURFACE|SDL_DOUBLEBUF);
 
+  Uint32 flags = SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE;
+#ifdef __ANDROID__
+  const SDL_VideoInfo* info = SDL_GetVideoInfo();
+  ScreenHeight = info->current_h;
+  ScreenWidth = info->current_w;
+#endif
+
+  SDLSurface = SDL_SetVideoMode(ScreenWidth, ScreenHeight, ScreenBPP, flags);
   if (SDLSurface) {
-    Screen = SDLSurface;
+    W = SDLSurface->w;
+    H = SDLSurface->h;
+    if (ScreenWidth != W || ScreenHeight != H) {
+      // retry if we can't get a screen as big as we wanted
+      ScreenWidth = W;
+      ScreenHeight = H;
+      return InitScreen(ScreenWidth, ScreenHeight, ScreenBPP);
+    } else {
+      BPP = ScreenBPP;
+      Screen = SDLSurface;
+    }
   } else {
     LOG("Unable to set video: " + IntoString(SDL_GetError()));;
   }
@@ -110,13 +121,13 @@ bool Surface::LoadImage(const string& NewFilename)
   */
 bool Surface::Init()
 {
-  return Init(ScreenW, ScreenH);
+  return Init(Screen->w, Screen->h);
 }
 
 /** @brief create an empty surface of given size
   */
-bool Surface::Init(lint Width,
-                   lint Height)
+bool Surface::Init(const lint Width,
+                   const lint Height)
 {
   Unload();
   SDLSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, Width, Height,
@@ -126,7 +137,7 @@ bool Surface::Init(lint Width,
 
 /** @brief Set global surface alpha
   */
-bool Surface::SetAlpha(usint Alpha)
+bool Surface::SetAlpha(const usint Alpha)
 {
   if (SDLSurface) {
     SDL_SetAlpha(SDLSurface, SDL_SRCALPHA, Alpha);
@@ -137,8 +148,8 @@ bool Surface::SetAlpha(usint Alpha)
 
 /** @brief Enlarge or shrink the image
   */
-bool Surface::Zoom(real X,
-                   real Y)
+bool Surface::Zoom(const real X,
+                   const real Y)
 {
   if (SDLSurface) {
     SDL_Surface* temp = zoomSurface(SDLSurface, X, Y, 1);
@@ -265,9 +276,9 @@ bool Surface::Unload()
 /** @brief draw rectangle on the surface
   */
 bool Surface::DrawRectangle(const Rect& Rectangle,
-                            usint R,
-                            usint G,
-                            usint B)
+                            const usint R,
+                            const usint G,
+                            const usint B)
 {
   if (SDLSurface) {
     SDL_Rect dst = {
@@ -287,9 +298,9 @@ bool Surface::DrawRectangle(const Rect& Rectangle,
 bool Surface::PrintText(const Rect& Position,
                         const Font& TextFont,
                         const string& Text,
-                        usint R,
-                        usint G,
-                        usint B)
+                        const usint R,
+                        const usint G,
+                        const usint B)
 {
   if (SDLSurface) {
     SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
@@ -315,9 +326,9 @@ bool Surface::PrintText(const Rect& Position,
   */
 bool Surface::CreateText(const Font& TextFont,
                          const string& Text,
-                         usint R,
-                         usint G,
-                         usint B)
+                         const usint R,
+                         const usint G,
+                         const usint B)
 {
   Unload();
   SDL_Color colour = { (Uint8)R, (Uint8)G, (Uint8)B, 0 };
@@ -328,15 +339,13 @@ bool Surface::CreateText(const Font& TextFont,
 
 /** @brief Set clip by width and height only, centering the clipped area
   */
-void Surface::Trim(lint ClipW,
-                   lint ClipH)
+void Surface::Trim(const lint ClipW,
+                   const lint ClipH)
 {
-  ClipW = min(ClipW, W);
-  ClipH = min(ClipH, H);
-  Clip.W = ClipW;
-  Clip.H = ClipH;
-  Clip.X = (W - ClipW) / 2;
-  Clip.Y = (H - ClipH) / 2;
+  Clip.W = min(ClipW, W);
+  Clip.H = min(ClipH, H);
+  Clip.X = (W - Clip.W) / 2;
+  Clip.Y = (H - Clip.H) / 2;
 }
 
 /** @brief Set the Clipping rectangle

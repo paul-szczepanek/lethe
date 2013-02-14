@@ -14,6 +14,12 @@ struct MouseState {
   bool RightUp = false;
 };
 
+struct SystemState {
+  lint W = 0;
+  lint H = 0;
+  bool Resized = false;
+};
+
 struct KeysState {
   void Reset() {
     Letter = '?';
@@ -61,7 +67,7 @@ public:
   Input() { };
   ~Input() { };
 
-  static bool Tick(MouseState& Mouse, KeysState& Keys);
+  static bool Tick(MouseState& Mouse, KeysState& Keys, SystemState& System);
   static real LimitFPS(ulint& LastTime);
 };
 

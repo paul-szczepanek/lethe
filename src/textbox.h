@@ -22,8 +22,8 @@ struct KeywordMap {
 };
 
 struct TextLine {
-  TextLine(const string& _Text, const Font* _LineFont, const Rect _Size)
-    : Text(_Text), LineFont(_LineFont), Size(_Size) { };
+  TextLine(const string& aText, const Font* aLineFont, const Rect aSize)
+    : Text(aText), LineFont(aLineFont), Size(aSize) { };
   const string Text;
   const Font* LineFont;
   const Rect Size;
@@ -70,7 +70,7 @@ public:
   lint PageHeight = 0;
   lint PageWidth = 0;
 
-  sz ValidateKeywords = 0; // how far to check the text keywords
+  szt ValidateKeywords = 0; // how far to check the text keywords
   Properties ValidKeywords;
 
   Rect PageSize;
@@ -85,7 +85,7 @@ private:
   Surface Highlights;
   Surface PageSurface;
 
-  sz SelectedKeyword = 0;
+  szt SelectedKeyword = 0;
 
   vector<TextLine> Lines;
   vector<KeywordMap> Keywords;
@@ -93,11 +93,11 @@ private:
   Colour TextColour;
 };
 
-inline void ShiftPositions(vector<sz_pair>& Positions,
-                           csz Beyond,
-                           csz Offset)
+inline void ShiftPositions(vector<szt_pair>& Positions,
+                           cszt Beyond,
+                           cszt Offset)
 {
-  for (sz_pair& pos : Positions) {
+  for (szt_pair& pos : Positions) {
     if (pos.X > Beyond) {
       pos.X += Offset;
     }

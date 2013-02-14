@@ -9,12 +9,12 @@ class File;
 
 struct Snapshot {
   Snapshot() { };
-  Snapshot(sz _QueueIndex, sz _AssetsIndex, sz _ChangesIndex)
-    : QueueIndex(_QueueIndex),  AssetsIndex(_AssetsIndex),
-      ChangesIndex(_ChangesIndex) { };
-  sz QueueIndex = 0;
-  sz AssetsIndex = 0;
-  sz ChangesIndex = 0;
+  Snapshot(szt aQueueIndex, szt aAssetsIndex, szt aChangesIndex)
+    : QueueIndex(aQueueIndex),  AssetsIndex(aAssetsIndex),
+      ChangesIndex(aChangesIndex) { };
+  szt QueueIndex = 0;
+  szt AssetsIndex = 0;
+  szt ChangesIndex = 0;
 };
 
 struct Bookmark {
@@ -24,7 +24,7 @@ struct Bookmark {
 
 struct AssetState {
   AssetState() { };
-  AssetState(bool _Playing) : Playing(_Playing) { };
+  AssetState(bool aPlaying) : Playing(aPlaying) { };
   bool Playing = false;
 };
 
@@ -47,7 +47,7 @@ public:
 
   Bookmark& CreateBookmark();
   bool CreateSnapshot();
-  bool LoadSnapshot(csz Index);
+  bool LoadSnapshot(cszt Index);
   void Trim();
 
 private:
@@ -64,7 +64,7 @@ public:
   bool ValuesChanged = true;
   bool AssetsChanged = true;
 
-  sz CurrentSnapshot = 0;
+  szt CurrentSnapshot = 0;
 
 private:
   map<string, Properties> UserValues;
@@ -78,9 +78,9 @@ private:
   vector<string> AssetsHistory;
   // this keeps track of all the values individually
   vector<vector<string>> ValuesHistories;
-  map<string, sz> ValuesHistoryNames;
-  vector<sz_pair> ValuesChanges;
-  map<sz, Bookmark> Bookmarks;
+  map<string, szt> ValuesHistoryNames;
+  vector<szt_pair> ValuesChanges;
+  map<szt, Bookmark> Bookmarks;
 
   friend class Book;
   friend class StoryQuery;

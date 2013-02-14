@@ -90,12 +90,12 @@ const string ButtonTypeNames[BUTTON_TYPE_MAX] = {
 
 namespace token
 {
-csz NUM_TOKENS_INSTRUCTION = 4;
-csz NUM_TOKENS_CONDITION = 8;
-csz NUM_SPACE_REMOVERS = 20;
+cszt NUM_TOKENS_INSTRUCTION = 4;
+cszt NUM_TOKENS_CONDITION = 8;
+cszt NUM_SPACE_REMOVERS = 20;
 
-csz isPaired = 0x0001;
-csz isWide   = 0x0002;
+cszt isPaired = 0x0001;
+cszt isWide   = 0x0002;
 
 enum operationName {
   plus,
@@ -331,18 +331,18 @@ const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
 
 } // namespace token
 
-sz_pair FindToken(const string& Text, token::tokenName TokenName,
-                  sz Start = 0, sz End = 0);
-sz FindTokenStart(const string& Text, token::tokenName TokenName,
-                  sz Start = 0, sz End = 0);
-sz FindTokenEnd(const string& Text, token::tokenName TokenName,
-                sz Start = 0, sz End = 0);
+szt_pair FindToken(const string& Text, token::tokenName TokenName,
+                  szt Start = 0, szt End = 0);
+szt FindTokenStart(const string& Text, token::tokenName TokenName,
+                   szt Start = 0, szt End = 0);
+szt FindTokenEnd(const string& Text, token::tokenName TokenName,
+                 szt Start = 0, szt End = 0);
 void CleanWhitespace(string& Text);
 string CleanEscapeCharacters(const string& Text);
 void StripComments(string& Text);
 
 // handy text parsing function for escaping special chars
-inline bool IsEscaped(const string& Text, sz Pos)
+inline bool IsEscaped(const string& Text, szt Pos)
 {
   if (Pos > 0) {
     return (Text[Pos-1] == '\\');
@@ -351,7 +351,7 @@ inline bool IsEscaped(const string& Text, sz Pos)
   }
 }
 
-inline bool IsSpecial(const string& Text, sz Pos, char token)
+inline bool IsSpecial(const string& Text, szt Pos, char token)
 {
   if ((Pos > 0) && (Text[Pos-1] == '\\')) {
     return false;
@@ -363,15 +363,15 @@ inline bool IsSpecial(const string& Text, sz Pos, char token)
 /** @brief Find first unescaped passed in character
   * \return npos if not found
   */
-inline sz FindCharacter(const string& Text,
-                        char Char,
-                        sz Start = 0,
-                        sz End = 0)
+inline szt FindCharacter(const string& Text,
+                         char Char,
+                         szt Start = 0,
+                         szt End = 0)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-  sz pos = Start;
+  szt pos = Start;
 
   while (pos < End) {
     if (IsSpecial(Text, pos, Char)) {
@@ -392,7 +392,7 @@ inline string GetCleanWhitespace(const string& Text)
 inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
 {
   if (!Text.empty()) {
-    csz scopePos = FindTokenStart(Text, token::scope);
+    cszt scopePos = FindTokenStart(Text, token::scope);
     if (scopePos != string::npos) {
       if (scopePos) {
         Noun = CutString(Text, 0, scopePos);

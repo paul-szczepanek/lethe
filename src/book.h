@@ -46,11 +46,11 @@ public:
   bool LoadSnapshot(const string& Description);
   void GetSnapshots(Properties& SnapshotItems);
   void GetBookmarks(Properties& SnapshotItems);
-  sz GetCurrentSnapshot();
+  szt GetCurrentSnapshot();
 
   void SetBookmark(const Properties& Description);
   void SetBookmark(const string& Description);
-  bool LoadSnapshot(csz SnapshotIndex);
+  bool LoadSnapshot(cszt SnapshotIndex);
   bool UndoSnapshot();
   bool RedoSnapshot();
 

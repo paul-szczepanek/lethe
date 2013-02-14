@@ -20,7 +20,7 @@ public:
       QuerySession(Progress) { };
   ~StoryQuery() { };
 
-  sz ExecuteBlock(const string& Noun, const Block& CurBlock, csz Level = 0);
+  szt ExecuteBlock(const string& Noun, const Block& CurBlock, cszt Level = 0);
   bool ExecuteExpression(const string& Noun, const string& Expression,
                          bool Condition = false);
 

@@ -75,9 +75,9 @@ bool WindowBox::BuildFrame()
     FrameVisible = false;
     return false;
   } else if (spritePage.W != BLOCK_SIZE * 4) {
-    //TODO: stretch SpritePage if needed
-    LOG("frame image size incorrect");
-    return false;
+    const real scale = (real)BLOCK_SIZE * (real)4 / (real)spritePage.W;
+    spritePage.Zoom(scale, scale);
+    LOG("frame image size incorrect, scaling to fit");
   }
 
   // sprite image layout
@@ -90,9 +90,9 @@ bool WindowBox::BuildFrame()
   Rect dst(BLOCK_SIZE, BLOCK_SIZE);
 
   // create the base frame
-  for (sz i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
-    for (sz j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
-      sz index;
+  for (szt i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
+    for (szt j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
+      szt index;
       if (j == 0) {
         if (i == 0) {
           index = 0;

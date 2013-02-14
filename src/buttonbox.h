@@ -23,7 +23,7 @@ struct Button {
   vector<Surface> ButtonSurfaces;
   Rect Size;
   string Name;
-  sz State = 0;
+  szt State = 0;
   buttonType Function;
   bool Visible = true;
 };
@@ -38,14 +38,14 @@ public:
   void Reset();
   bool HandleInput(MouseState& Mouse);
 
-  bool GetSelectedButton(buttonType& Selected, sz& State);
-  bool SetButtonState(const buttonType Selected, csz State);
+  bool GetSelectedButton(buttonType& Selected, szt& State);
+  bool SetButtonState(const buttonType Selected, cszt State);
   void AddButton(buttonType NewButton);
 
 
 private:
   vector<Button> Buttons;
-  sz SelectedButton;
+  szt SelectedButton;
 };
 
 #endif // BUTTONBOX_H

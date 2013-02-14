@@ -37,7 +37,7 @@ Reader::~Reader()
 void Reader::LoadSettings()
 {
   // load reader layouts
-  for (sz i = 0; i < ORIENTATION_MAX; ++i) {
+  for (szt i = 0; i < ORIENTATION_MAX; ++i) {
     // default layouts
     vector<string> layoutStrings;
     layoutStrings.resize(NUM_LAYOUTS, "0132 3111 1111 0 +000");
@@ -45,7 +45,7 @@ void Reader::LoadSettings()
     const string& key = SKEY_LAYOUTS + IntoString(i);
     Settings.GetValue(key, layoutStrings);
     // initialise the layouts with default or stored layouts strings
-    for (sz j = 0; j < NUM_LAYOUTS; ++j) {
+    for (szt j = 0; j < NUM_LAYOUTS; ++j) {
       Layouts[i][j].Init(layoutStrings[j]);
     }
   }
@@ -65,9 +65,9 @@ void Reader::LoadSettings()
 void Reader::SaveSettings()
 {
   // save reader layouts
-  for (sz i = 0; i < ORIENTATION_MAX; ++i) {
+  for (szt i = 0; i < ORIENTATION_MAX; ++i) {
     vector<string> layoutStrings;
-    for (sz j = 0; j < NUM_LAYOUTS; ++j) {
+    for (szt j = 0; j < NUM_LAYOUTS; ++j) {
       layoutStrings.push_back(Layouts[i][j].GetDefinition());
     }
     const string& key = SKEY_LAYOUTS + IntoString(i);
@@ -82,10 +82,14 @@ void Reader::SaveSettings()
 
 bool Reader::InitFonts()
 {
-  sz fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
+  szt fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
   Fonts.resize(TEXT_STYLE_MAX);
+#ifdef __ANDROID__
+  const real scale = (real)FontScale / 200.f;
+#else
   const real scale = (real)FontScale / 100.f;
-  for (sz i = 0; i < TEXT_STYLE_MAX; ++i) {
+#endif
+  for (szt i = 0; i < TEXT_STYLE_MAX; ++i) {
     if (Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
       Fonts[i].Style = textStyle(i);
     } else {
@@ -274,6 +278,13 @@ bool Reader::ReadMenu()
 
   MainMenu.SetText("");
   MenuSource = MyBook.ProcessMenuQueue();
+  RefreshMenu();
+
+  return true;
+}
+
+void Reader::RefreshMenu()
+{
   Rect maxSize(Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
                BLOCK_SIZE, BLOCK_SIZE);
   MainMenu.SetSize(maxSize);
@@ -282,62 +293,24 @@ bool Reader::ReadMenu()
   fitSize.X += (maxSize.W - fitSize.W) / 2;
   fitSize.Y += (maxSize.H - fitSize.H) / 2;
   MainMenu.SetSize(fitSize);
-  return true;
 }
 
 bool Reader::ProcessInput(real DeltaTime)
 {
   Keys.InputMode = MyBook.DialogOpen;
-  RedrawPending = Input::Tick(Mouse, Keys);
+  SystemState System;
+  RedrawPending = Input::Tick(Mouse, Keys, System);
 
-  if (Keys.KeyPressed) {
-    if (Keys.InputMode) {
-      GameDialog.AddCharacter(Keys.Letter);
-    } else if (Keys.SplitShrink) {
-      --(GetCurrentLayout().Split);
-      SetLayout();
-    } else if (Keys.SplitGrow) {
-      ++(GetCurrentLayout().Split);
-      SetLayout();
-    } else if (Keys.LayoutToggle) {
-      SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
-    } else if (Keys.PgDown) {
-      MainText.Scroll(100);
-    } else if (Keys.PgUp) {
-      MainText.Scroll(-100);
-#ifdef DEVBUILD
-    } else if (Keys.Console) {
-      VarView.Visible = !VarView.Visible;
-#endif
-    } else if (Keys.Escape) {
-      if (MyBook.MenuOpen) {
-        MyBook.HideMenu();
-      } else {
-        MyBook.ShowMenu();
-      }
-    } else if (Keys.Menu) {
-      if (MyBook.MenuOpen) {
-        MyBook.HideMenu();
-      } else {
-        MyBook.ShowMenu();
-      }
-    } else if (Keys.ImageZoom) {
-      //
-    } else if (Keys.Undo) {
-      MyBook.UndoSnapshot();
-    } else if (Keys.Redo) {
-      MyBook.RedoSnapshot();
-    } else if (Keys.Bookmark) {
-      MyBook.SetBookmark(QUICK_BOOKMARK);
-    }
-    if (Keys.Quit) {
-      MyBook.Quit();
-    }
-    Keys.Reset();
-  }
-
-  // releasing the button commits to an action
-  if (Mouse.LeftUp) {
+  if (System.Resized) {
+    // resize all the textboxes and ignore other input this time
+    Width = System.W;
+    Height = System.H;
+    Screen.InitScreen(Width, Height, BPP);
+    SetLayout();
+    RefreshMenu();
+    RedrawPending = true;
+  } else if (Mouse.LeftUp) {
+    // releasing the button commits to an action
     // verb -> dialog -> menu -> quick -> main text -> buttons
     if (VerbMenu.Visible) {
       if (VerbMenu.GetSelectedKeyword(KeywordAction.Y)) {
@@ -430,6 +403,51 @@ bool Reader::ProcessInput(real DeltaTime)
         }
       }
     }
+  } else if (Keys.KeyPressed) {
+    // keyboard shortcuts
+    if (Keys.InputMode) {
+      GameDialog.AddCharacter(Keys.Letter);
+    } else if (Keys.SplitShrink) {
+      --(GetCurrentLayout().Split);
+      SetLayout();
+    } else if (Keys.SplitGrow) {
+      ++(GetCurrentLayout().Split);
+      SetLayout();
+    } else if (Keys.LayoutToggle) {
+      SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
+    } else if (Keys.PgDown) {
+      MainText.Scroll(100);
+    } else if (Keys.PgUp) {
+      MainText.Scroll(-100);
+#ifdef DEVBUILD
+    } else if (Keys.Console) {
+      VarView.Visible = !VarView.Visible;
+#endif
+    } else if (Keys.Escape) {
+      if (MyBook.MenuOpen) {
+        MyBook.HideMenu();
+      } else {
+        MyBook.ShowMenu();
+      }
+    } else if (Keys.Menu) {
+      if (MyBook.MenuOpen) {
+        MyBook.HideMenu();
+      } else {
+        MyBook.ShowMenu();
+      }
+    } else if (Keys.ImageZoom) {
+      //
+    } else if (Keys.Undo) {
+      MyBook.UndoSnapshot();
+    } else if (Keys.Redo) {
+      MyBook.RedoSnapshot();
+    } else if (Keys.Bookmark) {
+      MyBook.SetBookmark(QUICK_BOOKMARK);
+    }
+    if (Keys.Quit) {
+      MyBook.Quit();
+    }
+    Keys.Reset();
   }
 
   if (VerbMenu.Visible) {
@@ -443,7 +461,6 @@ bool Reader::ProcessInput(real DeltaTime)
   } else if (MainMenu.Visible) {
     MainMenu.HandleInput(Mouse, DeltaTime);
   } else {
-
     QuickMenu.HandleInput(Mouse, DeltaTime);
     ReaderButtons.HandleInput(Mouse);
     MainText.HandleInput(Mouse, DeltaTime);
@@ -483,7 +500,7 @@ void Reader::RedrawScreen(real DeltaTime)
   DrawWindows();
   PrintFPS(DeltaTime);
 #ifdef DEVBUILD
-  csz maxlog = 102400;
+  cszt maxlog = 102400;
   if (GLog.size() > maxlog) {
     GLog = CutString(GLog, GLog.size() - maxlog);
   }
@@ -550,7 +567,7 @@ void Reader::PrintFPS(real DeltaTime)
 
 /** @brief Try to fix the layout that failed to fit by evening out the split
   */
-sz Reader::FixLayout()
+szt Reader::FixLayout()
 {
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   // can't fit, abort and try a smaller split
@@ -567,7 +584,7 @@ sz Reader::FixLayout()
   }
 }
 
-sz Reader::SetLayout(sz LayoutIndex)
+szt Reader::SetLayout(szt LayoutIndex)
 {
   CurrentOrientation = Width > Height? landscape : portrait;
   if (LayoutIndex < NUM_LAYOUTS) {
@@ -576,7 +593,7 @@ sz Reader::SetLayout(sz LayoutIndex)
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   WindowBox* boxes[BOX_TYPE_MAX];
 
-  for (sz i = 0; i < BOX_TYPE_MAX; ++i) {
+  for (szt i = 0; i < BOX_TYPE_MAX; ++i) {
     switch (layout.Order[i]) {
       case boxMain:
         boxes[i] = &MainText;
@@ -599,7 +616,7 @@ sz Reader::SetLayout(sz LayoutIndex)
 
   lint splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
-  for (sz i = 0; i < BOX_TYPE_MAX; ++i) {
+  for (szt i = 0; i < BOX_TYPE_MAX; ++i) {
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
     bool first = (i == 0) || (pos != layout.Side[i-1]);
@@ -632,9 +649,9 @@ sz Reader::SetLayout(sz LayoutIndex)
 
       if (layout.SizeSpan == i && pos == top && first) {
         // this element determines the size of the split
-        sz halfH = Height / 2;
+        szt halfH = Height / 2;
         // make sure the requested split is viable
-        if ((sz)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
+        if ((szt)Abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
           return FixLayout();
         }
         boxSize.H = halfH - (halfH % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
@@ -664,9 +681,9 @@ sz Reader::SetLayout(sz LayoutIndex)
 
       if (layout.SizeSpan == i && pos == left && first) {
         // this element determines the size of the split
-        sz halfW = Width / 2;
+        szt halfW = Width / 2;
         // make sure the requested split is viable
-        if ((sz)abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
+        if ((szt)Abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
           return FixLayout();
         }
         boxSize.W = halfW - (halfW % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;

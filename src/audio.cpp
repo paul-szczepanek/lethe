@@ -1,6 +1,6 @@
 #include "audio.h"
-#include <SDL.h>
-#include <SDL_mixer.h>
+#include "SDL.h"
+#include "SDL_mixer.h"
 
 const int NUM_CHANNELS = 16;
 bool Audio::Active = true;

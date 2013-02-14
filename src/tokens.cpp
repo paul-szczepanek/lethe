@@ -6,9 +6,9 @@ void CleanWhitespace(string& Text)
 {
   string clean;
   clean.reserve(Text.size());
-  sz pos = 0;
-  sz whiteCount = 0;
-  csz length = Text.size();
+  szt pos = 0;
+  szt whiteCount = 0;
+  cszt length = Text.size();
   char textBlockToken = token::Start[token::textBlock];
   char keywordStart = token::Start[token::keyword];
   char keywordEnd = token::End[token::keyword];
@@ -60,7 +60,7 @@ void CleanWhitespace(string& Text)
       if (inTextBlock) {
         inTextBlock = ignoreWhite = false;
         // special case where two blocks come after each other
-        sz ignore = pos;
+        szt ignore = pos;
         while (++ignore < length) {
           if (Text[ignore] != '\n' && Text[ignore] != ' '
               && Text[ignore] != '\t') {
@@ -92,7 +92,7 @@ void CleanWhitespace(string& Text)
       ignoreWhite = false;
       // unless it's a whitespace remover
       if (!inTextBlock || inKeywordBlock) {
-        for (sz i = 0; i < token::NUM_SPACE_REMOVERS; ++i) {
+        for (szt i = 0; i < token::NUM_SPACE_REMOVERS; ++i) {
           if (c == token::WhitespaceRemovers[i]) {
             whiteCount = 0;
             ignoreWhite = true;
@@ -118,8 +118,8 @@ string CleanEscapeCharacters(const string& Text)
 {
   string clean;
   clean.reserve(Text.size());
-  sz pos = 0;
-  csz length = Text.size();
+  szt pos = 0;
+  cszt length = Text.size();
   while (pos < length) {
     char c = Text[pos];
     if (c != '\\') {
@@ -135,28 +135,28 @@ string CleanEscapeCharacters(const string& Text)
   *
   * \return a pair of begin and end positions of the token
   */
-sz_pair FindToken(const string& Text,
+szt_pair FindToken(const string& Text,
                   token::tokenName TokenName,
-                  sz Start,
-                  sz End)
+                  szt Start,
+                  szt End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-  sz pos = Start;
+  szt pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  sz type = token::Type[TokenName];
+  szt type = token::Type[TokenName];
 
   if ((type & token::isPaired) && (type & token::isWide)) {
     // return if matching pair found like ** **
     while (pos < End - 1) {
       if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
-        sz match = pos;
+        szt match = pos;
         while (++match < End - 1) {
           if (IsSpecial(Text, match, tokenB)
               && IsSpecial(Text, match+1, tokenB)) {
-            return sz_pair(pos, match + 1);
+            return szt_pair(pos, match + 1);
           }
         }
         break;
@@ -167,14 +167,14 @@ sz_pair FindToken(const string& Text,
     // return if matching pair found like [ ]
     while (pos < End) {
       if (IsSpecial(Text, pos, tokenA)) {
-        sz match = pos;
-        sz matchCount = 1;
+        szt match = pos;
+        szt matchCount = 1;
         while (++match < End) {
           if (IsSpecial(Text, match, tokenA)) {
             ++matchCount;
           }
           if (IsSpecial(Text, match, tokenB) && (--matchCount == 0)) {
-            return sz_pair(pos, match);
+            return szt_pair(pos, match);
           }
         }
         break;
@@ -185,7 +185,7 @@ sz_pair FindToken(const string& Text,
     // if it's two char token check for other char and return if found
     while (pos < End - 1) {
       if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
-        return sz_pair(pos, pos+1);
+        return szt_pair(pos, pos+1);
       }
       ++pos;
     }
@@ -193,30 +193,30 @@ sz_pair FindToken(const string& Text,
     // if it's a single char token return when found
     while (pos < End) {
       if (IsSpecial(Text, pos, tokenA)) {
-        return sz_pair(pos, pos);
+        return szt_pair(pos, pos);
       }
       ++pos;
     }
   }
 
   // nothing found
-  return sz_pair(string::npos, string::npos);
+  return szt_pair(string::npos, string::npos);
 }
 
 /** @brief this version only returns the start of the token, even for paired
   */
-sz FindTokenStart(const string& Text,
-                  token::tokenName TokenName,
-                  sz Start,
-                  sz End)
+szt FindTokenStart(const string& Text,
+                   token::tokenName TokenName,
+                   szt Start,
+                   szt End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-  sz pos = Start;
+  szt pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  sz type = token::Type[TokenName];
+  szt type = token::Type[TokenName];
 
   while (pos < End) {
     if (IsSpecial(Text, pos, tokenA)) {
@@ -227,8 +227,8 @@ sz FindTokenStart(const string& Text,
         }
       } else if (type & token::isPaired) {
         // return if matching pair found like [ ]
-        sz match = pos;
-        sz matchCount = 1;
+        szt match = pos;
+        szt matchCount = 1;
 
         while (++match <= End) {
           if (IsSpecial(Text, match, tokenA)) {
@@ -254,18 +254,18 @@ sz FindTokenStart(const string& Text,
 /** @brief return the end position of a token, if a token is paired it
   * will count up pairs to match so needs to start at pair start
   */
-sz FindTokenEnd(const string& Text,
-                token::tokenName TokenName,
-                sz Start,
-                sz End)
+szt FindTokenEnd(const string& Text,
+                 token::tokenName TokenName,
+                 szt Start,
+                 szt End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
   }
-  sz pos = Start;
+  szt pos = Start;
   char tokenA = token::Start[TokenName];
   char tokenB = token::End[TokenName];
-  sz type = token::Type[TokenName];
+  szt type = token::Type[TokenName];
 
   while (pos < End) {
     if (IsSpecial(Text, pos, tokenA)) {
@@ -277,7 +277,7 @@ sz FindTokenEnd(const string& Text,
           break;
         }
       } else if (type & token::isPaired) {
-        sz matchCount = 1;
+        szt matchCount = 1;
         while (++pos < End) {
           if (IsSpecial(Text, pos, tokenA)) {
             ++matchCount;
@@ -301,8 +301,8 @@ sz FindTokenEnd(const string& Text,
   */
 void StripComments(string& Text)
 {
-  csz length = Text.size();
-  sz pos = 0;
+  cszt length = Text.size();
+  szt pos = 0;
 
   while (pos < length) {
     if (IsSpecial(Text, pos, token::Start[token::comment]) &&

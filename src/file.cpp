@@ -36,14 +36,14 @@ bool File::GetLine(string& Buffer)
       return false;
     }
     // remove whitespace from start
-    sz posStart = 0;
-    csz length = Buffer.size();
+    szt posStart = 0;
+    cszt length = Buffer.size();
     while (posStart < length
            && (Buffer[posStart] == ' ' || Buffer[posStart] == '\t')) {
       ++posStart;
     }
     // remove whitespace from end
-    sz posEnd = length;
+    szt posEnd = length;
     while (posEnd > posStart
            && (Buffer[posEnd - 1] == ' ' || Buffer[posEnd - 1] == '\t')) {
       --posEnd;

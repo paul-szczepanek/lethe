@@ -6,7 +6,7 @@
 
 struct VerbCondition {
   string Expression;
-  sz End;
+  szt End;
 };
 
 class PageParser
@@ -16,7 +16,7 @@ public:
   ~PageParser() { };
 
 private:
-  sz FindNextStatement(csz From);
+  szt FindNextStatement(cszt From);
 
   void AddTextBlock();
   void AddCondition();
@@ -32,8 +32,8 @@ private:
   vector<Block*> Blocks; // keeps track of local conditions stack
   vector<VerbCondition> VerbConditions; // top level conditions
   VerbBlock Verb; // gathers the verb definition before being copied to Verbs
-  sz Pos = 0;
-  sz Length;
+  szt Pos = 0;
+  szt Length;
   bool PopScopePending = false;
   bool VerbScopePending = false;
 

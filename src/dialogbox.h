@@ -9,7 +9,7 @@ public:
   DialogBox() { };
   ~DialogBox() { };
 
-  sz_pair GetMaxSize();
+  szt_pair GetMaxSize();
   void Draw();
   void DrawInput();
   void AddCharacter(const char NewChar);

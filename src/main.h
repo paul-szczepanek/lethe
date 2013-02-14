@@ -9,7 +9,6 @@
 #include <iterator>
 #include <vector>
 #include <map>
-#include <cassert>
 
 using std::cout;
 using std::endl;
@@ -27,7 +26,6 @@ using std::map;
 
 using std::min;
 using std::max;
-using std::abs;
 
 typedef float real;
 typedef unsigned short int usint;
@@ -35,21 +33,26 @@ typedef unsigned long int ulint;
 typedef long int lint;
 typedef unsigned int uint;
 typedef unsigned char uchar;
-typedef const size_t csz;
-typedef size_t sz;
+typedef const size_t cszt;
+typedef size_t szt;
 
 #ifdef DEVBUILD
 extern string GLog;
 extern string GTrace;
-extern sz GTraceIndent;
+extern szt GTraceIndent;
 #define LOG(t) { string log = (t); \
   if (log.size() > 0) { GLog = GLog + "\n" + log; cout << log << endl; } };
 #else
-#define LOG(t) nop;
+#define LOG(t);
+#endif
+
+#ifdef __ANDROID__
+const string DATA_DIR = "/sdcard/lethe/data";
+#else
+const string DATA_DIR = "data";
 #endif
 
 const string SLASH = "/";
-const string DATA_DIR = "data";
 const string STORY_DIR = DATA_DIR + SLASH + "books";
 const string MENU_DIR = DATA_DIR + SLASH + "menu";
 const string FONTS_DIR = DATA_DIR + SLASH + "fonts";
@@ -63,12 +66,16 @@ const string QUICK_BOOKMARK = "Quick bookmark";
 const string SETTINGS_FILE = DATA_DIR + SLASH + "settings";
 const char BACKSPACE_CHAR = (char)8;
 
+#ifdef __ANDROID__
+const lint BLOCK_SIZE = 16;
+#else
 const lint BLOCK_SIZE = 32;
+#endif
 
 struct Colour {
   Colour() { };
-  Colour(usint _R, usint _G, usint _B, usint _A)
-    : R(_R), G(_G), B(_B), A(_A) { };
+  Colour(usint aR, usint aG, usint aB, usint aA)
+    : R(aR), G(aG), B(aB), A(aA) { };
   usint R = 255;
   usint G = 255;
   usint B = 255;
@@ -76,7 +83,7 @@ struct Colour {
 };
 
 struct string_pair {
-  string_pair(string _X, string _Y) : X(_X), Y(_Y) { };
+  string_pair(string aX, string aY) : X(aX), Y(aY) { };
   string_pair() { };
   void clear() {
     X.clear();
@@ -88,32 +95,39 @@ struct string_pair {
   bool full() {
     return (!X.empty() && !Y.empty());
   };
-  sz size();
+  szt size();
   const char* c_str();
   string X;
   string Y;
 };
 
-struct size_t_pair {
-  size_t_pair() { };
-  size_t_pair(sz _X, sz _Y) : X(_X), Y(_Y) { };
-  sz X = 0;
-  sz Y = 0;
+struct int_pair {
+  int_pair() : X(0), Y(0) { };
+  int_pair(int aX, int aY) : X(aX), Y(aY) { };
+  int X;
+  int Y;
 };
-typedef size_t_pair sz_pair;
-typedef const size_t_pair csz_pair;
+
+struct szt_pair {
+  szt_pair() : X(0), Y(0) { };
+  szt_pair(szt aX, szt aY) : X(aX), Y(aY) { };
+  szt X;
+  szt Y;
+};
+
+typedef const szt_pair cszt_pair;
 
 struct real_pair {
   real_pair() { };
-  real_pair(real _X, real _Y) : X(_X), Y(_Y) { };
+  real_pair(real aX, real aY) : X(aX), Y(aY) { };
   real X = 0;
   real Y = 0;
 };
 
 struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
-  Rect(lint _W, lint _H, lint _X = 0, lint _Y = 0)
-    : W(_W), H(_H), X(_X), Y(_Y) { };
+  Rect(lint aW, lint aH, lint aX = 0, lint aY = 0)
+    : W(aW), H(aH), X(aX), Y(aY) { };
   bool operator!= (const Rect& other) const {
     return !(*this == other);
   };
@@ -162,10 +176,10 @@ template <typename T> inline int IntoInt(const T& Thing)
   return integer;
 }
 
-template <typename T> inline sz IntoSizeT(const T& Thing)
+template <typename T> inline szt IntoSizeT(const T& Thing)
 {
   stringstream stream;
-  sz integer;
+  szt integer;
   stream << Thing;
   stream >> integer;
   return integer;
@@ -181,8 +195,8 @@ inline string RealIntoString(const real a_real,
 
 // cutString("01234", 2, 4) returns "23"
 inline string CutString(const string Text,
-                        csz Start,
-                        csz End = string::npos)
+                        cszt Start,
+                        cszt End = string::npos)
 {
   return Start < End? Text.substr(Start, End - Start) : string();
 }
@@ -194,15 +208,10 @@ template <typename T> inline void Clamp(T& Value,
   Value = Value < Min? Min : (Value > Max? Max : Value);
 }
 
-template <typename T> inline void ClampZero(T& Value,
-    const T& Max)
+// android
+template <typename T> inline T Abs(const T& Value)
 {
-  Value = Value < 0? 0 : (Value > Max? Max : Value);
-}
-
-template <typename T> inline void ClampZeroOne(T& Value)
-{
-  Value = Value < 0? 0 : (Value > 1? 1 : Value);
+  return Value < 0? -Value : Value;
 }
 
 #endif // MAIN_H_INCLUDED

@@ -3,7 +3,7 @@
 
 /** @brief you need to init system nouns beforehand
   */
-bool Session::LoadSnapshot(csz Index)
+bool Session::LoadSnapshot(cszt Index)
 {
   if (Index >= Snapshots.size() || !Index) {
     // if it's not within the history or is the start of the story
@@ -11,9 +11,9 @@ bool Session::LoadSnapshot(csz Index)
     return false;
   }
   CurrentSnapshot = Index;
-  sz queueI = Snapshots[Index].QueueIndex;
-  sz assetI = Snapshots[Index].AssetsIndex;
-  sz changeI = Snapshots[Index].ChangesIndex;
+  szt queueI = Snapshots[Index].QueueIndex;
+  szt assetI = Snapshots[Index].AssetsIndex;
+  szt changeI = Snapshots[Index].ChangesIndex;
 
   // load the current queue
   if (queueI > 0) {
@@ -25,16 +25,16 @@ bool Session::LoadSnapshot(csz Index)
   }
 
   // find the most up to date positions of value histories for each history
-  vector<sz> currentIndex;
+  vector<szt> currentIndex;
   currentIndex.resize(ValuesHistories.size(), 0);
-  for (sz i = 0; i < changeI; ++i) {
-    csz_pair& change = ValuesChanges[i];
+  for (szt i = 0; i < changeI; ++i) {
+    cszt_pair& change = ValuesChanges[i];
     currentIndex[change.X] = change.Y;
   }
 
   for (const auto& value : ValuesHistoryNames) {
     const string& name = value.first;
-    csz i = value.second;
+    cszt i = value.second;
     // all indeces here are 1-based, 0 meaning book values should be used
     if (currentIndex[i]) {
       // it's safe to decrement as it's a temporary
@@ -64,8 +64,8 @@ bool Session::LoadSnapshot(csz Index)
   // assetI 0 means all assets are off
   if (assetI > 0) {
     const string& assets = AssetsHistory[--assetI];
-    sz lastPos = 0;
-    sz pos = FindCharacter(assets, '\n', lastPos);
+    szt lastPos = 0;
+    szt pos = FindCharacter(assets, '\n', lastPos);
 
     while (pos != string::npos && pos > lastPos) {
       const string& assetName = CutString(assets, lastPos, pos);
@@ -132,7 +132,7 @@ bool Session::Load()
   while (Save.GetLine(buffer)) {
     string indexBuffer;
     Save.GetLine(indexBuffer);
-    csz index = IntoSizeT(indexBuffer);
+    cszt index = IntoSizeT(indexBuffer);
     ValuesHistoryNames[buffer] = IntoSizeT(index);
     while (Save.GetLine(buffer)) {
       ValuesHistories[index].push_back(buffer);
@@ -141,17 +141,17 @@ bool Session::Load()
 
   // changes
   while (Save.GetLine(buffer)) {
-    csz pos = FindCharacter(buffer, VALUE_SEPARATOR);
+    cszt pos = FindCharacter(buffer, VALUE_SEPARATOR);
     const string& valueIndex = CutString(buffer, 0, pos);
     const string& changeIndex = CutString(buffer, pos + 1);
-    csz_pair change(IntoSizeT(valueIndex), IntoSizeT(changeIndex));
+    cszt_pair change(IntoSizeT(valueIndex), IntoSizeT(changeIndex));
     ValuesChanges.push_back(change);
   }
 
   // snapshots
   while (Save.GetLine(buffer)) {
-    csz pos = FindCharacter(buffer, VALUE_SEPARATOR);
-    csz pos2 = FindCharacter(buffer, VALUE_SEPARATOR, pos + 1);
+    cszt pos = FindCharacter(buffer, VALUE_SEPARATOR);
+    cszt pos2 = FindCharacter(buffer, VALUE_SEPARATOR, pos + 1);
     const string& queueIndex = CutString(buffer, 0, pos);
     const string& assetIndex = CutString(buffer, pos + 1, pos2);
     const string& changeIndex = CutString(buffer, pos2 + 1);
@@ -163,7 +163,7 @@ bool Session::Load()
 
   // bookmarks
   while (Save.GetLine(buffer)) {
-    csz index = IntoSizeT(buffer);
+    cszt index = IntoSizeT(buffer);
     string bookmarkDescription;
     while (Save.GetLine(buffer)) {
       bookmarkDescription += buffer;
@@ -220,7 +220,7 @@ const string Session::GetSessionText() const
   }
   text += '\n';
   // value change indexes
-  for (csz_pair& value : ValuesChanges) {
+  for (cszt_pair& value : ValuesChanges) {
     text += IntoString(value.X);
     text += VALUE_SEPARATOR;
     text += IntoString(value.Y);
@@ -228,7 +228,7 @@ const string Session::GetSessionText() const
   }
   text += '\n';
   // snapshots (don't save the first snapshot, it's part of initialisation)
-  for (sz i = 1, fSz = Snapshots.size(); i < fSz; ++i) {
+  for (szt i = 1, fSz = Snapshots.size(); i < fSz; ++i) {
     const Snapshot& value = Snapshots[i];
     text += IntoString(value.QueueIndex);
     text += VALUE_SEPARATOR;
@@ -305,22 +305,22 @@ void Session::Trim()
     QueueHistory.resize(trimSnapshot.QueueIndex);
 
     // find the highest indices of values histories used until the trim
-    vector<sz> biggestIndex;
+    vector<szt> biggestIndex;
     biggestIndex.resize(ValuesHistories.size(), 0);
-    for (sz i = 0; i < trimSnapshot.ChangesIndex; ++i) {
-      csz_pair& change = ValuesChanges[i];
+    for (szt i = 0; i < trimSnapshot.ChangesIndex; ++i) {
+      cszt_pair& change = ValuesChanges[i];
       if (change.Y > biggestIndex[change.X]) {
         biggestIndex[change.X] = change.Y;
       }
     }
     // trim all values histories beyond that index
-    for (sz i = 0; i < ValuesHistories.size(); ++i) {
+    for (szt i = 0; i < ValuesHistories.size(); ++i) {
       ValuesHistories[i].resize(biggestIndex[i]);
     }
     ValuesChanges.resize(trimSnapshot.ChangesIndex);
 
     // find the biggest index of asset changes and trim the rest
-    sz maxAssetStateIndex = 0;
+    szt maxAssetStateIndex = 0;
     for (const Snapshot& snap : Snapshots) {
       if (snap.AssetsIndex > maxAssetStateIndex) {
         maxAssetStateIndex = snap.AssetsIndex;
@@ -408,24 +408,24 @@ bool Session::CreateSnapshot()
       const auto it = ValuesHistoryNames.find(valueName);
       if (it == ValuesHistoryNames.end()) {
         // create a new history to hold the values
-        csz historyI = ValuesHistories.size();
+        cszt historyI = ValuesHistories.size();
         ValuesHistories.resize(historyI + 1);
         vector<string>& history = ValuesHistories[historyI];
         // create a new map entry for this new history
         ValuesHistoryNames[valueName] = historyI;
         // create the first history value in the history
         history.push_back(newValue.PrintValues());
-        ValuesChanges.push_back(sz_pair(historyI, history.size()));
+        ValuesChanges.push_back(szt_pair(historyI, history.size()));
         valuedAdded = true;
       } else {
         // add the value to the existing history
-        csz historyI = it->second;
+        cszt historyI = it->second;
         vector<string>& history = ValuesHistories[historyI];
         const string& oldValue = history.back();
         // todo: check all former values
         if (!newValue.IsEquivalent(Properties(oldValue))) {
           history.push_back(newValue.PrintValues());
-          ValuesChanges.push_back(sz_pair(historyI, history.size()));
+          ValuesChanges.push_back(szt_pair(historyI, history.size()));
           valuedAdded = true;
         }
       }
@@ -448,7 +448,7 @@ bool Session::CreateSnapshot()
   */
 Bookmark& Session::CreateBookmark()
 {
-  csz queueI = CurrentSnapshot > 1? CurrentSnapshot - 2 : 0;
+  cszt queueI = CurrentSnapshot > 1? CurrentSnapshot - 2 : 0;
   Bookmark& mark = Bookmarks[queueI];
   if (mark.Description.empty()) {
     if (queueI < QueueHistory.size()) {

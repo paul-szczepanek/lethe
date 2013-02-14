@@ -7,7 +7,7 @@ void PageParser::PrintBlock(string& BlockText,
   BlockText += Block.Expression;
   if (Block.Blocks.size()) {
     BlockText += token::Start[token::block];
-    for (sz j = 0, fSz = Block.Blocks.size(); j < fSz; ++j) {
+    for (szt j = 0, fSz = Block.Blocks.size(); j < fSz; ++j) {
       PrintBlock(BlockText, Block.Blocks[j]);
     }
     BlockText += token::End[token::block];
@@ -17,7 +17,7 @@ void PageParser::PrintBlock(string& BlockText,
 void PageParser::AddTextBlock()
 {
   // find the end of text at the next "
-  csz textEnd = FindCharacter(Text, token::End[token::textBlock], ++Pos);
+  cszt textEnd = FindCharacter(Text, token::End[token::textBlock], ++Pos);
   const string& plainText = CutString(Text, Pos, textEnd);
   if (textEnd == string::npos) {
     LOG("Unmatched \" in segment - " + CutString(Text, Pos-1, Pos+20));
@@ -45,7 +45,7 @@ void PageParser::AddTextBlock()
 void PageParser::AddCondition()
 {
   // find the end, which ignores & | letting statements chain
-  csz condEnd = FindNextStatement(++Pos);
+  cszt condEnd = FindNextStatement(++Pos);
   const string& expression = CutString(Text, Pos, condEnd);
 
   // global condition have different scope handling
@@ -56,12 +56,12 @@ void PageParser::AddCondition()
     // we keep looking for a verb definition until we find it
     // or we hit something illegal
     // this is not ideal but allows for implied scope
-    csz verbPos = FindTokenStart(Text, token::noun, condEnd);
+    cszt verbPos = FindTokenStart(Text, token::noun, condEnd);
     if (verbPos < Length) {
       // ignore if it's just another condition, otherwise
       // only { block designations allowed between conditions and verbs
       // no need to check for escaped characters as they will exit early
-      sz ignore = condEnd;
+      szt ignore = condEnd;
       const char& condChar = token::Start[token::condition];
       while (ignore < verbPos) {
         if (Text[ignore] == token::Start[token::block]) {
@@ -144,7 +144,7 @@ void PageParser::AddCondition()
 void PageParser::AddInstruction()
 {
   // find the end, which ignores & | letting statements chain
-  csz instEnd = FindNextStatement(++Pos);
+  cszt instEnd = FindNextStatement(++Pos);
   if (Verb.Names.empty()) {
     LOG(CutString(Text, Pos, instEnd) +
         " - illegal instruction position, must be under a named verb");
@@ -163,7 +163,7 @@ void PageParser::PopOldVerbConditions()
     // pop old conditions that no longer apply
     // or didn't have an explicit { } scope
     while (!VerbConditions.empty()) {
-      csz& verbEnd = VerbConditions.back().End;
+      cszt& verbEnd = VerbConditions.back().End;
       if (verbEnd < Pos || verbEnd == Length) {
         VerbConditions.pop_back();
       } else {
@@ -182,7 +182,7 @@ void PageParser::PopOldVerbConditions()
 void PageParser::AddVerb()
 {
   // find the end of verb name at ]
-  sz verbEnd = FindCharacter(Text, token::End[token::noun], ++Pos);
+  szt verbEnd = FindCharacter(Text, token::End[token::noun], ++Pos);
   if (verbEnd == string::npos) {
     LOG("Unmatched [ in segment - "+CutString(Text, Pos-1, Pos+20));
   }
@@ -217,7 +217,7 @@ void PageParser::AddVerb()
 
     // and append all conditions that still apply
     string verbExpression;
-    for (sz i = 0, fSz = VerbConditions.size(); i < fSz; ++i) {
+    for (szt i = 0, fSz = VerbConditions.size(); i < fSz; ++i) {
       if (i) { // after the first one keep prepending &
         verbExpression += token::Start[token::logicalAnd];
       }
@@ -237,14 +237,14 @@ void PageParser::AddVerb()
   PopScopePending = false;
 }
 
-sz PageParser::FindNextStatement(csz From)
+szt PageParser::FindNextStatement(cszt From)
 {
-  csz textPos = FindCharacter(Text, token::Start[token::textBlock], From);
-  csz nounPos = FindCharacter(Text, token::Start[token::noun], From);
-  csz condPos = FindCharacter(Text, token::Start[token::condition], From);
-  csz instPos = FindCharacter(Text, token::Start[token::instruction], From);
-  csz blockPos = FindCharacter(Text, token::Start[token::block], From);
-  csz blockEndPos = FindCharacter(Text, token::End[token::block], From);
+  cszt textPos = FindCharacter(Text, token::Start[token::textBlock], From);
+  cszt nounPos = FindCharacter(Text, token::Start[token::noun], From);
+  cszt condPos = FindCharacter(Text, token::Start[token::condition], From);
+  cszt instPos = FindCharacter(Text, token::Start[token::instruction], From);
+  cszt blockPos = FindCharacter(Text, token::Start[token::block], From);
+  cszt blockEndPos = FindCharacter(Text, token::End[token::block], From);
   // TODO: take a guess
   return min(textPos,
              min(nounPos,
@@ -254,8 +254,8 @@ sz PageParser::FindNextStatement(csz From)
 }
 
 PageParser::PageParser(const string& SourceText,
-                       Page& _MyPage)
-  : Text(SourceText), MyPage(_MyPage)
+                       Page& aMyPage)
+  : Text(SourceText), MyPage(aMyPage)
 {
   Length = Text.size();
   while (Pos < Length) {
@@ -290,15 +290,15 @@ PageParser::PageParser(const string& SourceText,
   }
 
   string ParsedText;
-  for (sz i = 0, fSz = MyPage.Verbs.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = MyPage.Verbs.size(); i < fSz; ++i) {
     Block& topBlock = MyPage.Verbs[i].BlockTree;
     ParsedText += topBlock.Expression;
-    for (sz j = 0, fSzj = MyPage.Verbs[i].Names.size(); j < fSzj; ++j) {
+    for (szt j = 0, fSzj = MyPage.Verbs[i].Names.size(); j < fSzj; ++j) {
       ParsedText = ParsedText + token::Start[token::noun]
                    + token::Start[token::scope]
                    + MyPage.Verbs[i].Names[j] + token::End[token::noun];
     }
-    for (sz j = 0, fSzj = topBlock.Blocks.size(); j < fSzj; ++j) {
+    for (szt j = 0, fSzj = topBlock.Blocks.size(); j < fSzj; ++j) {
       PrintBlock(ParsedText, topBlock.Blocks[j]);
     }
   }

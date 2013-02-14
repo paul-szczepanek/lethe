@@ -8,24 +8,24 @@ Image::Image(MediaManager& Manager,
   : Asset(Manager, AssetName)
 {
   string params = GetCleanWhitespace(Params);
-  sz xPos = FindCharacter(params, ',');
+  szt xPos = FindCharacter(params, ',');
   Filename = Media.AssetDir + CutString(params, 0, xPos);
   if (xPos != string::npos) {
     Priority = 1;
-    sz yPos = FindCharacter(params, ',', ++xPos);
+    szt yPos = FindCharacter(params, ',', ++xPos);
     const string& x = CutString(params, xPos, yPos);
     X = IntoReal(x);
     if (yPos != string::npos) {
-      sz zoomPos = FindCharacter(params, ',', ++yPos);
+      szt zoomPos = FindCharacter(params, ',', ++yPos);
       const string& y = CutString(params, yPos, zoomPos);
       Y = IntoReal(y);
       if (zoomPos != string::npos) {
-        sz orderPos = FindCharacter(params, ',', ++zoomPos);
+        szt orderPos = FindCharacter(params, ',', ++zoomPos);
         const string& zoom = CutString(params, zoomPos, orderPos);
         Zoom = IntoReal(zoom);
         if (orderPos != string::npos) {
           const string& order = CutString(params, orderPos);
-          Priority = abs(IntoInt(order)) + 1; //0 reserved for BG
+          Priority = Abs(IntoInt(order)) + 1; //0 reserved for BG
         }
       }
     }

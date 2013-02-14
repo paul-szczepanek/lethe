@@ -3,11 +3,11 @@
 
 Properties::Properties(const string& Value) : IntValue(0)
 {
-  sz pos = 0;
-  csz length = Value.size();
+  szt pos = 0;
+  cszt length = Value.size();
   while (pos < length) {
-    sz sepPos = FindTokenStart(Value, token::separator, pos);
-    sz endPos = sepPos != string::npos? sepPos : length;
+    szt sepPos = FindTokenStart(Value, token::separator, pos);
+    szt endPos = sepPos != string::npos? sepPos : length;
 
     // is it a number?
     if (Value[pos] == token::Start[token::number]) {
@@ -28,7 +28,7 @@ Properties::Properties(const string& Value) : IntValue(0)
 const string Properties::PrintTextValues() const
 {
   string text;
-  for (sz i = 0, fSz = TextValues.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += VALUE_SEPARATOR;
     }
@@ -42,7 +42,7 @@ const string Properties::PrintTextValues() const
 const string Properties::PrintValues() const
 {
   string text;
-  for (sz i = 0, fSz = TextValues.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     text += TextValues[i];
     text += VALUE_SEPARATOR;
   }
@@ -58,7 +58,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
     const string& Separator) const
 {
   string text;
-  for (sz i = 0, fSz = TextValues.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }
@@ -80,7 +80,7 @@ const string Properties::PrintValueSelectList(const string& Noun,
 const string Properties::PrintKeywordList(const string& Separator) const
 {
   string text;
-  for (sz i = 0, fSz = TextValues.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }
@@ -96,7 +96,7 @@ const string Properties::PrintKeywordList(const string& Separator) const
 const string Properties::PrintPlainList(const string& Separator) const
 {
   string text;
-  for (sz i = 0, fSz = TextValues.size(); i < fSz; ++i) {
+  for (szt i = 0, fSz = TextValues.size(); i < fSz; ++i) {
     if (i) {
       text += Separator;
     }

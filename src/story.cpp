@@ -31,13 +31,13 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
 {
   string text = GetCleanWhitespace(StoryText);
   // break up the expected [noun[pattern]=value]
-  sz_pair nounPos = FindToken(text, token::noun); // [] outer
-  sz_pair patPos = FindToken(text, token::noun, nounPos.X+1, // []
+  szt_pair nounPos = FindToken(text, token::noun); // [] outer
+  szt_pair patPos = FindToken(text, token::noun, nounPos.X+1, // []
                              nounPos.Y);
-  sz assignPos = FindTokenStart(text, token::assign, nounPos.X+1, // =
-                                nounPos.Y);
+  szt assignPos = FindTokenStart(text, token::assign, nounPos.X+1, // =
+                                 nounPos.Y);
   // cut the noun name
-  csz nounEnd = min(min(nounPos.Y, patPos.X), assignPos);
+  cszt nounEnd = min(min(nounPos.Y, patPos.X), assignPos);
   const string& noun = CutString(text, nounPos.X+1, nounEnd);
   // and the definition that follows
   string pageText;
@@ -97,10 +97,10 @@ string Story::PrependPattern(const string& Keyword,
                              const string& PatternText)
 {
   string text = PatternText;
-  sz pos = 0;
+  szt pos = 0;
   // replace the pattern name with the keyword
   while (pos < text.size()) { // size changes along the way
-    sz patternPos = text.find(PatternName, pos);
+    szt patternPos = text.find(PatternName, pos);
     if (patternPos != string::npos) {
       text.replace(patternPos, PatternName.size(), Keyword);
       pos = patternPos + Keyword.size();

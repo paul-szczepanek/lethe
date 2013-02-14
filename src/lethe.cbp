@@ -13,7 +13,7 @@
 				<Option object_output="../obj/debug/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="1000x1600 -s" />
+				<Option parameters="-s" />
 				<Compiler>
 					<Add option="-Wshadow" />
 					<Add option="-Winit-self" />
@@ -127,7 +127,6 @@
 				<lib name="SDL_ttf" />
 				<lib name="SDL_gfx" />
 				<lib name="SDL_image" />
-				<lib name="SDL_stretch" />
 				<lib name="SDL_mixer" />
 			</lib_finder>
 			<DoxyBlocks>
