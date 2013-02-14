@@ -15,6 +15,8 @@ const string SKEY_CURRENT_LAYOUT = "current layout";
 const string SKEY_FONT_NAMES = "fonts";
 const string SKEY_FONT_SCALE = "font scale";
 const string SKEY_LAYOUTS = "layouts";
+const string SKEY_SCREENW = "screen width";
+const string SKEY_SCREENH = "screen height";
 
 const real REDRAW_TIMEOUT = 5.0;
 const real MIN_TIMEOUT = 0.1;
@@ -59,6 +61,15 @@ void Reader::LoadSettings()
 
   Settings.GetValue(SKEY_FONT_SCALE, FontScale);
 
+  if (!Width || !Height) {
+    Settings.GetValue(SKEY_SCREENW, Width);
+    Settings.GetValue(SKEY_SCREENH, Height);
+    if (!Width || !Height) {
+      Width = 640;
+      Height = 480;
+    }
+  }
+
   Timeout = MIN_TIMEOUT;
 }
 
@@ -78,6 +89,9 @@ void Reader::SaveSettings()
   // fonts
   Settings.SetValue(SKEY_FONT_NAMES, FontNames);
   Settings.SetValue(SKEY_FONT_SCALE, FontScale);
+  // screen
+  Settings.SetValue(SKEY_SCREENW, Width);
+  Settings.SetValue(SKEY_SCREENH, Height);
 }
 
 bool Reader::InitFonts()

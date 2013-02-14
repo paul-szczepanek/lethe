@@ -14,14 +14,15 @@ public:
 
   inline void SetValue(const string& Key, const string& Value);
   inline void SetValue(const string& Key, cszt& Value);
+  inline void SetValue(const string& Key, const lint& Value);
   inline void SetValue(const string& Key, const real& Value);
   inline void SetValue(const string& Key, const vector<string>& Values);
 
-  inline bool GetValue(const string& Key, vector<string>& Values);
-
   inline bool GetValue(const string& Key, szt& Value);
+  inline bool GetValue(const string& Key, lint& Value);
   inline bool GetValue(const string& Key, real& Value);
   inline bool GetValue(const string& Key, string& Value);
+  inline bool GetValue(const string& Key, vector<string>& Values);
 
 private:
   inline vector<string> GetValues(const string& Key);
@@ -73,6 +74,18 @@ inline bool ValueStore::GetValue(const string& Key,
 inline const string& ValueStore::GetValue(const string& Key)
 {
   return StoredValues[Key];
+}
+
+inline bool ValueStore::GetValue(const string& Key,
+                                 lint& Value)
+{
+  const string& value = StoredValues[Key];
+  if (value.empty()) {
+    return false;
+  } else {
+    Value = IntoInt(value);
+    return true;
+  }
 }
 
 inline bool ValueStore::GetValue(const string& Key,
@@ -139,6 +152,12 @@ inline void ValueStore::SetValue(const string& Key,
 
 inline void ValueStore::SetValue(const string& Key,
                                  cszt& Value)
+{
+  StoredValues[Key] = IntoString(Value);
+}
+
+inline void ValueStore::SetValue(const string& Key,
+                                 const lint& Value)
 {
   StoredValues[Key] = IntoString(Value);
 }

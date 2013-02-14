@@ -7,7 +7,7 @@
 #include "SDL.h"
 #include "SDL_main.h"
 
-// android java bindings
+// android Java bindings
 #include <jni.h>
 
 extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls);
@@ -41,16 +41,16 @@ szt GTraceIndent = 0;
 int main (int Count, char* Switches[])
 {
   bool sound = true;
-  int width = 640;
-  int height = 480;
+  int width = 0;
+  int height = 0;
   for (int i = 1; i < Count; ++i) {
     const string argument(Switches[i]);
     //screen size
     if (i == 1 && !argument.empty() && isdigit(argument[0])) {
       szt xPos = FindCharacter(argument, 'x');
       if (xPos != string::npos) {
-        width = IntoInt(CutString(argument, 0, xPos));
-        height = IntoInt(CutString(argument, xPos + 1));
+        width = Abs(IntoInt(CutString(argument, 0, xPos)));
+        height = Abs(IntoInt(CutString(argument, xPos + 1)));
       }
     }
     if (argument == "-s" || argument == "-silent" || argument == "-no-sound") {
@@ -68,7 +68,7 @@ int main (int Count, char* Switches[])
     }
     return 0;
   } else {
-    LOG("Reader init failed.");
+    LOG("Reader initialisation failed.");
     return 1;
   }
 }

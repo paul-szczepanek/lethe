@@ -1,7 +1,7 @@
 Don't hand edit (or if you do, keep the spacing)
 
 [current layout]
-1
+0
 
 [font scale]
 100
@@ -13,10 +13,16 @@ quote.ttf
 mono.ttf
 
 [layouts0]
-0132 3111 1111 0 +000
-0132 3111 1111 0 +000
+0132 3111 1111 0 +002
+0132 3111 1111 0 +002
 
 [layouts1]
 0132 3111 1111 0 +000
 0132 3111 1111 0 +001
+
+[screen height]
+602
+
+[screen width]
+734
 
