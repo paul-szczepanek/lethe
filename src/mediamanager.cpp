@@ -3,6 +3,7 @@
 #include "image.h"
 #include "sound.h"
 #include "book.h"
+#include "windowbox.h"
 
 MediaManager::~MediaManager()
 {
@@ -111,10 +112,10 @@ void MediaManager::Draw()
   */
 void MediaManager::SetImageWindowSize(Rect Size)
 {
-  Size.W -= BLOCK_SIZE;
-  Size.H -= BLOCK_SIZE;
-  Size.X += BLOCK_SIZE / 2;
-  Size.Y += BLOCK_SIZE / 2;
+  Size.W -= GRID;
+  Size.H -= GRID;
+  Size.X += GRID / 2;
+  Size.Y += GRID / 2;
   if (ImageWindowSize != Size) {
     ImageWindowSize = Size;
     ImageWindow.Init();

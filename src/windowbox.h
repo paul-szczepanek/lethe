@@ -5,6 +5,8 @@
 #include "font.h"
 #include "surface.h"
 
+#define GRID WindowBox::Grid
+
 class WindowBox
 {
 public:
@@ -22,6 +24,8 @@ public:
 
 
 public:
+  static lint Grid;
+
   int BPP;
   Rect Size;
 
@@ -39,9 +43,9 @@ public:
 private:
   string FrameName;
 
-  Rect UpDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
-  Rect DownDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
-  Rect IconDst = { BLOCK_SIZE, BLOCK_SIZE, 0, 0 };
+  Rect UpDst;
+  Rect DownDst;
+  Rect IconDst;
 
   Surface FrameSurface;
   Surface FrameDown;

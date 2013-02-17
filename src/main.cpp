@@ -2,7 +2,7 @@
 #include "reader.h"
 #include "input.h"
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) && ! defined (FAKEANDROID)
 // android only has the SDL reader and we need SDL_main defined
 #include "SDL.h"
 #include "SDL_main.h"
@@ -73,8 +73,8 @@ int main (int Count, char* Switches[])
   }
 }
 
-/* helper functions for debugging
- */
+/** helper functions for debugging
+  */
 const char* string_pair::c_str()
 {
   return (X + Y).c_str();

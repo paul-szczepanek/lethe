@@ -12,6 +12,7 @@ Button::Button(const buttonType aFunction) : Function(aFunction)
     const string& name = surfaceNames[i];
     Surface& newSurface = ButtonSurfaces[i];
     newSurface.LoadImage(BUTTONS_DIR + SLASH + name);
+    newSurface.Resize(GRID + GRID);
     Size.W = newSurface.W;
     Size.H = newSurface.H;
   }

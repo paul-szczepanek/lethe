@@ -57,6 +57,8 @@
 			<Add option="-Wall" />
 			<Add option="`sdl-config --cflags`" />
 			<Add option="-DDEVBUILD" />
+			<Add option="-D__ANDROID__" />
+			<Add option="-DFAKEANDROID" />
 		</Compiler>
 		<Linker>
 			<Add option="`sdl-config --libs`" />

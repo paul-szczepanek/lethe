@@ -1,5 +1,11 @@
 #include "windowbox.h"
 
+#ifdef __ANDROID__
+lint WindowBox::Grid = 16;
+#else
+lint WindowBox::Grid = 32;
+#endif
+
 void WindowBox::Init(const string& Frame,
                      const int Bpp)
 {
@@ -27,20 +33,20 @@ void WindowBox::FixAspectRatio(Rect& NewSize)
   if (AspectW) {
     if (AspectH) {
       lint maxH = NewSize.W * ((real)AspectH / (real)AspectW);
-      if (maxH < AspectH * BLOCK_SIZE) {
-        maxH = AspectH * BLOCK_SIZE;
+      if (maxH < AspectH * GRID) {
+        maxH = AspectH * GRID;
       }
       if (NewSize.H > maxH) {
         NewSize.H = maxH;
       }
     } else {
-      if (NewSize.W < AspectW * BLOCK_SIZE) {
-        NewSize.W = AspectW * BLOCK_SIZE;
+      if (NewSize.W < AspectW * GRID) {
+        NewSize.W = AspectW * GRID;
       }
     }
   } else if (AspectH) {
-    if (NewSize.H < AspectH * BLOCK_SIZE) {
-      NewSize.H = AspectH * BLOCK_SIZE;
+    if (NewSize.H < AspectH * GRID) {
+      NewSize.H = AspectH * GRID;
     }
   }
 }
@@ -51,7 +57,16 @@ void WindowBox::SetSize(Rect NewSize)
 {
   FixAspectRatio(NewSize);
 
-  NewSize.Blockify();
+  // align size to block size
+  NewSize.W = max(NewSize.W, 2*GRID);
+  NewSize.H = max(NewSize.H, 2*GRID);
+  const lint newW = NewSize.W - (NewSize.W % GRID);
+  const lint newH = NewSize.H - (NewSize.H % GRID);
+  NewSize.X += (NewSize.W - newW) / 2;
+  NewSize.Y += (NewSize.H - newH) / 2;
+  NewSize.W = newW;
+  NewSize.H = newH;
+
   if (Size != NewSize) {
     Size = NewSize;
     BuildFrame();
@@ -74,8 +89,8 @@ bool WindowBox::BuildFrame()
     LOG(FrameName+" - frame image missing");
     FrameVisible = false;
     return false;
-  } else if (spritePage.W != BLOCK_SIZE * 4) {
-    const real scale = (real)BLOCK_SIZE * (real)4 / (real)spritePage.W;
+  } else if (spritePage.W != GRID * 4) {
+    const real scale = (real)GRID * (real)4 / (real)spritePage.W;
     spritePage.Zoom(scale, scale);
     LOG("frame image size incorrect, scaling to fit");
   }
@@ -86,12 +101,12 @@ bool WindowBox::BuildFrame()
   // 08E 09D 10U 11E   edge    down   up   edge
   // 12C 13M 14E 15C   corner middle edge corner
 
-  Rect src(BLOCK_SIZE, BLOCK_SIZE);
-  Rect dst(BLOCK_SIZE, BLOCK_SIZE);
+  Rect src(GRID, GRID);
+  Rect dst(GRID, GRID);
 
   // create the base frame
-  for (szt i = 0, colS = Size.W / BLOCK_SIZE; i < colS; ++i) {
-    for (szt j = 0, rowS = Size.H / BLOCK_SIZE; j < rowS; ++j) {
+  for (szt i = 0, colS = Size.W / GRID; i < colS; ++i) {
+    for (szt j = 0, rowS = Size.H / GRID; j < rowS; ++j) {
       szt index;
       if (j == 0) {
         if (i == 0) {
@@ -130,39 +145,42 @@ bool WindowBox::BuildFrame()
           index = 15;
         }
       }
-      src.X = BLOCK_SIZE * (index % 4);
-      src.Y = BLOCK_SIZE * (index / 4);
-      dst.X = BLOCK_SIZE * i;
-      dst.Y = BLOCK_SIZE * j;
+      src.X = GRID * (index % 4);
+      src.Y = GRID * (index / 4);
+      dst.X = GRID * i;
+      dst.Y = GRID * j;
       spritePage.SetClip(src);
       spritePage.Draw(FrameSurface, dst);
     }
   }
 
   // create icons
-  FrameUp.Init(BLOCK_SIZE, BLOCK_SIZE);
-  FrameIcon.Init(BLOCK_SIZE, BLOCK_SIZE);
-  FrameDown.Init(BLOCK_SIZE, BLOCK_SIZE);
-  src.X = BLOCK_SIZE * 2;
-  src.Y = BLOCK_SIZE * 2;
+  FrameUp.Init(GRID, GRID);
+  FrameIcon.Init(GRID, GRID);
+  FrameDown.Init(GRID, GRID);
+  src.X = GRID * 2;
+  src.Y = GRID * 2;
   spritePage.SetClip(src);
   spritePage.Draw(FrameUp);
-  src.X = BLOCK_SIZE * 2;
-  src.Y = BLOCK_SIZE * 1;
+  src.X = GRID * 2;
+  src.Y = GRID * 1;
   spritePage.SetClip(src);
   spritePage.Draw(FrameIcon);
-  src.X = BLOCK_SIZE * 1;
-  src.Y = BLOCK_SIZE * 2;
+  src.X = GRID * 1;
+  src.Y = GRID * 2;
   spritePage.SetClip(src);
   spritePage.Draw(FrameDown);
 
   // set up icon locations
-  UpDst.X = Size.X + Size.W - 2 * BLOCK_SIZE;
+  UpDst.W = UpDst.H = GRID;
+  UpDst.X = Size.X + Size.W - 2 * GRID;
   UpDst.Y = Size.Y;
+  DownDst.W = DownDst.H = GRID;
   DownDst.X = UpDst.X;
-  DownDst.Y = Size.Y + Size.H - BLOCK_SIZE;
-  IconDst.X = Size.X + Size.W - BLOCK_SIZE;
-  IconDst.Y = Size.Y + BLOCK_SIZE;
+  DownDst.Y = Size.Y + Size.H - GRID;
+  IconDst.W = IconDst.H = GRID;
+  IconDst.X = Size.X + Size.W - GRID;
+  IconDst.Y = Size.Y + GRID;
 
   return true;
 }

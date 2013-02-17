@@ -29,8 +29,8 @@ void TextBox::Init(Font& TextBoxFont,
 Rect TextBox::GetTextSize()
 {
   Rect fitSize = Size;
-  const lint newW = PageWidth + Size.W - PageSize.W + BLOCK_SIZE;
-  const lint newH = PageHeight + Size.H - PageSize.H + BLOCK_SIZE;
+  const lint newW = PageWidth + Size.W - PageSize.W + GRID;
+  const lint newH = PageHeight + Size.H - PageSize.H + GRID;
   // resize if at least one dimension shrunk (but not if the other grew)
   if (newW < Size.W) {
     fitSize.W = newW;
@@ -84,10 +84,10 @@ void TextBox::AddText(const string& NewText)
   */
 void TextBox::Reset()
 {
-  PageSize.X = Size.X + BLOCK_SIZE / 2;
-  PageSize.Y = Size.Y + BLOCK_SIZE / 2;
-  PageSize.W = Size.W - BLOCK_SIZE;
-  PageSize.H = Size.H - BLOCK_SIZE;
+  PageSize.X = Size.X + GRID / 2;
+  PageSize.Y = Size.Y + GRID / 2;
+  PageSize.W = Size.W - GRID;
+  PageSize.H = Size.H - GRID;
   ResetText();
 }
 

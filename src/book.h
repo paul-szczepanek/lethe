@@ -68,6 +68,7 @@ public:
   const string GetStoryVerbs(const string& Noun);
   const string GetMenuVerbs(const string& Noun);
   bool GetChoice(string_pair& Choice) const;
+  Properties& GetMenuValues(const string& Noun);
 
   inline void DrawImage();
   inline void ShowImage(const Rect& Size);

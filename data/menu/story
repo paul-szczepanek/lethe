@@ -29,12 +29,9 @@
   "some text"
 
  [:options]
-  "**Options**
-  font size
-  \nfont colour
-  \nUI size
-  \ntext only mode
-  \n
+  "**Options**"
+  "<Font Size[FONT SIZE]>"
+  "\n
   \n<Back to Main Menu[main:menu]>"
 
  [:books]
@@ -94,6 +91,28 @@
   !SelectValue(session:open)
   "\n\n<Back to Main Menu[main:menu]>"
 
+//**********************************
+
+[FONT SIZE = #100]
+ [:reset]
+  !=#100
+  !main:options
+ [:smaller]
+  !-=#10
+  !main:options
+ [:bigger]
+  !+=#10
+  !main:options
+
+//**********************************
+
+[FONT COLOUR = white]
+ [:white]
+  !=white
+  !main:options
+ [:green]
+  !=green
+  !main:options
 
 //**********************************
 

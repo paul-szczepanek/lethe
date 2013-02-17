@@ -324,24 +324,27 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
               if (isText || right.empty()) {
                 userValues.SetValues(rightValues);
               }
-              if (isNum) {
+              if (isNum && userValues.IntValue != rightValues.IntValue) {
                 userValues.IntValue = rightValues.IntValue;
+                userValues.Dirty = true;
               }
               break;
             case token::add:
               if (isText) {
                 userValues.AddValues(rightValues);
               }
-              if (isNum) {
+              if (isNum && rightValues.IntValue) {
                 userValues.IntValue += rightValues.IntValue;
+                userValues.Dirty = true;
               }
               break;
             case token::remove:
               if (isText) {
                 userValues.RemoveValues(rightValues);
               }
-              if (isNum) {
+              if (isNum && rightValues.IntValue) {
                 userValues.IntValue -= rightValues.IntValue;
+                userValues.Dirty = true;
               }
               break;
             default:

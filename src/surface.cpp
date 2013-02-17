@@ -73,7 +73,7 @@ bool Surface::InitScreen(lint& ScreenWidth,
   Unload();
 
   Uint32 flags = SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE;
-#ifdef __ANDROID__
+#if defined(__ANDROID__) && ! defined (FAKEANDROID)
   const SDL_VideoInfo* info = SDL_GetVideoInfo();
   ScreenHeight = info->current_h;
   ScreenWidth = info->current_w;
@@ -144,6 +144,18 @@ bool Surface::SetAlpha(const usint Alpha)
     return true;
   }
   return false;
+}
+
+/** @brief Enlarge or shrink the image
+  */
+bool Surface::Resize(lint NewW,
+                     lint NewH)
+{
+  if (NewH) {
+    return Zoom((real)NewW / (real)W, (real)NewH / (real)H);
+  } else {
+    return Zoom((real)NewW / (real)W, (real)NewW / (real)W);
+  }
 }
 
 /** @brief Enlarge or shrink the image

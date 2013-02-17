@@ -13,6 +13,9 @@ const string EXITS = "EXITS";
 const string CALLS = "CALLS";
 const string QUICK = "QUICK";
 
+//extra nouns reserved only for the menu
+const string FONT_SIZE = "FONT SIZE";
+
 const string CONTENTS = "@";
 const string QUEUE_CONTENTS = CONTENTS + QUEUE;
 const string NOUNS_CONTENTS = CONTENTS + NOUNS;

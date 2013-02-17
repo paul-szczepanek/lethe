@@ -38,6 +38,7 @@ bool Input::Tick(MouseState& Mouse,
   while (SDL_PollEvent(&event)) {
     switch (event.type) {
       case SDL_QUIT:
+        Keys.KeyPressed = changed = true;
         Keys.Quit = true;
         break;
 

@@ -46,7 +46,7 @@ extern szt GTraceIndent;
 #define LOG(t);
 #endif
 
-#ifdef __ANDROID__
+#if defined(__ANDROID__) && ! defined (FAKEANDROID)
 const string DATA_DIR = "/sdcard/lethe/data";
 #else
 const string DATA_DIR = "data";
@@ -62,15 +62,8 @@ const string SESSION_EXT = ".session";
 const string STORY_EXT = ".story";
 const string STORY_FILE = "story";
 const string SESSION_MAP = "session";
-const string QUICK_BOOKMARK = "Quick bookmark";
 const string SETTINGS_FILE = DATA_DIR + SLASH + "settings";
 const char BACKSPACE_CHAR = (char)8;
-
-#ifdef __ANDROID__
-const lint BLOCK_SIZE = 16;
-#else
-const lint BLOCK_SIZE = 32;
-#endif
 
 struct Colour {
   Colour() { };
@@ -133,17 +126,6 @@ struct Rect {
   };
   bool operator== (const Rect& other) const {
     return W == other.W && H == other.H && X == other.X && Y == other.Y;
-  };
-  // align size to block size
-  void Blockify() {
-    W = max(W, 2*(lint)BLOCK_SIZE);
-    H = max(H, 2*(lint)BLOCK_SIZE);
-    lint newW = W - (W % BLOCK_SIZE);
-    lint newH = H - (H % BLOCK_SIZE);
-    X += (W - newW) / 2;
-    Y += (H - newH) / 2;
-    W = newW;
-    H = newH;
   };
   lint W;
   lint H;

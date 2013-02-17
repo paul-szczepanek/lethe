@@ -79,7 +79,8 @@ private:
   Font FontSys;
   vector<Font> Fonts;
   vector<string> FontNames;
-  szt FontScale = 100;
+  szt FontSize = 100;
+  Properties* FontSizeSetting = NULL;
 
   // logic
   Book MyBook;

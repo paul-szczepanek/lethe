@@ -23,6 +23,7 @@ public:
   bool Init(const lint Width, const lint Height);
   bool LoadImage(const string& NewFilename = "");
   bool Zoom(const real X, const real Y);
+  bool Resize(const lint NewW, const lint NewH = 0);
   bool SetAlpha(const usint Alpha);
   bool Draw(Surface& Destination, const Rect& Position);
   bool Draw(Surface& Destination);

@@ -311,6 +311,12 @@ const string Book::GetMenuVerbs(const string& Noun)
   StoryQuery query(*this, MenuStory, GameSession, text);
   return query.GetVerbs(Noun).PrintKeywordList("\n");
 }
+Properties& Book::GetMenuValues(const string& Noun)
+{
+  string text; // discarded
+  StoryQuery query(*this, MenuStory, GameSession, text);
+  return query.GetUserValues(Noun);
+}
 
 /** @brief If the first element of the pair is a complete action
   * rearrange to fill the proper fields

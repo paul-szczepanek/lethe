@@ -17,6 +17,9 @@ const string SKEY_FONT_SCALE = "font scale";
 const string SKEY_LAYOUTS = "layouts";
 const string SKEY_SCREENW = "screen width";
 const string SKEY_SCREENH = "screen height";
+const string SKEY_GRID = "grid size";
+
+const string QUICK_BOOKMARK = "Quick bookmark";
 
 const real REDRAW_TIMEOUT = 5.0;
 const real MIN_TIMEOUT = 0.1;
@@ -59,7 +62,7 @@ void Reader::LoadSettings()
   // replaced defaults with saved ones if present
   Settings.GetValue(SKEY_FONT_NAMES, FontNames);
 
-  Settings.GetValue(SKEY_FONT_SCALE, FontScale);
+  Settings.GetValue(SKEY_FONT_SCALE, FontSize);
 
   if (!Width || !Height) {
     Settings.GetValue(SKEY_SCREENW, Width);
@@ -69,6 +72,7 @@ void Reader::LoadSettings()
       Height = 480;
     }
   }
+  Settings.GetValue(SKEY_GRID, GRID);
 
   Timeout = MIN_TIMEOUT;
 }
@@ -88,21 +92,32 @@ void Reader::SaveSettings()
 
   // fonts
   Settings.SetValue(SKEY_FONT_NAMES, FontNames);
-  Settings.SetValue(SKEY_FONT_SCALE, FontScale);
+  Settings.SetValue(SKEY_FONT_SCALE, FontSize);
   // screen
   Settings.SetValue(SKEY_SCREENW, Width);
   Settings.SetValue(SKEY_SCREENH, Height);
+  Settings.SetValue(SKEY_GRID, GRID);
 }
 
 bool Reader::InitFonts()
 {
   szt fonstSizes[TEXT_STYLE_MAX] = { 22, 46, 16, 16 };
   Fonts.resize(TEXT_STYLE_MAX);
+
 #ifdef __ANDROID__
-  const real scale = (real)FontScale / 200.f;
+  const lint smallScreen = min(Screen.W, Screen.H);
+  // we need some fallback if we're running on a low resolution screen
+  real androidFactor = 1;
+  // scale the fontScale for android screens that are tiny
+  if (smallScreen < 400) {
+    GRID = 16;
+    androidFactor = (real)400 / (real)smallScreen;
+  }
+  const real scale = (real)FontSize / (100.f * androidFactor);
 #else
-  const real scale = (real)FontScale / 100.f;
+  const real scale = (real)FontSize / 100.f;
 #endif
+
   for (szt i = 0; i < TEXT_STYLE_MAX; ++i) {
     if (Fonts[i].Init(FontNames[i], fonstSizes[i] * scale)) {
       Fonts[i].Style = textStyle(i);
@@ -119,8 +134,8 @@ bool Reader::InitFonts()
 void Reader::InitWindows()
 {
   // Windows not part of the dynamic layout use the screen size
-  const Rect mainWindowSize(Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
-                            BLOCK_SIZE, BLOCK_SIZE);
+  const Rect mainWindowSize(Width - 2 * GRID, Height - 2 * GRID,
+                            GRID, GRID);
 
   // popups
   VerbMenu.Init(Fonts, FRAME_SOLID, BPP);
@@ -170,9 +185,9 @@ bool Reader::Init()
 {
   // initialise all the critical systems and assets
   if (!Surface::SystemInit()
+      || !Screen.InitScreen(Width, Height, BPP)
       || !Font::SystemInit()
       || !Audio::SystemInit(Silent)
-      || !Screen.InitScreen(Width, Height, BPP)
       || !InitFonts()) {
     return false;
   }
@@ -183,6 +198,10 @@ bool Reader::Init()
   InitWindows();
   SetLayout();
   MyBook.ShowMenu();
+
+  FontSizeSetting = &MyBook.GetMenuValues(FONT_SIZE);
+  FontSizeSetting->IntValue = FontSize;
+
   return true;
 }
 
@@ -247,7 +266,14 @@ bool Reader::ProcessDialogs()
       }
       GameDialog.SetText(text);
       // centre it on the screen
-      GameDialog.Size.H = GameDialog.PageHeight + 2 * BLOCK_SIZE;
+#ifdef __ANDROID__
+      GameDialog.Size.W = Width;
+      GameDialog.Size.X = 0;
+#else
+      GameDialog.Size.W = Width - 2 * GRID;
+      GameDialog.Size.X = GRID;
+#endif
+      GameDialog.Size.H = GameDialog.PageHeight + 2 * GRID;
       GameDialog.Size.Y = (Height - GameDialog.Size.H) / 2;
       GameDialog.SetSize(GameDialog.Size);
     }
@@ -299,8 +325,23 @@ bool Reader::ReadMenu()
 
 void Reader::RefreshMenu()
 {
-  Rect maxSize(Width - 2 * BLOCK_SIZE, Height - 2 * BLOCK_SIZE,
-               BLOCK_SIZE, BLOCK_SIZE);
+#ifdef __ANDROID__
+  Rect maxSize(Width, Height, 0, 0);
+#else
+  Rect maxSize(Width - 2 * GRID, Height, GRID, 0);
+#endif
+  // check if we need to resize fonts
+  if (FontSizeSetting->Dirty) {
+    FontSizeSetting->Dirty = false;
+    // enforce minimum
+    if (FontSizeSetting->IntValue <= 0) {
+      FontSizeSetting->IntValue = 10;
+    }
+    if (FontSize != (szt)FontSizeSetting->IntValue) {
+      FontSize = FontSizeSetting->IntValue;
+      InitFonts();
+    }
+  }
   MainMenu.SetSize(maxSize);
   MainMenu.SetText(MenuSource);
   Rect fitSize = MainMenu.GetTextSize();
@@ -655,7 +696,7 @@ szt Reader::SetLayout(szt LayoutIndex)
 
     if (pos == top || pos == bottom) {
       // horizontal fill
-      if (Width >= boxSize.X + BLOCK_SIZE * 2) {
+      if (Width >= boxSize.X + GRID * 2) {
         boxSize.W = Width - boxSize.X;
       } else {
         return FixLayout();
@@ -665,20 +706,20 @@ szt Reader::SetLayout(szt LayoutIndex)
         // this element determines the size of the split
         szt halfH = Height / 2;
         // make sure the requested split is viable
-        if ((szt)Abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfH) {
+        if ((szt)Abs(layout.Split) * GRID + GRID * 2 >= halfH) {
           return FixLayout();
         }
-        boxSize.H = halfH - (halfH % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
+        boxSize.H = halfH - (halfH % GRID) + layout.Split * GRID;
       } else {
         // find how much vertical space is left
         if (first) {
-          if (Height > splitV + BLOCK_SIZE * 2) {
+          if (Height > splitV + GRID * 2) {
             boxSize.H = Height - splitV;
           } else {
             return FixLayout();
           }
         } else {
-          if (splitV > boxSize.Y + BLOCK_SIZE * 2) {
+          if (splitV > boxSize.Y + GRID * 2) {
             boxSize.H = splitV - boxSize.Y;
           } else {
             return FixLayout();
@@ -687,7 +728,7 @@ szt Reader::SetLayout(szt LayoutIndex)
       }
     } else {
       // vertical fill
-      if (Height >= boxSize.Y + BLOCK_SIZE * 2) {
+      if (Height >= boxSize.Y + GRID * 2) {
         boxSize.H = Height - boxSize.Y;
       } else {
         return FixLayout();
@@ -697,20 +738,20 @@ szt Reader::SetLayout(szt LayoutIndex)
         // this element determines the size of the split
         szt halfW = Width / 2;
         // make sure the requested split is viable
-        if ((szt)Abs(layout.Split) * BLOCK_SIZE + BLOCK_SIZE * 2 >= halfW) {
+        if ((szt)Abs(layout.Split) * GRID + GRID * 2 >= halfW) {
           return FixLayout();
         }
-        boxSize.W = halfW - (halfW % BLOCK_SIZE) + layout.Split * BLOCK_SIZE;
+        boxSize.W = halfW - (halfW % GRID) + layout.Split * GRID;
       } else {
         // find how much horizontal space is left
         if (first) {
-          if (Width > splitH + BLOCK_SIZE * 2) {
+          if (Width > splitH + GRID * 2) {
             boxSize.W = Width - splitH;
           } else {
             return FixLayout();
           }
         } else {
-          if (splitH > boxSize.X + BLOCK_SIZE * 2) {
+          if (splitH > boxSize.X + GRID * 2) {
             boxSize.W = splitH - boxSize.X;
           } else {
             return FixLayout();
