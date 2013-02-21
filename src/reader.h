@@ -13,7 +13,7 @@
 #include "input.h"
 #include "valuestore.h"
 
-cszt NUM_LAYOUTS = 2;
+cszt NUM_LAYOUTS = 3;
 
 class Book;
 
@@ -55,6 +55,8 @@ private:
 
   void LoadSettings();
   void SaveSettings();
+
+  real GetGridPercentage();
 
 
 public:

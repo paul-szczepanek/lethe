@@ -27,6 +27,7 @@ public:
 
   bool Init(const string& Text);
   const string GetDefinition() const;
+  void ChangeSplit(real Change);
 
 
 public:
@@ -34,7 +35,7 @@ public:
   side Side[BOX_TYPE_MAX] = { left, right, right, right };
   bool Active[BOX_TYPE_MAX] = { true, true, true, true };
   szt SizeSpan = 0;
-  int Split = 0;
+  real Split = 0;
 };
 
 #endif // LAYOUT_H

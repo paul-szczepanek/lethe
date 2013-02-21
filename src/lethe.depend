@@ -353,7 +353,7 @@
 	"SDL_main.h"
 	<jni.h>
 
-1361136180 /home/paul/lethe/lethe/src/reader.h
+1361480175 /home/paul/lethe/lethe/src/reader.h
 	"main.h"
 	"book.h"
 	"textbox.h"
@@ -383,7 +383,7 @@
 	"properties.h"
 	"tokens.h"
 
-1361136947 source:/home/paul/lethe/lethe/src/reader.cpp
+1361480584 source:/home/paul/lethe/lethe/src/reader.cpp
 	"reader.h"
 	"audio.h"
 	"input.h"
@@ -413,7 +413,7 @@
 	"main.h"
 	"properties.h"
 
-1360765156 source:/home/paul/lethe/lethe/src/storyquery.cpp
+1361138772 source:/home/paul/lethe/lethe/src/storyquery.cpp
 	"storyquery.h"
 	"tokens.h"
 	"story.h"
@@ -421,7 +421,7 @@
 	"book.h"
 	"page.h"
 
-1360764942 /home/paul/lethe/lethe/src/layout.h
+1361480222 /home/paul/lethe/lethe/src/layout.h
 	"main.h"
 
 1361051512 /home/paul/lethe/lethe/src/windowbox.h
@@ -437,8 +437,9 @@
 	"windowbox.h"
 	"surface.h"
 
-1360764941 source:/home/paul/lethe/lethe/src/layout.cpp
+1361481206 source:/home/paul/lethe/lethe/src/layout.cpp
 	"layout.h"
+	"reader.h"
 
 1361051591 source:/home/paul/lethe/lethe/src/windowbox.cpp
 	"windowbox.h"

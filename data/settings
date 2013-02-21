@@ -12,17 +12,22 @@ title.ttf
 quote.ttf
 mono.ttf
 
-[layouts0]
-0132 3111 1111 0 +002
-0132 3111 1111 0 +002
+[grid size]
+16
 
-[layouts1]
-0132 3111 1111 0 +000
-0132 3111 1111 0 +001
+[layouts horizontal]
+0132 3111 1111 0 40
+1032 3311 1111 0 60
+0132 3111 1011 0 60
+
+[layouts vertical]
+1032 3311 1111 0 70
+1032 0311 1111 1 60
+0132 3111 1011 0 70
 
 [screen height]
-602
+950
 
 [screen width]
-734
+717
 

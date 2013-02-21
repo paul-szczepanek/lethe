@@ -14,7 +14,8 @@ const string FRAME_IMAGE = "image";
 const string SKEY_CURRENT_LAYOUT = "current layout";
 const string SKEY_FONT_NAMES = "fonts";
 const string SKEY_FONT_SCALE = "font scale";
-const string SKEY_LAYOUTS = "layouts";
+const string SKEY_LAYOUTSH = "layouts horizontal";
+const string SKEY_LAYOUTSV = "layouts vertical";
 const string SKEY_SCREENW = "screen width";
 const string SKEY_SCREENH = "screen height";
 const string SKEY_GRID = "grid size";
@@ -41,19 +42,24 @@ Reader::~Reader()
 
 void Reader::LoadSettings()
 {
-  // load reader layouts
-  for (szt i = 0; i < ORIENTATION_MAX; ++i) {
-    // default layouts
-    vector<string> layoutStrings;
-    layoutStrings.resize(NUM_LAYOUTS, "0132 3111 1111 0 +000");
-    // overwrite with stored ones
-    const string& key = SKEY_LAYOUTS + IntoString(i);
-    Settings.GetValue(key, layoutStrings);
-    // initialise the layouts with default or stored layouts strings
-    for (szt j = 0; j < NUM_LAYOUTS; ++j) {
-      Layouts[i][j].Init(layoutStrings[j]);
-    }
+  // default layouts
+  vector<string> layoutStringsH = { "0132 3111 1111 0 40",
+                                    "1032 3311 1111 0 60",
+                                    "0132 3111 1011 0 60"
+                                  };
+  vector<string> layoutStringsV = { "1032 3311 1111 0 70",
+                                    "1032 0311 1111 1 60",
+                                    "0132 3111 1011 0 70"
+                                  };
+  // overwrite with stored ones
+  Settings.GetValue(SKEY_LAYOUTSH, layoutStringsH);
+  Settings.GetValue(SKEY_LAYOUTSV, layoutStringsV);
+  // initialise the layouts with default or stored layouts strings
+  for (szt i = 0; i < NUM_LAYOUTS; ++i) {
+    Layouts[landscape][i].Init(layoutStringsH[i]);
+    Layouts[portrait][i].Init(layoutStringsV[i]);
   }
+
   Settings.GetValue(SKEY_CURRENT_LAYOUT, CurrentLayout);
 
   // font defaults
@@ -80,16 +86,18 @@ void Reader::LoadSettings()
 void Reader::SaveSettings()
 {
   // save reader layouts
-  for (szt i = 0; i < ORIENTATION_MAX; ++i) {
-    vector<string> layoutStrings;
-    for (szt j = 0; j < NUM_LAYOUTS; ++j) {
-      layoutStrings.push_back(Layouts[i][j].GetDefinition());
-    }
-    const string& key = SKEY_LAYOUTS + IntoString(i);
-    Settings.SetValue(key, layoutStrings);
+  vector<string> layoutStringsH;
+  for (szt j = 0; j < NUM_LAYOUTS; ++j) {
+    layoutStringsH.push_back(Layouts[landscape][j].GetDefinition());
   }
+  Settings.SetValue(SKEY_LAYOUTSH, layoutStringsH);
+  vector<string> layoutStringsV;
+  for (szt j = 0; j < NUM_LAYOUTS; ++j) {
+    layoutStringsV.push_back(Layouts[portrait][j].GetDefinition());
+  }
+  Settings.SetValue(SKEY_LAYOUTSV, layoutStringsV);
+  // current layout
   Settings.SetValue(SKEY_CURRENT_LAYOUT, IntoString(CurrentLayout));
-
   // fonts
   Settings.SetValue(SKEY_FONT_NAMES, FontNames);
   Settings.SetValue(SKEY_FONT_SCALE, FontSize);
@@ -463,10 +471,10 @@ bool Reader::ProcessInput(real DeltaTime)
     if (Keys.InputMode) {
       GameDialog.AddCharacter(Keys.Letter);
     } else if (Keys.SplitShrink) {
-      --(GetCurrentLayout().Split);
+      GetCurrentLayout().ChangeSplit(-GetGridPercentage());
       SetLayout();
     } else if (Keys.SplitGrow) {
-      ++(GetCurrentLayout().Split);
+      GetCurrentLayout().ChangeSplit(GetGridPercentage());
       SetLayout();
     } else if (Keys.LayoutToggle) {
       SetLayout((CurrentLayout + 1) % NUM_LAYOUTS);
@@ -626,11 +634,11 @@ szt Reader::FixLayout()
 {
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   // can't fit, abort and try a smaller split
-  if (layout.Split < 0) {
-    ++layout.Split;
+  if (layout.Split - GetGridPercentage() < 50) {
+    layout.ChangeSplit(GetGridPercentage());
     return SetLayout();
-  } else if (layout.Split > 0) {
-    --layout.Split;
+  } else if (layout.Split + GetGridPercentage() > 50) {
+    layout.ChangeSplit(-GetGridPercentage());
     return SetLayout();
   } else {
     LOG("layout impossible on this screen");
@@ -671,15 +679,25 @@ szt Reader::SetLayout(szt LayoutIndex)
 
   lint splitH = 0, splitV = 0;
   Rect boxSize; // we retain certain position data in the loop between boxes
+  side lastSide = SIDE_MAX;
+  lint layoutW = Width;
+  lint layoutH = Height;
   for (szt i = 0; i < BOX_TYPE_MAX; ++i) {
     // check if neighbours are on the same side
     const side pos = layout.Side[i];
-    bool first = (i == 0) || (pos != layout.Side[i-1]);
+    bool first = (pos != lastSide);
 
-    boxes[i]->Visible = layout.Active[i];
+    if (layout.Active[i]) {
+      boxes[i]->Visible = true;
+      lastSide = pos;
+    } else {
+      // skip invisible boxes
+      boxes[i]->Visible = false;
+      continue;
+    }
 
     if (pos == left || (first && (pos == top || pos == bottom))) {
-      boxSize.X = 0;
+      boxSize.X = Width - layoutW;
     } else if (!first && (pos == right)) {
       // retain the last X position
     } else {
@@ -687,7 +705,7 @@ szt Reader::SetLayout(szt LayoutIndex)
     }
 
     if (pos == top || (first && (pos == left || pos == right))) {
-      boxSize.Y = 0;
+      boxSize.Y = Height - layoutH;
     } else if (!first && (pos == bottom)) {
       // retain the last Y position
     } else {
@@ -704,12 +722,13 @@ szt Reader::SetLayout(szt LayoutIndex)
 
       if (layout.SizeSpan == i && pos == top && first) {
         // this element determines the size of the split
-        szt halfH = Height / 2;
+        lint splitSize = Height * layout.Split;
+        splitSize = splitSize - (splitSize % GRID);
         // make sure the requested split is viable
-        if ((szt)Abs(layout.Split) * GRID + GRID * 2 >= halfH) {
+        if (splitSize < GRID * 2 || Height - splitSize < GRID * 2 ) {
           return FixLayout();
         }
-        boxSize.H = halfH - (halfH % GRID) + layout.Split * GRID;
+        boxSize.H = splitSize;
       } else {
         // find how much vertical space is left
         if (first) {
@@ -736,12 +755,13 @@ szt Reader::SetLayout(szt LayoutIndex)
 
       if (layout.SizeSpan == i && pos == left && first) {
         // this element determines the size of the split
-        szt halfW = Width / 2;
+        lint splitSize = Width * layout.Split;
+        splitSize = splitSize - (splitSize % GRID);
         // make sure the requested split is viable
-        if ((szt)Abs(layout.Split) * GRID + GRID * 2 >= halfW) {
+        if (splitSize < GRID * 2 || Width - splitSize < GRID * 2 ) {
           return FixLayout();
         }
-        boxSize.W = halfW - (halfW % GRID) + layout.Split * GRID;
+        boxSize.W = splitSize;
       } else {
         // find how much horizontal space is left
         if (first) {
@@ -769,6 +789,10 @@ szt Reader::SetLayout(szt LayoutIndex)
     boxSize = boxes[i]->Size;
     splitH = boxSize.X + boxSize.W;
     splitV = boxSize.Y + boxSize.H;
+
+    if (pos == top) {
+      layoutH -= boxes[i]->Size.H + GRID / 2;
+    }
   }
 
   if (MainImage.Visible) {
@@ -782,6 +806,11 @@ szt Reader::SetLayout(szt LayoutIndex)
 #endif
 
   return CurrentLayout;
+}
+
+real Reader::GetGridPercentage()
+{
+  return (real)GRID / (real)Width;
 }
 
 Layout& Reader::GetCurrentLayout()
