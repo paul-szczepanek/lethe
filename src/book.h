@@ -70,11 +70,10 @@ public:
   bool GetChoice(string_pair& Choice) const;
   Properties& GetMenuValues(const string& Noun);
 
-  inline void DrawImage();
-  inline void ShowImage(const Rect& Size);
-  inline void HideImage();
   inline bool GetAssetState(const string& AssetName);
   inline void SetAssetState(const string& AssetName, const bool Playing);
+
+  inline MediaManager* GetMediaManagerPointer() { return &Media; };
 
 #ifdef DEVBUILD
   const string ShowVariables();
@@ -130,20 +129,7 @@ void Book::SetAssetState(const string& AssetName, const bool Playing)
   }
 }
 
-void Book::DrawImage()
-{
-  Media.Draw();
-}
 
-void Book::ShowImage(const Rect& Size)
-{
-  Media.SetImageWindowSize(Size);
-  Media.Visible = true;
-}
 
-void Book::HideImage()
-{
-  Media.Visible = false;
-}
 
 #endif // BOOK_H

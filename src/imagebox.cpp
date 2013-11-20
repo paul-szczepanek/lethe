@@ -1,12 +1,30 @@
 #include "imagebox.h"
+#include "mediamanager.h"
 
 /** @brief Draw page onto passed in surface
   */
 void ImageBox::Draw()
 {
   if (Visible) {
+    if (ImageManager) {
+      ImageManager->Visible = true;
+      ImageSurface.Blank();
+      ImageManager->Draw(ImageSurface);
+      ImageSurface.Draw(Size);
+    }
     DrawFrame();
-    ImageSurface.Draw(Dst);
+  } else {
+    if (ImageManager) {
+      ImageManager->Visible = false;
+    }
+  }
+}
+
+void ImageBox::Reset()
+{
+  ImageSurface.Init(Size);
+  if (ImageManager) {
+    ImageManager->SetImageWindowSize(Size);
   }
 }
 

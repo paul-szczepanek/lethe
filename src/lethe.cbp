@@ -55,14 +55,24 @@
 			<Add option="-std=c++11" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
+			<Add option="-pg" />
 			<Add option="`sdl-config --cflags`" />
 			<Add option="-DDEVBUILD" />
-			<Add option="-D__ANDROID__" />
-			<Add option="-DFAKEANDROID" />
+			<Add directory="/usr/include/SDL" />
+			<Add directory="/usr/include/SDL_stretch" />
 		</Compiler>
 		<Linker>
-			<Add option="`sdl-config --libs`" />
+			<Add option="-pg" />
+			<Add option="`sdl-config --static-libs`" />
+			<Add library="SDL_mixer" />
+			<Add library="SDL_image" />
+			<Add library="SDL_ttf" />
+			<Add library="SDL_stretch" />
+			<Add library="SDL_gfx" />
 		</Linker>
+		<Unit filename="../data/books/missing/story" />
+		<Unit filename="../data/books/tutorial/story" />
+		<Unit filename="../data/menu/story" />
 		<Unit filename="asset.cpp" />
 		<Unit filename="asset.h" />
 		<Unit filename="audio.cpp" />
@@ -121,6 +131,7 @@
 			<code_completion>
 				<search_path add="src" />
 				<search_path add="/usr/include/c++/4.7/" />
+				<search_path add="/usr/include/SDL" />
 			</code_completion>
 			<envvars />
 			<debugger />
@@ -130,6 +141,7 @@
 				<lib name="SDL_gfx" />
 				<lib name="SDL_image" />
 				<lib name="SDL_mixer" />
+				<lib name="SDL_stretch" />
 			</lib_finder>
 			<DoxyBlocks>
 				<comment_style block="0" line="0" />
@@ -140,6 +152,9 @@
 				<doxyfile_dot />
 				<general />
 			</DoxyBlocks>
+			<wxsmith version="1">
+				<gui name="wxWidgets" src="" main="" init_handlers="necessary" language="CPP" />
+			</wxsmith>
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

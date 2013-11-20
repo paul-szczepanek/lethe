@@ -124,6 +124,13 @@ bool Surface::Init()
   return Init(Screen->w, Screen->h);
 }
 
+/** @brief create an empty surface of the same size as the screen
+  */
+bool Surface::Init(const Rect& InitSize)
+{
+  return Init(InitSize.W, InitSize.H);
+}
+
 /** @brief create an empty surface of given size
   */
 bool Surface::Init(const lint Width,

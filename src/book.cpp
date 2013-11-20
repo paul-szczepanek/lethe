@@ -196,17 +196,21 @@ bool Book::OpenStory(const string& Path,
         continue;
       }
       // look for a keyword definition or asset definition
-      // but make sure it's not a [:verb] definition
-      if (buffer.size() > 1
+      if (buffer.size() > 2
           && buffer[0] == token::Start[token::noun]
           && buffer[1] != token::Start[token::scope]) {
-        // if it's the second keyword we hit on this run
-        if (!storyText.empty()) {
-          // parse the text and start a new run
-          MyStory.ParseKeywordDefinition(storyText);
-        }
-        if (string::npos != FindTokenEnd(buffer, token::noun)) { // [noun]
-          storyText = buffer;
+        szt nounPos = FindTokenEnd(buffer, token::noun);
+        if (string::npos != nounPos) { // [noun]
+          szt patPos = FindTokenStart(buffer, token::noun, 2, nounPos);
+          if (string::npos != patPos) {
+            // not a noun or a pattern definition - pattern used in noun [n[p]]
+          } else if (!storyText.empty()) {
+            // if it's the second keyword we hit on this run
+            // parse the text and start a new run
+            MyStory.ParseKeywordDefinition(storyText);
+            storyText.clear();
+          }
+          storyText += buffer;
         } else {
           LOG(buffer + " - malformed noun definition")
         }

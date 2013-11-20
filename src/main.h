@@ -158,6 +158,11 @@ template <typename T> inline int IntoInt(const T& Thing)
   return integer;
 }
 
+template <> inline int IntoInt(const string& Thing)
+{
+  return std::stoi(Thing);
+}
+
 template <typename T> inline szt IntoSizeT(const T& Thing)
 {
   stringstream stream;

@@ -20,6 +20,7 @@ public:
 
   bool InitScreen(lint& ScreenWidth, lint& ScreenHeight, const int ScreenBPP);
   bool Init();
+  bool Init(const Rect& InitSize);
   bool Init(const lint Width, const lint Height);
   bool LoadImage(const string& NewFilename = "");
   bool Zoom(const real X, const real Y);

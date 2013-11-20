@@ -46,7 +46,7 @@ syn region skimTextBlock start="\"" end="\"[cwd]\=" skip="\\\\\|\\\""
  \ nextgroup=skimFormat,skimText 
 
 syn region skimKeywordBlock start="<" end=">"
- \ fold transparent contained oneline
+ \ fold transparent contained 
  \ contains=skimKeywordExecuteBlock,skimKeyword,skimKeyStart,skimKeyEnd
 
 syn region skimKeywordExecuteBLock start="\v\[" end="\v\]"

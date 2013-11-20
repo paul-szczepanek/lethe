@@ -20,8 +20,9 @@ public:
   inline Page& FindPage(const string& Noun);
 
 private:
-  string PrependPattern(const string& Keyword, const string& PageText,
-                        const string& PatternName, const string& PatternText);
+  string ApplyPatterns(const string& Keyword, const string& PageText);
+  string PreparePattern(const string& Keyword, const string& PatternName,
+                        const string& PatternText);
 
 
 private:

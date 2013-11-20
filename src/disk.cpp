@@ -25,6 +25,7 @@ vector<string> Disk::ListFiles(const string& Path,
 
   // filter files
   if (Extension.empty()) {
+    closedir(directory);
     return files;
   }
   vector<string> result;
@@ -42,6 +43,7 @@ vector<string> Disk::ListFiles(const string& Path,
       }
     }
   }
+  closedir(directory);
   return result;
 }
 
@@ -67,6 +69,7 @@ vector<string> Disk::GetFileSeries(const string& Path,
 
   // filter files
   if (Stem.empty()) {
+    closedir(directory);
     return files;
   }
   vector<string> result;
@@ -88,6 +91,7 @@ vector<string> Disk::GetFileSeries(const string& Path,
       }
     }
   }
+  closedir(directory);
   return result;
 }
 

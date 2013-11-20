@@ -100,11 +100,9 @@ bool MediaManager::Tick(real DeltaTime,
   return dirty;
 }
 
-void MediaManager::Draw()
+void MediaManager::Draw(Surface& View)
 {
-  if (Visible) {
-    ImageWindow.Draw();
-  }
+  ImageWindow.Draw(ImageWindowSize);
 }
 
 /** @brief Set the size of the big image
@@ -112,12 +110,8 @@ void MediaManager::Draw()
   */
 void MediaManager::SetImageWindowSize(Rect Size)
 {
-  Size.W -= GRID;
-  Size.H -= GRID;
-  Size.X += GRID / 2;
-  Size.Y += GRID / 2;
   if (ImageWindowSize != Size) {
     ImageWindowSize = Size;
-    ImageWindow.Init();
+    ImageWindow.Init(ImageWindowSize);
   }
 }

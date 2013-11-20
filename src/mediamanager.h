@@ -17,7 +17,7 @@ public:
   void Reset();
 
   bool Tick(real DeltaTime, Book& MyBook);
-  void Draw();
+  void Draw(Surface& View);
   void SetImageWindowSize(Rect Size);
 
   bool CreateAssets(const vector<string_pair>& AssetDefs,

@@ -4,6 +4,13 @@
 #include "asset.h"
 #include "surface.h"
 
+/** @class This controls an asset that shows an image in an imagebox.
+ *  This is the high level class and it uses Surface to show the image.
+ *
+ * It will automatically adapt the zoom to match the pixel scale of the
+ * current background image.
+ */
+
 class Image : public Asset
 {
 public:
@@ -28,7 +35,6 @@ private:
   bool BG = false;
 };
 
-Rect GetCrop(const Rect& Size, const Rect& Frame);
 void CentreWithin(Rect& Size, const Rect& Frame,
                   const real X = 0, const real Y = 0);
 

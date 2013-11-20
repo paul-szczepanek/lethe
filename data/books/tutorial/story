@@ -46,7 +46,7 @@
 
   "Some more text but **this in big title font**. This is a keyword
   that will be printed highlighted: <this will be printed[sample noun]>.
-  Clicking on such a keyword will show a menu containing all the verbs 
+  Clicking on such a keyword will show a menu containing all the verbs
   unless they were hidden by failing their top level condition."
 
 //******************************* user noun ************************************
@@ -59,7 +59,7 @@
 
 [chapter 1] // This is a user noun.
 
- [:open] // This is a verb belonging to it, calling chapter 1:open will 
+ [:open] // This is a verb belonging to it, calling chapter 1:open will
          // execute this block. The block ends with the next verb or noun.
 
   "Text in \"quotes\" is printed to the screen.
@@ -142,7 +142,7 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //****************************** quick menu ************************************
 
-// We provide this because we want to have an inventory. We will story items
+// We provide this because we want to have an inventory. We will store items
 // as values of this noun.
 
 [self]
@@ -223,6 +223,7 @@ $hello = Sound(hello.wav) // One-off sound.
 // This noun, pen, uses the pattern item. It will be prepended and the name of
 // the pattern replaced with the name of the noun so this:
 
+[pen]
 [pen[item]]
  [:look]
   !Play(pen) // Show the image.
@@ -246,7 +247,7 @@ $hello = Sound(hello.wav) // One-off sound.
 
 // This noun, pen, uses the pattern item. It will be prepended and the name of
 // the pattern replaced with the name of the noun so this:
-
+[crowbar]
 [crowbar[item]]
  [:look]
   "A small iron <crowbar>." // Text in < > is a keyword.
@@ -257,7 +258,8 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //******************************************************************************
 
-[tutorial room[room] = pen, door, crowbar, tea]
+[tutorial room = pen, door, crowbar, tea]
+[tutorial room[room]]
 
  [:look] // Because we appended the room definition this verb is only visible
          // when we're in the room.
@@ -266,8 +268,8 @@ $hello = Sound(hello.wav) // One-off sound.
                                            // and the text will be re-flowed.
    This text was triggered by
    <looking[tutorial room:look]>." // Clicking on this keyword will not
-                                   // produce a menu of verbs. Clicking it 
-                                   // will execute the verb [:look] 
+                                   // produce a menu of verbs. Clicking it
+                                   // will execute the verb [:look]
                                    // in the noun [tutorial room].
 
   "You are <writing a story[story]>." // The name in [ ] is the name of the
@@ -294,7 +296,7 @@ $hello = Sound(hello.wav) // One-off sound.
                                  // depending on the state of the door.
                                  // A space will be inserted if needed.
 
-  ?@door+=open { 
+  ?@door+=open {
    "leading <outside>."
    !EXITS+=outside // If the door is open add outside as a possible exit.
   } {
@@ -313,7 +315,7 @@ $hello = Sound(hello.wav) // One-off sound.
   ?-=locked {
    "You try the door but it's locked."
    !door+=locked
-  } { 
+  } {
    "You already know it's locked."
   }
 
@@ -400,9 +402,10 @@ $hello = Sound(hello.wav) // One-off sound.
   "You work for a few minutes."
   !tea-=warm
   !+=#1 // Add one to the integer value of the noun.
-  
+
 //******************************************************************************
 
+[outside]
 [outside[room]]
  [:look]
   "You are outside the <tutorial room>."
@@ -411,7 +414,7 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //******************************************************************************
 
-[reminder = #5] 
+[reminder = #5]
 
  [:tick] // This was placed in CALLS and will get called every turn.
 

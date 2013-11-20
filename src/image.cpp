@@ -40,7 +40,8 @@ bool Image::Play()
 {
   if (!Playing && Media.Visible) {
     Playing = true;
-    Size = WindowSize = Media.ImageWindowSize;
+    WindowSize.W = Media.ImageWindowSize.W;
+    WindowSize.H = Media.ImageWindowSize.H;
     if (ImageSurface.LoadImage(Filename)) {
       Size.W = ImageSurface.W;
       Size.H = ImageSurface.H;
@@ -54,9 +55,8 @@ bool Image::Play()
         const real zoom = Zoom * Media.BGZoom;
         ImageSurface.Zoom(zoom, zoom);
         CentreWithin(Size, WindowSize, X, Y);
-        //ImageSurface.SetClip(GetCrop(Size, WindowSize));
       }
-      ImageSurface.Draw(Media.ImageWindow, Size);
+      ImageSurface.Draw();
     }
     return true;
   }
@@ -72,14 +72,6 @@ bool Image::Draw()
     return true;
   }
   return false;
-}
-
-Rect GetCrop(const Rect& Size,
-             const Rect& Frame)
-{
-  Rect result;
-  //todo
-  return result;
 }
 
 void CentreWithin(Rect& Size,
@@ -98,7 +90,8 @@ bool Image::Tick(real DeltaTime)
 {
   if (Playing && Media.Visible) {
     // reload if the size of the window changed
-    if (WindowSize != Media.ImageWindowSize) {
+    if (WindowSize.W != Media.ImageWindowSize.W
+        || WindowSize.H != Media.ImageWindowSize.H) {
       Playing = false;
       return Play();
     }

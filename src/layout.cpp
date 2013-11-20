@@ -1,6 +1,8 @@
 #include "layout.h"
 #include "reader.h"
 
+
+
 /** @brief create layout based on string
  */
 bool Layout::Init(const string& Text)

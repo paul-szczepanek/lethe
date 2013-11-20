@@ -206,6 +206,7 @@ bool Reader::Init()
   InitWindows();
   SetLayout();
   MyBook.ShowMenu();
+  MainImage.SetMediaManager(MyBook.GetMediaManagerPointer());
 
   FontSizeSetting = &MyBook.GetMenuValues(FONT_SIZE);
   FontSizeSetting->IntValue = FontSize;
@@ -559,7 +560,6 @@ bool Reader::ShowVerbMenu(const string& VerbsText)
 void Reader::RedrawScreen(real DeltaTime)
 {
   DrawBackdrop();
-  MyBook.DrawImage();
   DrawWindows();
   PrintFPS(DeltaTime);
 #ifdef DEVBUILD
@@ -634,11 +634,11 @@ szt Reader::FixLayout()
 {
   Layout& layout = Layouts[CurrentOrientation][CurrentLayout];
   // can't fit, abort and try a smaller split
-  if (layout.Split - GetGridPercentage() < 50) {
-    layout.ChangeSplit(GetGridPercentage());
-    return SetLayout();
-  } else if (layout.Split + GetGridPercentage() > 50) {
+  if (layout.Split - GetGridPercentage() > 0.5) {
     layout.ChangeSplit(-GetGridPercentage());
+    return SetLayout();
+  } else if (layout.Split + GetGridPercentage() < 0.5) {
+    layout.ChangeSplit(GetGridPercentage());
     return SetLayout();
   } else {
     LOG("layout impossible on this screen");
@@ -793,12 +793,6 @@ szt Reader::SetLayout(szt LayoutIndex)
     if (pos == top) {
       layoutH -= boxes[i]->Size.H + GRID / 2;
     }
-  }
-
-  if (MainImage.Visible) {
-    MyBook.ShowImage(MainImage.Size);
-  } else {
-    MyBook.HideImage();
   }
 
 #ifdef DEVBUILD
