@@ -32,7 +32,7 @@ are useful only in particular story styles or within the menu system.
 
 ---
 
-### `Noun Definition _______________________________________________ [] [[]]`
+### `Noun Definition _______________________________________ [] [[]]`
 
 `[noun]` - begin definition of the noun. This delimits noun definitions and
            needs to start on a new line.
@@ -55,7 +55,7 @@ string gets replaced with the noun string of the noun being defined.
 They are not evaluated and need to be defined before they are used.
 They are essentially macros that get prepended to a noun definition.
 
-### `Values __________________________________________________________ [ = ]`
+### `Values ______________________________________________ [ = ]`
 
 `[noun[pattern] = value1, value2, #9]` - sets the initial values of the noun.
 
@@ -70,7 +70,7 @@ doesn't count as a regular text value.
 
 > In the initial assignment, you can't force noun evaluations with @.
 
-### `Verb Definition ___________________________________________________ [:]`
+### `Verb Definition ___________________________________________ [:]`
 
 Verbs define the actions possible in the keyword menu.
 
@@ -83,7 +83,7 @@ Verbs define the actions possible in the keyword menu.
 You can have multiple verb definitions of the same name. First one with true
 top level condition will activate upon being called.
 
-### `Conditions __________________________________________________________ ?`
+### `Conditions ______________________________________________ ?`
 
 Value comparisons:
 
@@ -111,7 +111,7 @@ Conditions may be placed above verb definitions. Apart from being a top
 level condition they will hide the verb from the drop down menu if the
 condition is not met.
 
-### `Instructions ________________________________________________________ !`
+### `Instructions ____________________________________________ !`
 
 `!b:verb` - go to '[b]' and execute `[:verb]` (then return and continue).
 
@@ -132,7 +132,7 @@ What is on the left side is the name of the noun you want to assign to.
 
 Instructions need to be below a verb definition.
 
-### `Evaluation ________________________________________________________ @ #`
+### `Evaluation ____________________________________________ @ #`
 
 Rather than using value literals (numbers and strings) for an instruction or
 condition you can get the values contained in a noun. `#noun` evaluates to the
@@ -161,7 +161,7 @@ You can nest @ evaluations.
 `!@@noun1:verb` - will go to noun3:verb, if noun1 has a value called noun2
                     and there is a noun2 that has a value called noun3.
 
-### `Arithmetic ________________________________________________ ( ) - + * /`
+### `Arithmetic ________________________________________ ( ) - + * /`
 
 You can do arithmetic operations on numbers with `+ - / * ( )`.
 
@@ -183,7 +183,7 @@ Then the following statements are all true:
 Order of operations is left to right regardless of type so if you need
 a different order of evaluation you can use parenthesis `( )`.
 
-### `Code Blocks _______________________________________________ { } & | !<<`
+### `Code Blocks _______________________________________ { } & | !<<`
 
 `{ }` are used for blocks. If no `{ }` are used then the code block is assumed
 to end at the next condition. Implied block of a top level condition
@@ -224,7 +224,7 @@ You cannot put a '!<<' in a series. Needs to be a standalone instruction.
 
 > Note that a single `<` as in `!<` is illegal (and would be pointless).
 
-### `Else Clause _____________________________________ \n ?statement { } { }`
+### `Else Clause _____________________________ \n ?statement { } { }`
 
 If you use `{ }` to define a scope of a condition you can define the else
 clause (the set of instruction that get executed if the condition fails) by
@@ -251,7 +251,7 @@ placing it within a set of '{ }' immediately following the previous pair.
 > }
 > ```
 
-### `Printing Text _______________________________________ \n text <keyword>`
+### `Printing Text _______________________________ \n text <keyword>`
 
 Text written inside of `" "` will be printed to the screen. Text needs to be
 placed under a verb definition.
@@ -283,7 +283,7 @@ If the styled line doesn't start and end on a new line it will be added.
 Styles cannot be nested or placed inside keywords (but keywords may be
 placed within styled lines).
 
-### `Keywords in Text ____________________________________________ <keyword>`
+### `Keywords in Text ____________________________________ <keyword>`
 
 Text can contain `<keywords>` inlined with text. Clicking on them creates a
 menu with a list of possible actions based on the verbs that the user can
@@ -306,7 +306,7 @@ assignment into the verb.
 > `<keyword[noun=value]>` on its own is illegal as it would not visibly
 > advance the story, giving no indication of an action having happened.
 
-### `Special Noun Names ____________________________________________ [QUEUE]`
+### `Special Noun Names ____________________________________ [QUEUE]`
 
 These nouns are treated differently by the reader (not all are required):
 `QUEUE, PLACE, EXITS, NOUNS, CALLS, QUICK`
@@ -347,7 +347,7 @@ The absolute minimum is: `[QUEUE> = noun:verb]`. This will be called when
 starting the story and will tell the reader to go to verb in noun and execute
 that block.
 
-### `Function Calls _________________________________________________ name()`
+### `Function Calls _________________________________________ name()`
 
 Function calls can also be used wherever a value can be used.
 
