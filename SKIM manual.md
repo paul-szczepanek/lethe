@@ -424,7 +424,7 @@ Also available but mostly useful internally in the menu:
 - `Quit()` - this will call CloseBook() to save the session and then quit
              the game.
 
-### `Media Assets _______________________________________________ $ = Type()`
+### `Media Assets _______________________________________ $ = Type()`
 
 Assets need to be defined before play starts.
 
