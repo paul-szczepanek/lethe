@@ -184,7 +184,7 @@ bool Book::OpenStory(const string& Path,
   szt i = filenames.size();
   while (i) { // reverse for loop
     const string& filename = filenames[--i];
-    string storyText;
+    string textBlock;
     string buffer;
     File story;
     story.Read(Path + SLASH + filename);
@@ -201,31 +201,28 @@ bool Book::OpenStory(const string& Path,
           && buffer[1] != token::Start[token::scope]) {
         szt nounPos = FindTokenEnd(buffer, token::noun);
         if (string::npos != nounPos) { // [noun]
-          szt patPos = FindTokenStart(buffer, token::noun, 2, nounPos);
-          if (string::npos != patPos) {
-            // not a noun or a pattern definition - pattern used in noun [n[p]]
-          } else if (!storyText.empty()) {
+          if (!textBlock.empty()) {
             // if it's the second keyword we hit on this run
             // parse the text and start a new run
-            MyStory.ParseKeywordDefinition(storyText);
-            storyText.clear();
+            MyStory.ParseKeywordDefinition(textBlock);
+            textBlock.clear();
           }
-          storyText += buffer;
+          textBlock += buffer;
         } else {
           LOG(buffer + " - malformed noun definition")
         }
       } else if (buffer[0] == token::Start[token::asset]) {
         AddAssetDefinition(buffer);
-      } else if (!storyText.empty()) {
+      } else if (!textBlock.empty()) {
         // we didn't find a keyword, keep adding lines if we already hit one
-        storyText += " "; // replace new lines with spaces
-        storyText += buffer;
+        textBlock += " "; // replace new lines with spaces
+        textBlock += buffer;
       }
     }
 
     // last keyword definition
-    if (!storyText.empty()) {
-      MyStory.ParseKeywordDefinition(storyText);
+    if (!textBlock.empty()) {
+      MyStory.ParseKeywordDefinition(textBlock);
     }
   }
 

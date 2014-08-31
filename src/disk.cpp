@@ -2,7 +2,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
-/** @brief Return files of given extension withou stripping the extension
+/** @brief Return files of given extension without stripping the extension
   */
 vector<string> Disk::ListFiles(const string& Path,
                                const string& Extension,

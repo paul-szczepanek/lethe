@@ -223,7 +223,6 @@ $hello = Sound(hello.wav) // One-off sound.
 // This noun, pen, uses the pattern item. It will be prepended and the name of
 // the pattern replaced with the name of the noun so this:
 
-[pen]
 [pen[item]]
  [:look]
   !Play(pen) // Show the image.
@@ -247,7 +246,6 @@ $hello = Sound(hello.wav) // One-off sound.
 
 // This noun, pen, uses the pattern item. It will be prepended and the name of
 // the pattern replaced with the name of the noun so this:
-[crowbar]
 [crowbar[item]]
  [:look]
   "A small iron <crowbar>." // Text in < > is a keyword.
@@ -258,8 +256,7 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //******************************************************************************
 
-[tutorial room = pen, door, crowbar, tea]
-[tutorial room[room]]
+[tutorial room[room]= pen, door, crowbar, tea]
 
  [:look] // Because we appended the room definition this verb is only visible
          // when we're in the room.
@@ -405,7 +402,6 @@ $hello = Sound(hello.wav) // One-off sound.
 
 //******************************************************************************
 
-[outside]
 [outside[room]]
  [:look]
   "You are outside the <tutorial room>."
@@ -425,7 +421,7 @@ $hello = Sound(hello.wav) // One-off sound.
    !QUEUE+=reminder:show // This will queue up that verb to be executed after
                          // the user action (QUEUE is first come first served).
  [:show]
-   "\nMaybe you should do some work."
+   "Maybe you should do some work."
 
 //******************************************************************************
 
