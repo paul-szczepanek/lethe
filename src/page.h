@@ -36,6 +36,7 @@ public:
 
   void Parse(const string& SourceText);
   const VerbBlock& GetVerb(const string& Verb) const;
+  void AddVerb(const VerbBlock& Verb);
   void SetValues(const string& Values);
   void AddValues(const string& Values);
   void RemoveValues(const string& Values);

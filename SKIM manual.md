@@ -77,13 +77,15 @@ doesn't count as a regular text value.
 Verbs define the actions possible in the keyword menu.
 
 - `[:verb]` - past this is where execution goes when you choose the action.
-- `[:verb1] [:verb2]` - only the first one is visible in the drop down menu
-                        but both work (internal alias).
-- `[:] [:hidden verb]` - leaving the name of the first verb blank will make
-                         the action hidden from the list.
+- `[:verb1 :verb2]` - only the first one is visible in the drop down menu
+                      but both work (internal alias).
+- `[: :hidden verb]` - leaving the name of the first verb blank will make
+		       the action hidden from the list (space between `: :` is 
+		       optional, like all other whitespace).
 
-You can have multiple verb definitions of the same name. First one with true
-top level condition will activate upon being called.
+You can't have multiple verb definitions using the same name. Each
+previous verb definition using a name that is being redefined will be
+removed, even if it also had other names (blank names don't count).
 
 ### `Conditions _________________________________________________ ?`
 
@@ -115,7 +117,7 @@ condition is not met.
 
 ### `Instructions ______________________________________________ !`
 
-`!b:verb` - go to '[b]' and execute `[:verb]` (then return and continue).
+`!b:verb` - execute `[:verb]` in noun `[b]` (then return and continue).
 
 Assignment instructions:
 

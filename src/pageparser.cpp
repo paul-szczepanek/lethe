@@ -80,7 +80,7 @@ void PageParser::AddCondition()
         // we have to add the verb now so we can pop old verb conditions
         // before we add this one to the pool
         if (!Verb.Names.empty()) {
-          MyPage.Verbs.push_back(Verb);
+          MyPage.AddVerb(Verb);
           Verb.Reset();
         }
       }
@@ -189,27 +189,34 @@ void PageParser::AddVerb()
 
   // flush the existing verb definition
   if (!Verb.Names.empty()) {
-    MyPage.Verbs.push_back(Verb);
+    MyPage.AddVerb(Verb);
     Verb.Reset();
   }
 
   // make sure this is a verb definition starting with a :
   if (Text[Pos] == token::Start[token::scope]) {
-    const string& verbName = CutString(Text, ++Pos, verbEnd);
-    Pos = verbEnd;
+    ++Pos;
+    // find the end of the definition ]
+    // or it can end with another verb name instead :
+    szt nameEnd = min(FindCharacter(Text, token::End[token::noun], Pos),
+                      FindCharacter(Text, token::Start[token::scope], Pos));
+    const string& verbName = CutString(Text, Pos, nameEnd);
+    Pos = nameEnd;
+    // if the verb name is empty it will be hidden from the drop down menu
     Verb.VisualName = verbName;
     if (!verbName.empty()) {
       Verb.Names.push_back(verbName);
     }
 
-    // add all chained [:verb1][:verb2] into Names
-    while (verbEnd+3 < Length
-           && Text[verbEnd+1] == token::Start[token::noun]
-           && Text[verbEnd+2] == token::Start[token::scope]) {
+    // add all chained [:verb1:verb2] into Names
+    while (Pos < verbEnd
+           && Text[Pos] == token::Start[token::scope]) {
       // get the next alias of the verb
-      verbEnd = FindCharacter(Text, token::End[token::noun], verbEnd+2);
-      Verb.Names.push_back(CutString(Text, Pos, verbEnd));
-      Pos = verbEnd;
+      ++Pos;
+      nameEnd = min(FindCharacter(Text, token::End[token::noun], Pos),
+                    FindCharacter(Text, token::Start[token::scope], Pos));
+      Verb.Names.push_back(CutString(Text, Pos, nameEnd));
+      Pos = nameEnd;
     }
 
     PopOldVerbConditions();
@@ -286,7 +293,7 @@ PageParser::PageParser(const string& SourceText,
   }
 
   if (!Verb.Names.empty()) {
-    MyPage.Verbs.push_back(Verb);
+    MyPage.AddVerb(Verb);
   }
 
   string ParsedText;

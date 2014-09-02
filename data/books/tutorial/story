@@ -307,8 +307,8 @@ $hello = Sound(hello.wav) // One-off sound.
 [door]
 
 ?-=open
- [:open] [:use] // Only the first verb name is visible in the menu the player
-                // can see, but both will work internally.
+ [:open:use] // Only the first verb name is visible in the menu the player
+             // can see, but both will work internally.
   ?-=locked {
    "You try the door but it's locked."
    !door+=locked
