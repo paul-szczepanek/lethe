@@ -1,0 +1,10 @@
+style=1tbs
+indent=spaces=2
+indent-switches
+keep-one-line-statements
+align-pointer=type
+align-reference=type
+unpad-paren
+pad-header
+pad-oper
+suffix=none
