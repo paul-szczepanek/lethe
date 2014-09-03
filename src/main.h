@@ -78,14 +78,17 @@ struct Colour {
 struct string_pair {
   string_pair(string aX, string aY) : X(aX), Y(aY) { };
   string_pair() { };
-  void clear() {
+  void clear()
+  {
     X.clear();
     Y.clear();
   };
-  bool empty() {
+  bool empty()
+  {
     return (X.empty() || Y.empty());
   };
-  bool full() {
+  bool full()
+  {
     return (!X.empty() && !Y.empty());
   };
   szt size();
@@ -121,10 +124,12 @@ struct Rect {
   Rect() : W(0), H(0), X(0), Y(0) { };
   Rect(lint aW, lint aH, lint aX = 0, lint aY = 0)
     : W(aW), H(aH), X(aX), Y(aY) { };
-  bool operator!= (const Rect& other) const {
+  bool operator!= (const Rect& other) const
+  {
     return !(*this == other);
   };
-  bool operator== (const Rect& other) const {
+  bool operator== (const Rect& other) const
+  {
     return W == other.W && H == other.H && X == other.X && Y == other.Y;
   };
   lint W;
@@ -185,20 +190,20 @@ inline string CutString(const string Text,
                         cszt Start,
                         cszt End = string::npos)
 {
-  return Start < End? Text.substr(Start, End - Start) : string();
+  return Start < End ? Text.substr(Start, End - Start) : string();
 }
 
 template <typename T> inline void Clamp(T& Value,
                                         const T& Min,
                                         const T& Max)
 {
-  Value = Value < Min? Min : (Value > Max? Max : Value);
+  Value = Value < Min ? Min : (Value > Max ? Max : Value);
 }
 
 // android
 template <typename T> inline T Abs(const T& Value)
 {
-  return Value < 0? -Value : Value;
+  return Value < 0 ? -Value : Value;
 }
 
 #endif // MAIN_H_INCLUDED

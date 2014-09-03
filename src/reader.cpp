@@ -179,7 +179,7 @@ void Reader::InitWindows()
   ReaderButtons.SetButtonState(buttonLayout, CurrentLayout);
 
 #ifdef DEVBUILD
-  GLog="";
+  GLog = "";
   Logger.Visible = true;
   Logger.Init(FontSys, "", BPP);
   Logger.RawMode = true;
@@ -649,7 +649,7 @@ szt Reader::FixLayout()
 
 szt Reader::SetLayout(szt LayoutIndex)
 {
-  CurrentOrientation = Width > Height? landscape : portrait;
+  CurrentOrientation = Width > Height ? landscape : portrait;
   if (LayoutIndex < NUM_LAYOUTS) {
     CurrentLayout = LayoutIndex;
   }
@@ -725,7 +725,7 @@ szt Reader::SetLayout(szt LayoutIndex)
         lint splitSize = Height * layout.Split;
         splitSize = splitSize - (splitSize % GRID);
         // make sure the requested split is viable
-        if (splitSize < GRID * 2 || Height - splitSize < GRID * 2 ) {
+        if (splitSize < GRID * 2 || Height - splitSize < GRID * 2) {
           return FixLayout();
         }
         boxSize.H = splitSize;
@@ -758,7 +758,7 @@ szt Reader::SetLayout(szt LayoutIndex)
         lint splitSize = Width * layout.Split;
         splitSize = splitSize - (splitSize % GRID);
         // make sure the requested split is viable
-        if (splitSize < GRID * 2 || Width - splitSize < GRID * 2 ) {
+        if (splitSize < GRID * 2 || Width - splitSize < GRID * 2) {
           return FixLayout();
         }
         boxSize.W = splitSize;

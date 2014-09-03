@@ -133,10 +133,10 @@ void ButtonBox::Reset()
 
   lint X = Size.X;
   lint Y = Size.Y;
-  const real scaleW = vertical?
+  const real scaleW = vertical ?
                       (real)Size.W / (real)maxW
                       : (real)Size.W / (real)allW;
-  const real scaleH = vertical?
+  const real scaleH = vertical ?
                       (real)Size.H / (real)allH
                       : (real)Size.H / (real)maxH;
   for (szt i = 0, fSz = Buttons.size(); i < fSz; ++i) {

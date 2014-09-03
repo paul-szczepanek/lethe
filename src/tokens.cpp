@@ -30,7 +30,7 @@ void CleanWhitespace(string& Text)
       }
     } else if (c == '\\') {
       // recover whitespace
-      while(whiteCount) {
+      while (whiteCount) {
         clean += ' ';
         --whiteCount;
       }
@@ -101,7 +101,7 @@ void CleanWhitespace(string& Text)
         }
       }
       // recover whitespace
-      while(whiteCount) {
+      while (whiteCount) {
         clean += ' ';
         --whiteCount;
       }
@@ -136,9 +136,9 @@ string CleanEscapeCharacters(const string& Text)
   * \return a pair of begin and end positions of the token
   */
 szt_pair FindToken(const string& Text,
-                  token::tokenName TokenName,
-                  szt Start,
-                  szt End)
+                   token::tokenName TokenName,
+                   szt Start,
+                   szt End)
 {
   if (End == 0 || End > Text.size()) {
     End = Text.size();
@@ -151,11 +151,11 @@ szt_pair FindToken(const string& Text,
   if ((type & token::isPaired) && (type & token::isWide)) {
     // return if matching pair found like ** **
     while (pos < End - 1) {
-      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
+      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos + 1, tokenB)) {
         szt match = pos;
         while (++match < End - 1) {
           if (IsSpecial(Text, match, tokenB)
-              && IsSpecial(Text, match+1, tokenB)) {
+              && IsSpecial(Text, match + 1, tokenB)) {
             return szt_pair(pos, match + 1);
           }
         }
@@ -184,8 +184,8 @@ szt_pair FindToken(const string& Text,
   } else if (type & token::isWide) {
     // if it's two char token check for other char and return if found
     while (pos < End - 1) {
-      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos+1, tokenB)) {
-        return szt_pair(pos, pos+1);
+      if (IsSpecial(Text, pos, tokenA) && IsSpecial(Text, pos + 1, tokenB)) {
+        return szt_pair(pos, pos + 1);
       }
       ++pos;
     }
@@ -222,7 +222,7 @@ szt FindTokenStart(const string& Text,
     if (IsSpecial(Text, pos, tokenA)) {
       if (type & token::isWide) {
         // if it's two char token check for other char and return if found
-        if (IsSpecial(Text, pos+1, tokenB)) {
+        if (IsSpecial(Text, pos + 1, tokenB)) {
           return pos;
         }
       } else if (type & token::isPaired) {
@@ -306,7 +306,7 @@ void StripComments(string& Text)
 
   while (pos < length) {
     if (IsSpecial(Text, pos, token::Start[token::comment]) &&
-        (pos+1 < length) && Text[pos+1] == token::End[token::comment]) {
+        (pos + 1 < length) && Text[pos + 1] == token::End[token::comment]) {
       // ignore the rest of the line
       Text = Text.substr(0, pos);
       break;

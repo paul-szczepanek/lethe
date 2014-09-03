@@ -286,9 +286,9 @@ const usint Type[TOKEN_NAME_MAX] = {
   isPaired,     //block,
   isWide,       //stop,
 
-  isWide|isPaired, //styleTitle,
-  isWide|isPaired, //styleMono,
-  isWide|isPaired  //styleQuote,
+  isWide | isPaired, //styleTitle,
+  isWide | isPaired, //styleMono,
+  isWide | isPaired  //styleQuote,
 };
 
 const tokenName Conditions[NUM_TOKENS_CONDITION] = {
@@ -335,7 +335,7 @@ const char WhitespaceRemovers[NUM_SPACE_REMOVERS] = {
 } // namespace token
 
 szt_pair FindToken(const string& Text, token::tokenName TokenName,
-                  szt Start = 0, szt End = 0);
+                   szt Start = 0, szt End = 0);
 szt FindTokenStart(const string& Text, token::tokenName TokenName,
                    szt Start = 0, szt End = 0);
 szt FindTokenEnd(const string& Text, token::tokenName TokenName,
@@ -348,7 +348,7 @@ void StripComments(string& Text);
 inline bool IsEscaped(const string& Text, szt Pos)
 {
   if (Pos > 0) {
-    return (Text[Pos-1] == '\\');
+    return (Text[Pos - 1] == '\\');
   } else {
     return false;
   }
@@ -356,7 +356,7 @@ inline bool IsEscaped(const string& Text, szt Pos)
 
 inline bool IsSpecial(const string& Text, szt Pos, char token)
 {
-  if ((Pos > 0) && (Text[Pos-1] == '\\')) {
+  if ((Pos > 0) && (Text[Pos - 1] == '\\')) {
     return false;
   } else {
     return (Text[Pos] == token);
@@ -402,7 +402,7 @@ inline bool ExtractNounVerb(const string& Text, string& Noun, string& Verb)
       } else {
         Noun.clear();
       }
-      Verb = CutString(Text, scopePos+1);
+      Verb = CutString(Text, scopePos + 1);
       return true;
     }
   }

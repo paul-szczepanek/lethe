@@ -56,7 +56,7 @@ void TextBox::ResetText()
     // to avoid constant resets
     cszt limit = Text.size() - (MAX_TEXT_SIZE / 2);
     cszt cut = FindCharacter(Text, '\n', limit);
-    Text = CutString(Text, cut+1);
+    Text = CutString(Text, cut + 1);
   }
 
   Pane.Y = PageHeight = PageWidth = 0;
@@ -134,7 +134,7 @@ bool TextBox::HandleInput(MouseState& Mouse,
     } else {
       // translate screen position to text surface position
       const lint X = Mouse.X - PageSize.X;
-      const lint Y = Mouse.Y - (PageSize.Y - Pane.Y );
+      const lint Y = Mouse.Y - (PageSize.Y - Pane.Y);
       // find selected keyword
       for (szt i = 0, fSz = Keywords.size(); i < fSz; ++i) {
         if (Keywords[i].Active && (Keywords[i].Size.X < X)
@@ -220,7 +220,7 @@ bool TextBox::BreakText()
     length = 0;
   }
   // record keywords and their positions and remove syntax symbols
-  while(pos < length) {
+  while (pos < length) {
     // keywordPos store the positions in the cleaned string and need fixing
     szt_pair namePos = FindToken(Text, token::keyword, pos);
     // quit if no more keywords
@@ -235,10 +235,10 @@ bool TextBox::BreakText()
     pos = namePos.Y + 1;
     // don't print the real name, but record it
     if (realNamePos.X != string::npos) {
-      realName = CutString(Text, realNamePos.X+1, realNamePos.Y);
+      realName = CutString(Text, realNamePos.X + 1, realNamePos.Y);
       namePos.Y = realNamePos.X;
     } else {
-      realName = CutString(Text, namePos.X+1, namePos.Y);
+      realName = CutString(Text, namePos.X + 1, namePos.Y);
     }
 
     // check keywords found in a position earlier than set threshold to see
@@ -252,7 +252,7 @@ bool TextBox::BreakText()
     szt_pair keyPos;
     // copy the keyword and record its starting and ending position in cleaned
     keyPos.X = cleaned.size();
-    cleaned += CutString(Text, namePos.X+1, namePos.Y);
+    cleaned += CutString(Text, namePos.X + 1, namePos.Y);
     keyPos.Y = cleaned.size();
     keywordPos.push_back(keyPos);
   }
@@ -271,7 +271,7 @@ bool TextBox::BreakText()
     length = 0;
   }
   // record font changes and strip the formatting
-  while(pos < length) {
+  while (pos < length) {
     cszt_pair& titlePos = FindToken(cleaned, token::styleTitle, pos);
     cszt_pair& quotePos = FindToken(cleaned, token::styleQuote, pos);
     cszt_pair& monoPos = FindToken(cleaned, token::styleMono, pos);
@@ -306,10 +306,10 @@ bool TextBox::BreakText()
       plain += CutString(cleaned, pos, changePos.X);
       // insert a newline in front to make sure it breaks
       cszt plainLength = plain.size();
-      if (plainLength && plain[plainLength-1] == ' ') {
-        plain[plainLength-1] = '\n';
+      if (plainLength && plain[plainLength - 1] == ' ') {
+        plain[plainLength - 1] = '\n';
         ShiftPositions(keywordPos, plainLength, -2);
-      } else if (plainLength && plain[plainLength-1] != '\n') {
+      } else if (plainLength && plain[plainLength - 1] != '\n') {
         ShiftPositions(keywordPos, plainLength, -1);
         plain += '\n';
       } else {
@@ -349,7 +349,7 @@ bool TextBox::BreakText()
   szt skip = 0;
   pos = 0;
   // remove escape characters
-  while(pos < length) {
+  while (pos < length) {
     const char c = plain[pos];
     if (c == '\\') {
       ++skip;
@@ -386,7 +386,7 @@ bool TextBox::BreakText()
   length = plain.size();
 
   // break the text into lines that fit within the text box width
-  while(pos < length) {
+  while (pos < length) {
     // did we hit a font change?
     if (fontChangeI < fontChanges.size()
         && fontChanges[fontChangeI].Position <= pos) {
@@ -478,8 +478,8 @@ bool TextBox::BreakText()
         // they can also be split across multiple lines
         KeywordMap newKey(keywordNames[j]);
         // get positions relative to line start
-        cszt beg = keyPos.X < lastLineEnd? 0 : keyPos.X - lastLineEnd;
-        cszt end = keyPos.Y > lineEnd?
+        cszt beg = keyPos.X < lastLineEnd ? 0 : keyPos.X - lastLineEnd;
+        cszt end = keyPos.Y > lineEnd ?
                    lineLength : keyPos.Y - lastLineEnd;
         // find where the keyword starts
         newKey.Size.X = lineSize.X;
@@ -502,7 +502,7 @@ bool TextBox::BreakText()
   SelectedKeyword = Keywords.size();
   HighlightsDirty = PageDirty = true;
   // scroll to end
-  Pane.Y = PageHeight > PageSize.H? (PageHeight - PageSize.H) : 0;
+  Pane.Y = PageHeight > PageSize.H ? (PageHeight - PageSize.H) : 0;
 
   return (PageHeight > 0);
 }

@@ -18,7 +18,8 @@ struct Block {
 };
 
 struct VerbBlock {
-  void Reset() {
+  void Reset()
+  {
     VisualName.clear();
     BlockTree.Blocks.clear();
     Names.clear();

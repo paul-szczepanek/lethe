@@ -65,17 +65,17 @@ bool Audio::SystemInit(bool Silent)
     Active = false;
     return true;
   }
-  if(SDL_Init(SDL_INIT_AUDIO) < 0) {
+  if (SDL_Init(SDL_INIT_AUDIO) < 0) {
     LOG("Unable to init SDL: " + IntoString(SDL_GetError()));
     return false;
   }
   atexit(SDL_Quit);
-  if(Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
+  if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
     LOG("Unable to init Mixer: " + IntoString(Mix_GetError()));
     return false;
   }
   atexit(Mix_Quit);
-  if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
+  if (Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) < 0) {
     LOG("Unable to Open Audio: " + IntoString(Mix_GetError()));
     return false;
   }

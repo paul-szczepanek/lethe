@@ -7,11 +7,11 @@ Properties::Properties(const string& Value) : IntValue(0)
   cszt length = Value.size();
   while (pos < length) {
     szt sepPos = FindTokenStart(Value, token::separator, pos);
-    szt endPos = sepPos != string::npos? sepPos : length;
+    szt endPos = sepPos != string::npos ? sepPos : length;
 
     // is it a number?
     if (Value[pos] == token::Start[token::number]) {
-      IntValue = IntoInt(CutString(Value, pos+1, endPos));
+      IntValue = IntoInt(CutString(Value, pos + 1, endPos));
     } else {
       // in case there is an escaped # (madness)
       if (Value[pos] == '\\') {

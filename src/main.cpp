@@ -38,7 +38,7 @@ string GTrace = "";
 szt GTraceIndent = 0;
 #endif
 
-int main (int Count, char* Switches[])
+int main(int Count, char* Switches[])
 {
   bool sound = true;
   int width = 0;

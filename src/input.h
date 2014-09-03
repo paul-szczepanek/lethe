@@ -21,7 +21,8 @@ struct SystemState {
 };
 
 struct KeysState {
-  void Reset() {
+  void Reset()
+  {
     Letter = '?';
     InputMode = false;
     KeyPressed = false;

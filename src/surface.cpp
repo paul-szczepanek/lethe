@@ -72,7 +72,7 @@ bool Surface::InitScreen(lint& ScreenWidth,
 {
   Unload();
 
-  Uint32 flags = SDL_HWSURFACE|SDL_DOUBLEBUF|SDL_RESIZABLE;
+  Uint32 flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE;
 #if defined(__ANDROID__) && ! defined (FAKEANDROID)
   const SDL_VideoInfo* info = SDL_GetVideoInfo();
   ScreenHeight = info->current_h;

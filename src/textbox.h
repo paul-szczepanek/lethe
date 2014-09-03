@@ -5,7 +5,7 @@
 #include "properties.h"
 
 struct PaneState {
-  PaneState () { };
+  PaneState() { };
   lint PaneDragY = 0;
   lint Y = 0;
   real DragTimeout = 0.25;
@@ -52,7 +52,8 @@ public:
   bool HandleInput(MouseState& Mouse, const real DeltaTime);
   bool GetSelectedKeyword(string& Keyword);
 
-  inline bool Empty() {
+  inline bool Empty()
+  {
     return Text.empty();
   };
 

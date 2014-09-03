@@ -211,7 +211,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
       if (op != token::condition) {
         bool isNum = false, isText = false;
         const string& left = CutString(Expression, pos, opPos.X);
-        const string& right = CutString(Expression, opPos.Y+1, endPos);
+        const string& right = CutString(Expression, opPos.Y + 1, endPos);
 
         Properties rightValues;
         Properties leftEvalValues;
@@ -228,7 +228,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
           }
 #endif
         }
-        const Properties& leftValues = left.empty()?
+        const Properties& leftValues = left.empty() ?
                                        GetValues(Noun)
                                        : leftEvalValues;
 
@@ -304,7 +304,7 @@ bool StoryQuery::ExecuteExpression(const string& Noun,
         Properties rightValues;
 
         const string& left = CutString(Expression, pos, opPos.X);
-        const string& right = CutString(Expression, opPos.Y+1, endPos);
+        const string& right = CutString(Expression, opPos.Y + 1, endPos);
 
         // default to current page noun
         if (left.empty()) {
@@ -455,7 +455,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
               opStack.resize(1);
             }
           }
-          opStack.resize(opStack.size()+1);
+          opStack.resize(opStack.size() + 1);
 
           // grouping and function calls recurse with the (contents)
           if (i == token::parens) {
@@ -485,7 +485,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
 
     if (valueFound && valueEnd > valuePos) {
       // if an op was found this iteration, assign value to the previous op
-      OperationNode& lastOp = opFound? *(opStack.rbegin()+1) : opStack.back();
+      OperationNode& lastOp = opFound ? *(opStack.rbegin() + 1) : opStack.back();
       const string& valueText = CutString(Expression, valuePos, valueEnd);
       // a value terminates a series of nested operators
       lastOp.Nested = funcFound; // unless it was a function
@@ -526,7 +526,7 @@ bool StoryQuery::EvaluateExpression(Properties& Result,
 
     Properties& operand = opStack[opI].Operand;
     // when dealing with nested values copy values to previous operand
-    Properties& target = nested? opStack[opI - 1].Operand : Result;
+    Properties& target = nested ? opStack[opI - 1].Operand : Result;
 
     switch (opStack[opI].Operation) {
       case token::plus:
@@ -826,16 +826,16 @@ bool StoryQuery::ExecuteFunction(const Properties& FunctionName,
       case bookFunctionUserBookmark:
         // create a bookmark using the argument to produce the text
         // overwrites any previous bookmark at that place
-        {
-          string bookmarkDesc;
-          for (const string& arg : textArgs) {
-            bookmarkDesc += arg;
-          }
-          QueryBook.SetBookmark(bookmarkDesc);
+      {
+        string bookmarkDesc;
+        for (const string& arg : textArgs) {
+          bookmarkDesc += arg;
         }
-        intArg = 1;
-        textArgs.clear();
-        break;
+        QueryBook.SetBookmark(bookmarkDesc);
+      }
+      intArg = 1;
+      textArgs.clear();
+      break;
       case bookFunctionLoadSnapshot:
         // Load the given snapshot
         intArg = 0;

@@ -73,7 +73,10 @@ public:
   inline bool GetAssetState(const string& AssetName);
   inline void SetAssetState(const string& AssetName, const bool Playing);
 
-  inline MediaManager* GetMediaManagerPointer() { return &Media; };
+  inline MediaManager* GetMediaManagerPointer()
+  {
+    return &Media;
+  };
 
 #ifdef DEVBUILD
   const string ShowVariables();

@@ -20,7 +20,7 @@ void PageParser::AddTextBlock()
   cszt textEnd = FindCharacter(Text, token::End[token::textBlock], ++Pos);
   const string& plainText = CutString(Text, Pos, textEnd);
   if (textEnd == string::npos) {
-    LOG("Unmatched \" in segment - " + CutString(Text, Pos-1, Pos+20));
+    LOG("Unmatched \" in segment - " + CutString(Text, Pos - 1, Pos + 20));
   }
   Pos = textEnd;
 
@@ -184,7 +184,7 @@ void PageParser::AddVerb()
   // find the end of verb name at ]
   szt verbEnd = FindCharacter(Text, token::End[token::noun], ++Pos);
   if (verbEnd == string::npos) {
-    LOG("Unmatched [ in segment - "+CutString(Text, Pos-1, Pos+20));
+    LOG("Unmatched [ in segment - " + CutString(Text, Pos - 1, Pos + 20));
   }
 
   // flush the existing verb definition
@@ -286,7 +286,7 @@ PageParser::PageParser(const string& SourceText,
         ++Pos;
       }
     } else {
-      LOG(string("Illegal token ")+c+" near "+CutString(Text, Pos, Pos+20));
+      LOG(string("Illegal token ") + c + " near " + CutString(Text, Pos, Pos + 20));
       ++Pos;
       break;
     }

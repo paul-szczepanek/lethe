@@ -15,21 +15,21 @@ bool Layout::Init(const string& Text)
   //            ----
   szt offset = 0;
   for (szt i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
-    Order[i] = (boxType)IntoInt(Text[offset+i]);
+    Order[i] = (boxType)IntoInt(Text[offset + i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
   // read this: 0132 3111 1111 0 00
   //                 ----
   for (szt i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
-    Side[i] = (side)IntoInt(Text[offset+i]);
+    Side[i] = (side)IntoInt(Text[offset + i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
   // read this: 0132 3111 1111 0 00
   //                      ----
   for (szt i = 0, fSz = BOX_TYPE_MAX; i < fSz; ++i) {
-    Active[i] = IntoInt(Text[offset+i]);
+    Active[i] = IntoInt(Text[offset + i]);
   }
   offset += BOX_TYPE_MAX;
   ++offset;
@@ -39,7 +39,7 @@ bool Layout::Init(const string& Text)
   offset += 2;
   // read this: 0132 3111 1111 0 00
   //                             --
-  Split = IntoReal(CutString(Text, offset, offset+2)) / (real)100;
+  Split = IntoReal(CutString(Text, offset, offset + 2)) / (real)100;
   return true;
 };
 

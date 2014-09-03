@@ -58,8 +58,8 @@ void WindowBox::SetSize(Rect NewSize)
   FixAspectRatio(NewSize);
 
   // align size to block size
-  NewSize.W = max(NewSize.W, 2*GRID);
-  NewSize.H = max(NewSize.H, 2*GRID);
+  NewSize.W = max(NewSize.W, 2 * GRID);
+  NewSize.H = max(NewSize.H, 2 * GRID);
   const lint newW = NewSize.W - (NewSize.W % GRID);
   const lint newH = NewSize.H - (NewSize.H % GRID);
   NewSize.X += (NewSize.W - newW) / 2;
@@ -85,8 +85,8 @@ bool WindowBox::BuildFrame()
   FrameSurface.Init(Size.W, Size.H);
 
   Surface spritePage;
-  if (!spritePage.LoadImage(FRAMES_DIR+SLASH+FrameName+".png")) {
-    LOG(FrameName+" - frame image missing");
+  if (!spritePage.LoadImage(FRAMES_DIR + SLASH + FrameName + ".png")) {
+    LOG(FrameName + " - frame image missing");
     FrameVisible = false;
     return false;
   } else if (spritePage.W != GRID * 4) {

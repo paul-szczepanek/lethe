@@ -32,12 +32,12 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   string text = GetCleanWhitespace(StoryText);
   // break up the expected [[pattern]] or [noun=value]
   szt_pair nounPos = FindToken(text, token::noun); // [] outer
-  szt_pair patPos = FindToken(text, token::noun, nounPos.X+1, nounPos.Y); // []
-  szt assignPos = FindTokenStart(text, token::assign, nounPos.X+1, nounPos.Y);
+  szt_pair patPos = FindToken(text, token::noun, nounPos.X + 1, nounPos.Y); // []
+  szt assignPos = FindTokenStart(text, token::assign, nounPos.X + 1, nounPos.Y);
 
   // cut the noun name
   cszt nounEnd = min(min(nounPos.Y, patPos.X), assignPos);
-  const string& noun = CutString(text, nounPos.X+1, nounEnd);
+  const string& noun = CutString(text, nounPos.X + 1, nounEnd);
 
   // check if it's already defined
   if (Pages.find(noun) != Pages.end()) {
@@ -56,13 +56,13 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
   // check if the keyword contains a pattern name
   if (patPos.X != string::npos) {
     // if this is a pattern definition
-    if (nounPos.X == patPos.X-1) {
-      const string& pattern = CutString(text, patPos.X+1, patPos.Y);
+    if (nounPos.X == patPos.X - 1) {
+      const string& pattern = CutString(text, patPos.X + 1, patPos.Y);
       // try find the pattern in the defined patterns
       map<string, string>::iterator it = Patterns.find(pattern);
       // add a new pattern definition
       if (it == Patterns.end()) {
-        Patterns[pattern] = CutString(text, nounPos.Y+1);
+        Patterns[pattern] = CutString(text, nounPos.Y + 1);
         return true;
       } else {
         LOG(pattern + " - pattern already defined");
@@ -75,10 +75,10 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
       // there can be multiple patterns defined inn sequence [p1, p2, p3]
       while (curPos.X < patPos.Y) {
         // pattern name ends in ] or , if there are multiple pattern names
-        curPos.Y = min(FindTokenStart(text, token::separator, curPos.X+1, patPos.Y),
+        curPos.Y = min(FindTokenStart(text, token::separator, curPos.X + 1, patPos.Y),
                        curPos.Y);
 
-        const string& pattern = CutString(text, curPos.X+1, curPos.Y);
+        const string& pattern = CutString(text, curPos.X + 1, curPos.Y);
         // try find the pattern in the defined patterns
         map<string, string>::iterator it = Patterns.find(pattern);
         if (it != Patterns.end()) {
@@ -88,13 +88,13 @@ bool Story::ParseKeywordDefinition(const string& StoryText)
         }
 
         // move onto the next pattern name
-        curPos.X = FindTokenStart(text, token::separator, curPos.Y+1, patPos.Y);
+        curPos.X = FindTokenStart(text, token::separator, curPos.Y + 1, patPos.Y);
       }
     }
   }
 
   // append the rest of the noun definition
-  pageText += CutString(text, nounPos.Y+1);
+  pageText += CutString(text, nounPos.Y + 1);
 
   Pages[noun].Parse(pageText);
 

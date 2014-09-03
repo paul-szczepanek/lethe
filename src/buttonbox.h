@@ -8,14 +8,16 @@
 class MouseState;
 
 struct Button {
-  void Deselect() {
+  void Deselect()
+  {
     if (State) {
       --State;
     } else {
       State = ButtonSurfaces.size() - 1;
     }
   };
-  void Select() {
+  void Select()
+  {
     ++State;
     State %= ButtonSurfaces.size();
   };

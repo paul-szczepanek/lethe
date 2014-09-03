@@ -266,7 +266,7 @@ bool Book::AddAssetDefinition(const string& StoryText)
   // definition can't be empty either
   if (defPos + 1 < text.size()) {
     const string& assetName = CutString(text, 1, defPos);
-    const string& assetDefinition = CutString(text, defPos+1);
+    const string& assetDefinition = CutString(text, defPos + 1);
     Assets.push_back(string_pair(assetName, assetDefinition));
     return true;
   }
@@ -327,7 +327,7 @@ bool Book::GetChoice(string_pair& Choice) const
   // is the first part of the pair a noun:verb?
   szt scopePos = FindTokenEnd(Choice.X, token::scope);
   if (scopePos != string::npos) {
-    const string& verb = CutString(Choice.X, scopePos+1, Choice.X.size());
+    const string& verb = CutString(Choice.X, scopePos + 1, Choice.X.size());
     const string& noun = CutString(Choice.X, 0, scopePos);
     // rearrange the noun:verb,value into proper places
     if (Choice.Y.empty()) {
@@ -556,7 +556,7 @@ const vector<string_pair> Book::GetSessionNamemap(const string& Path)
     // read the file and name pairs from the session file but only add
     // the ones that also exist as filename in the folder
     string existingFilename, sessionName;
-    while(filemap.GetLine(existingFilename)) {
+    while (filemap.GetLine(existingFilename)) {
       filemap.GetLine(sessionName);
       for (const string& filename : files) {
         if (existingFilename == filename) {
@@ -685,7 +685,7 @@ void Book::GetSnapshots(Properties& SnapshotItems)
   // find the range ending with the desired location
   cszt desiredEnd = max((szt)SnapshotItems.IntValue, HISTORY_PAGE);
   cszt last = min(desiredEnd, BookSession.Snapshots.size());
-  cszt first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  cszt first = last > HISTORY_PAGE ? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
   // print all the snapshots in range
   for (szt i = first; i < last; ++i) {
@@ -716,7 +716,7 @@ void Book::GetBookmarks(Properties& SnapshotItems)
 {
   cszt desiredEnd = max((szt)SnapshotItems.IntValue, HISTORY_PAGE);
   cszt last = min(desiredEnd, BookSession.Bookmarks.size());
-  cszt first = last > HISTORY_PAGE? last - HISTORY_PAGE : 1;
+  cszt first = last > HISTORY_PAGE ? last - HISTORY_PAGE : 1;
   SnapshotItems.IntValue = last;
   szt i = 0;
   // the bookmarks are sorted but not contiguous so we iterate
@@ -728,7 +728,7 @@ void Book::GetBookmarks(Properties& SnapshotItems)
       break;
     }
     cszt index = mark.first;
-    string entry = IntoString(index+1) + ". " + mark.second.Description;
+    string entry = IntoString(index + 1) + ". " + mark.second.Description;
     if (index == BookSession.CurrentSnapshot - 1) {
       entry += " - present -";
     }

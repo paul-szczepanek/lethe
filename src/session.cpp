@@ -181,7 +181,7 @@ bool Session::Load()
 const string Session::GetSessionText() const
 {
   string text;
-  text.reserve(1024*1024); // reserve a meg outright
+  text.reserve(1024 * 1024); // reserve a meg outright
   // basic info
   text += "Session name:\n";
   text += Name;
@@ -448,7 +448,7 @@ bool Session::CreateSnapshot()
   */
 Bookmark& Session::CreateBookmark()
 {
-  cszt queueI = CurrentSnapshot > 1? CurrentSnapshot - 2 : 0;
+  cszt queueI = CurrentSnapshot > 1 ? CurrentSnapshot - 2 : 0;
   Bookmark& mark = Bookmarks[queueI];
   if (mark.Description.empty()) {
     if (queueI < QueueHistory.size()) {

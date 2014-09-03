@@ -62,7 +62,7 @@ lint Font::GetWidth(const string& Text) const
   int width = 0;
   int height = 0;
   if (SDLFont) {
-    TTF_SizeText(SDLFont, Text.c_str(), &width ,&height);
+    TTF_SizeText(SDLFont, Text.c_str(), &width , &height);
   }
   return (lint)width;
 }
@@ -74,7 +74,7 @@ int_pair Font::GetSize(const string& Text) const
   int width = 0;
   int height = 0;
   if (SDLFont) {
-    TTF_SizeText(SDLFont, Text.c_str(), &width ,&height);
+    TTF_SizeText(SDLFont, Text.c_str(), &width , &height);
   }
   return int_pair(width, height);
 }
